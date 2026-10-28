@@ -48,7 +48,7 @@
           <text class="p" x="739" y="50" text-anchor="middle">Cualquier persona</text>
           <text class="s" x="739" y="70" text-anchor="middle">y tiendas en línea</text>
           <text class="p" x="1021" y="50" text-anchor="middle">Certificadoras, marcas, FONART</text>
-          <text class="s" x="1021" y="70" text-anchor="middle">y la administración de Yucu</text>
+          <text class="s" x="1021" y="70" text-anchor="middle">y otros proyectos de Stellar</text>
           <line class="ar" x1="175" y1="84" x2="175" y2="153" marker-end="url(#ah1)"/>
           <line class="ar" x1="457" y1="84" x2="457" y2="153" marker-end="url(#ah1)"/>
           <line class="ar" x1="739" y1="84" x2="739" y2="153" marker-end="url(#ah1)"/>
@@ -82,9 +82,9 @@
           <rect class="box new" x="890" y="156" width="262" height="122" rx="8"/>
           <text class="t" x="1021" y="182" text-anchor="middle">Consola de emisores</text>
           <text class="tag new" x="1021" y="199" text-anchor="middle">NUEVO</text>
-          <text class="s" x="1021" y="221" text-anchor="middle">darse de alta como emisor</text>
+          <text class="s" x="1021" y="221" text-anchor="middle">registrar esquemas · resolvers</text>
           <text class="s" x="1021" y="237" text-anchor="middle">emitir y revocar · historial</text>
-          <text class="s" x="1021" y="253" text-anchor="middle">+ admin de esquemas (solo Yucu)</text>
+          <text class="s" x="1021" y="253" text-anchor="middle">firma en su propio dispositivo</text>
           <text class="m" x="1021" y="270" text-anchor="middle">usa: Wallet · Attestation</text>
 
           <!-- Puertos -->
@@ -139,7 +139,7 @@
           <text class="t" x="284" y="494">Servidor · server.ts</text>
           <text class="warn" x="906" y="494" text-anchor="end">Nunca recibe llaves ni dinero</text>
           <text class="s" x="284" y="516">prepara transacciones sin firmar (W2) · patrocina comisiones (W4) · asistente con IA, Gemini</text>
-          <text class="s new" x="284" y="538">+ API de lectura: índice de lotes y atestaciones para el verificador y el SDK (nuevo)</text>
+          <text class="s new" x="284" y="538">+ índice de solo lectura: lee los eventos de lotes y atestaciones para listados e historial (nuevo)</text>
 
           <!-- Servidor → Stellar -->
           <line class="ar" x1="300" y1="554" x2="202" y2="611" marker-end="url(#ah1)"/>
@@ -161,8 +161,8 @@
           <text class="s" x="371" y="660" text-anchor="middle">pasaporte del lote · W17</text>
 
           <rect class="box todo" x="492" y="614" width="206" height="66" rx="8"/>
-          <text class="t" x="595" y="640" text-anchor="middle">attestation_registry</text>
-          <text class="s new" x="595" y="660" text-anchor="middle">varios emisores · liga al lote</text>
+          <text class="t" x="595" y="640" text-anchor="middle">Núcleo de atestaciones</text>
+          <text class="s new" x="595" y="660" text-anchor="middle">inmutable · + resolvers de Yucu</text>
 
           <rect class="box ext" x="716" y="614" width="206" height="66" rx="8"/>
           <text class="t" x="819" y="640" text-anchor="middle">Trustless Work</text>

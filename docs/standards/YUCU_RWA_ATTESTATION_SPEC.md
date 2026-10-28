@@ -1,3 +1,5 @@
+> **Obsoleto (28 de octubre de 2026).** Este borrador describe un diseño anterior y contiene afirmaciones sin evidencia. No lo uses ni lo compartas: la arquitectura vigente está en [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) y este documento se reescribirá a partir de ella.
+
 # 🏛️ Yucu RWA Attestation Specification (v1.2.0)
 ## *High-Performance Decentralized Real-World Asset (RWA) Provenance, Anti-Fraud & Physical Attestation Infrastructure on Stellar & Soroban*
 
