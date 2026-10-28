@@ -1,7 +1,7 @@
-# ADR-005: Infraestructura de atestaciones para emisores y verificadores externos
+# ADR-005: Infraestructura de atestaciones abierta para Stellar, con Yucu como primer usuario
 
 * **Estado:** Propuesta (borrador). No se construye nada de aquí hasta que los mantenedores la acepten.
-* **Fecha:** 27 de octubre de 2026 (D3 simplificada el 28 de octubre de 2026)
+* **Fecha:** 27 de octubre de 2026. Reescrita el 28 de octubre de 2026 con fuentes oficiales (sección 8).
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
 * **Relación:** Se apoya en [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (no custodial, puertos) y [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (D5: lo mínimo en la cadena; D11: servicios para compradores y marcas). Los diagramas están en [`docs/arquitectura/`](../arquitectura/README.md).
 
@@ -9,111 +9,196 @@
 
 ## 1. Contexto
 
-Hoy Yucu tiene una sola app, la PWA, pensada para la artesana y el comprador. Los servicios que ADR-004 (D11) propone cobrar a compradores y marcas necesitan que **personas y organizaciones de fuera** usen el protocolo:
+Yucu necesita que **personas y organizaciones de fuera** usen el protocolo (ADR-004, D11):
 
-* **Emisores:** grupos, cooperativas, certificadoras, marcas o instituciones que afirman algo sobre un lote ("este lote es de origen comunitario", "esta colaboración tuvo consentimiento").
-* **Verificadores:** cualquier comprador o tienda que escanea el QR y quiere saber si esa afirmación es válida, sin cuenta ni billetera.
+* **Emisores:** grupos, cooperativas, certificadoras, marcas o instituciones que afirman algo sobre un lote, una pieza o una cuenta.
+* **Verificadores:** cualquier comprador, tienda o contrato que quiere saber si esa afirmación sigue vigente, sin cuenta ni billetera.
 
-Nada de eso existe. Además, `contracts/attestation_registry` acepta **un solo emisor por esquema**, recibe los IDs desde fuera, guarda textos libres en la cadena, lleva un contador que no usa nadie y guarda un campo `signature` que no verifica.
+Queremos que la infraestructura sea **útil para cualquier proyecto de Stellar**, no solo para Yucu. Eso cambia el diseño: un registro que solo sirve a Yucu, con un administrador de Yucu, no lo adoptaría una certificadora ni otro proyecto.
 
-Antes de decidir se revisó la única infraestructura de atestaciones en Soroban con despliegue en mainnet: Attest Protocol ([`daccred/attestprotocol`](https://github.com/daccred/attestprotocol), commit `c0c4529`). Lo que se encontró está en la sección 4.
+**El contrato actual no sirve para eso.** `contracts/attestation_registry` acepta un solo emisor por esquema, recibe los IDs desde fuera, guarda textos libres en la cadena, lleva un contador global que no usa nadie, guarda un campo `signature` que no verifica, y el administrador puede inicializarlo cualquiera que llegue primero (#110). Otros contratos solo pueden preguntar `verify_attestation(uid) -> bool`: `fair_escrow` aceptaría como "prueba de entrega" cualquier atestación vigente, de cualquier esquema y sobre cualquier cosa.
 
-## 2. Decisiones
+**Lo que ya existe en Stellar** (revisado el 28 de octubre de 2026):
 
-**D1. Dos apps nuevas, separadas de la PWA de la artesana.**
-* **Verificador público:** una página ligera que abre el enlace del QR y muestra "vigente" o "revocado", quién lo afirma y cuándo. No pide cuenta ni billetera.
-* **Consola de emisores:** el emisor emite y revoca atestaciones y ve su historial. Incluye una pantalla mínima de administración de esquemas que solo usa Yucu.
+* **Attest Protocol** ([`daccred/attestprotocol`](https://github.com/daccred/attestprotocol), licencia MIT, commit `c0c4529` del 11 de septiembre de 2026). Recibió del SCF 120.6 mil dólares en dos rondas (#29 y #32) y lo mantiene una sola persona. Tiene esquemas, *resolvers* (`onattest`, `onrevoke`, `onresolve`), delegación, revocación y vencimiento, y en `contracts/stellar/audit/` hay reportes de Almanax (noviembre de 2025) y de Scout, además de citas a hallazgos de Halborn. Es la referencia más cercana a lo que queremos, pero hoy tiene cuatro bloqueos para Yucu (sección 6).
+* **No hay un SEP de atestaciones.** Las "attestations" de los SEP actuales se refieren a la verificación de builds, no a afirmaciones sobre bienes o personas.
+* La SDF no tiene una convocatoria (RFP) de atestaciones abierta y su roadmap no las menciona. Proponerlo como estándar requiere demostrar que otros proyectos lo necesitan.
 
-Se separan porque son públicos muy distintos: una artesana mayor y una certificadora no deben compartir pantallas.
+## 2. Qué significa "profesional" aquí
 
-*Alternativa:* una sola PWA con roles. Se construye más rápido, pero mezcla los dos públicos.
+1. **Genérico:** el núcleo no sabe nada de lotes, artesanas ni la Mixteca. Lo de Yucu vive en sus esquemas y *resolvers*.
+2. **Nadie controla las atestaciones de otros:** el núcleo no tiene administrador ni `upgrade`. Una versión nueva es otro despliegue.
+3. **Reimplementable:** la especificación define el cálculo de cada ID con vectores de prueba, para que otro equipo obtenga los mismos IDs.
+4. **Compatible:** el modelo de datos y la interfaz de *resolvers* siguen a Attest Protocol y a EAS (Ethereum), para poder migrar o interoperar.
+5. **Privado por diseño:** en la cadena no va ningún dato personal; el contenido sensible va como hash con sal.
+6. **Revisable:** modelo de amenazas, pruebas de propiedades y auditoría externa antes de mainnet.
 
-**D2. Un puerto nuevo, `AttestationPort`, en `src/core/chain/ports.ts`.** Sigue el patrón de ADR-003: preparar → firmar → enviar. Forma propuesta:
+## 3. Decisiones
+
+**D1. Tres capas separadas.**
+
+| Capa | Qué es | Quién la controla |
+|---|---|---|
+| **Núcleo** | Contrato genérico: esquemas, atestaciones, revocación, vencimiento, referencias | Nadie (inmutable) |
+| **Esquemas y *resolvers* de Yucu** | Las reglas de Yucu: quién emite el origen, la cofirma de la artesana, quién revoca | Yucu, de forma pública y declarada (D8) |
+| **Apps** | Verificador público, consola de emisores y `AttestationPort` en la PWA | Yucu |
+
+**D2. Modelo de datos del núcleo.** Los nombres siguen a Attest Protocol y EAS; la forma final la ajustan los alumnos en su issue.
+
+```rust
+struct Schema {
+    creator: Address,              // quien lo registró y pagó su renta
+    definition_hash: BytesN<32>,   // sha256 de la definición (JSON Schema) publicada fuera de la cadena
+    resolver: Option<Address>,     // contrato con reglas propias del esquema (D3)
+    revocable: bool,
+    storage: StorageKind,          // Persistent o Temporary (#100)
+}
+
+struct Attestation {
+    schema_uid: BytesN<32>,
+    attester: Address,             // quien afirma; firma con require_auth
+    subject: BytesN<32>,           // sobre qué: sha256("lot:" + código), "item:", "addr:", "sale:"...
+    recipient: Option<Address>,    // la cuenta a la que se refiere, si la hay
+    ref_uid: Option<BytesN<32>>,   // atestación relacionada (procedencia → entrega → reventa)
+    data: Bytes,                   // hash con sal, o datos codificados con tamaño máximo
+    nonce: u64,                    // por emisor; permite reemitir después de revocar
+    time: u64,                     // hora del ledger; la hora de la observación va en el contenido
+    expiration_time: Option<u64>,
+    revocation_time: Option<u64>,
+}
+```
+
+* **IDs calculados en el contrato.** `schema_uid = sha256(prefijo ‖ definition_hash ‖ creator ‖ resolver ‖ revocable ‖ storage)` y `uid = sha256(prefijo ‖ dirección del contrato ‖ schema_uid ‖ attester ‖ subject ‖ nonce)`. El prefijo de dominio y la dirección del contrato evitan que un ID de otra red o de otro despliegue coincida.
+* **El nonce es por emisor**, guardado en su propia entrada `persistent`. No hay contador global, así que las emisiones no compiten por la misma entrada.
+* **Esquemas sin permiso:** cualquiera registra un esquema y paga su renta. Cada esquema es una entrada `persistent` propia, no `instance` (ver sección 6), así que no hay un límite común que se pueda llenar.
+* **Se quitan** `name`, `description`, el texto de la definición y `signature`. La autenticidad la da `require_auth` del emisor.
+
+**D3. Funciones del núcleo.**
+
+```rust
+fn register_schema(creator, definition_hash, resolver, revocable, storage) -> BytesN<32>;
+fn attest(attester, schema_uid, subject, recipient, ref_uid, data, expiration_time) -> BytesN<32>;
+fn revoke(revoker, uid);
+fn get_schema(schema_uid) -> Schema;
+fn get_attestation(uid) -> Attestation;
+fn is_valid(uid) -> bool;                                   // existe, no venció, no se revocó
+fn is_valid_for(uid, schema_uid, subject) -> bool;          // lo que deben usar los otros contratos
+fn extend_ttl(uid);                                          // cualquiera puede pagar la renta
+fn timestamp(hash) -> u64;                                   // ancla un hash (D6)
+fn revoke_offchain(revoker, hash) -> u64;                    // revoca una atestación fuera de la cadena (D6)
+```
+
+* `attest` rechaza un `expiration_time` que ya pasó, un `ref_uid` que no existe y un `data` más grande que el máximo.
+* `revoke` lo puede hacer el emisor. Otro firmante solo puede revocar si el *resolver* del esquema lo aprueba en `onrevoke` (por ejemplo, la artesana que retira su consentimiento).
+* Las funciones de varios a la vez (`multi_attest`, `multi_revoke`) se agregan si las mediciones de costo lo justifican.
+* `fair_escrow` y `perpetual_royalties` deben usar `is_valid_for`, nunca solo `is_valid`.
+
+**D4. *Resolvers* con la misma interfaz que Attest Protocol.** `onattest(data) -> bool` y `onrevoke(data) -> bool` se llaman antes de guardar y, si fallan, se revierte todo. `onresolve` se llama después y su fallo no revierte. Usar los mismos nombres y tipos permite llevar un *resolver* de un registro al otro. Con *resolvers* se resuelven, sin tocar el núcleo:
+
+* lista de emisores autorizados por esquema, o un quórum;
+* **cofirma:** el *resolver* llama `require_auth()` sobre la dirección de la artesana, que firma su propia entrada de autorización en su teléfono;
+* revocación por la persona a quien se refiere la atestación;
+* corte por llave robada: el *resolver* deja de aceptar a un emisor a partir de una fecha;
+* cobros por emitir, si algún día se decide (ADR-004, D11), siempre al emisor y nunca a la artesana.
+
+**D5. Gobierno.** El núcleo no tiene administrador, ni `initialize`, ni `upgrade`: se despliega con `__constructor` y sin estado de control. Una corrección es un despliegue nuevo (v1, v2) y la especificación dice cómo migrar. Los *resolvers* de Yucu sí tienen administrador (una cuenta multifirma), y eso se declara en la especificación de cada esquema.
+
+**D6. Emitir sin pagar, sin conexión y en volumen.**
+
+* **Patrocinio:** en Soroban, la firma de autorización y la transacción pueden ser de cuentas distintas. El emisor firma su entrada con `require_auth` y otra cuenta envía y paga. No hace falta delegación con BLS12-381, que WebCrypto no soporta. Sirve para el patrocinio de #94.
+* **Fuera de la cadena:** el emisor firma el contenido con SEP-53 (Final, v1.0.0) usando el mismo `schema_uid`. La revocación (`revoke_offchain`) y la fecha cierta (`timestamp`) sí van a la cadena. SEP-53 solo prueba una llave ed25519; con cuentas multifirma o contratos no prueba el control de la cuenta, así que esos emisores emiten en la cadena.
+* **Lotes:** un emisor junta muchas atestaciones de tránsito, ancla su raíz de Merkle con `timestamp` y cada atestación se comprueba con su prueba. Encaja con la cola sin conexión de #21. Solo para tipos que no se revocan uno por uno.
+* Más adelante se puede exportar una atestación como credencial verificable de W3C (VC 2.0) para compradores en el extranjero.
+
+**D7. Almacenamiento y renta.**
+
+* Según la documentación oficial, una entrada `temporary` que llega a TTL 0 **se borra para siempre**, y una `persistent` **se archiva** y debe restaurarse antes de usarla. Desde el protocolo 23 la restauración puede ir dentro de la misma transacción si la simulación la incluye.
+* El verificador simula la lectura. Si la simulación pide restaurar, muestra "archivada, se puede restaurar", no "no existe".
+* El tipo de almacenamiento lo fija el esquema (#100). El tránsito usa `temporary`; el origen, `persistent`.
+* `extend_ttl` es pública. Quién paga la renta de las atestaciones de origen es una pregunta abierta (sección 7).
+* Antes de fijar tamaños máximos, los alumnos miden en testnet el costo real de una atestación. No se escriben cifras sin esa medición.
+
+**D8. Esquemas iniciales de Yucu.** Cada uno se publica con su definición JSON, su hash y la descripción de su *resolver*.
+
+| Esquema | Emisor | *Resolver* | Almacenamiento |
+|---|---|---|---|
+| Origen comunitario | El grupo | Lista de grupos dados de alta por Yucu después de verificarlos fuera de la cadena | `persistent` |
+| Colaboración con consentimiento | La marca | Exige la cofirma de la artesana; ella puede revocar | `persistent` |
+| Entrega | El comprador o el grupo | Exige `ref_uid` a la venta o al escrow | `persistent` |
+| Tránsito (pesaje, humedad) | El grupo o la promotora | Lista de emisores | `temporary` |
+| Dictamen de IA | El servicio de IA de Yucu | Se muestra siempre como "dictamen de IA", nunca como certificación (regla 3 de AGENTS.md) | `temporary` |
+
+Todos guardan en `data` un hash con **sal aleatoria obligatoria**: datos con pocas opciones, como "25 kg" o un municipio, se adivinan probando todas las combinaciones. En la cadena nunca va un nombre ni una coordenada. El verificador muestra el producto, el emisor, el municipio o región y las fechas.
+
+**D9. `AttestationPort` en `src/core/chain/ports.ts`.** Sigue el patrón de ADR-003: preparar → firmar → enviar. Habla con el núcleo a través de un adaptador, así que funciona igual con el núcleo propio o con Attest Protocol (D10).
 
 ```ts
 export interface AttestationPort {
   prepareAttest(req: AttestRequest): Promise<UnsignedTransaction>;
-  prepareRevoke(attestationId: string, issuerAddress: string): Promise<UnsignedTransaction>;
+  prepareRevoke(attestationId: string, revokerAddress: string): Promise<UnsignedTransaction>;
   /** Envía la emisión firmada y devuelve el ID que calculó el contrato. */
   submitAttest(signedXdr: string): Promise<ChainReceipt & { attestationId: string }>;
   submit(signedXdr: string): Promise<ChainReceipt>;
   /** Lectura directa de la red: el verificador no depende del servidor de Yucu. */
-  verify(attestationId: string): Promise<{ valid: boolean; revoked: boolean; expired: boolean; source: ChainSource }>;
+  verify(attestationId: string, expected?: { schemaId: string; subject: string }): Promise<{
+    valid: boolean; revoked: boolean; expired: boolean; archived: boolean; source: ChainSource;
+  }>;
   listForLot(lotCode: string): Promise<{ items: AttestationRecord[]; source: ChainSource }>;
 }
 ```
 
-`AttestRequest` lleva el esquema, el emisor, el código del lote, el hash del contenido y una fecha de vencimiento opcional. Nunca lleva nombres. El puerto convierte el código del lote en el `subject` que guarda el contrato (D3). El emisor firma con su propia billetera (`ExternalWalletPort` o `DeviceWalletPort`).
+`AttestRequest` lleva el esquema, el emisor, el código del lote, el contenido y una fecha de vencimiento opcional. El puerto calcula `subject`, agrega la sal y el hash, y nunca manda nombres. `listForLot` usa la API de solo lectura del servidor, que indexa los eventos del núcleo (los eventos llevan `schema_uid`, `attester` y `subject`). Esa API no firma ni guarda llaves.
 
-**D3. Un registro más simple en `attestation_registry`.** El contrato guarda solo lo que el verificador necesita para responder "vigente" o "revocado". Ninguna parte de la app llama hoy a `register_schema` ni a `create_attestation`, así que el cambio no rompe nada.
+**D10. Primero proponer los cambios a Attest Protocol; el núcleo propio, solo si no se aceptan.**
 
-Forma propuesta (los nombres son orientativos; los alumnos la ajustan en su issue):
+1. Antes de escribir código del núcleo, abrir en `daccred/attestprotocol` una issue por cada bloqueo de la sección 6, con la propuesta de esta ADR.
+2. Si los acepta antes de la fecha que fijen los mantenedores, Yucu usa Attest Protocol con sus propios *resolvers* (D8) y **no despliega un registro propio**.
+3. Si no, los alumnos construyen el núcleo de D2 y D3 con la misma interfaz de *resolvers* (D4), y el adaptador de D9 permite cambiar después.
+4. En los dos casos, la interfaz común se propone como SEP **junto con** ese equipo, siguiendo el proceso oficial: primero una discusión pública (GitHub Discussions de `stellar-protocol` o el Discord de desarrolladores), después el borrador con el número "por asignar".
 
-```rust
-// El administrador crea el esquema. El ID es sha256(definición) y lo calcula el contrato.
-fn register_schema(env, definition_hash: BytesN<32>, revocable: bool, storage: StorageKind) -> BytesN<32>;
-fn add_issuer(env, schema_id: BytesN<32>, issuer: Address);
-fn remove_issuer(env, schema_id: BytesN<32>, issuer: Address);
+Así Yucu no compite con un proyecto que el SCF ya financió, y el trabajo de los alumnos mejora una pieza que usa todo el ecosistema.
 
-// El emisor firma. El ID es sha256(esquema, sujeto, emisor, payload_hash) y lo calcula el contrato.
-fn create_attestation(env, issuer: Address, schema_id: BytesN<32>, subject: BytesN<32>,
-                      payload_hash: BytesN<32>, expires_at: Option<u64>) -> BytesN<32>;
-fn revoke_attestation(env, issuer: Address, attestation_id: BytesN<32>);
-fn verify_attestation(env, attestation_id: BytesN<32>) -> bool;
-fn extend_ttl(env, attestation_id: BytesN<32>);
+## 4. Calidad exigida
 
-struct Schema      { revocable: bool, storage: StorageKind }
-struct Attestation { schema_id, subject, issuer, payload_hash, issued_at: u64,
-                     expires_at: Option<u64>, revoked_at: Option<u64> }
-```
+* Especificación con el cálculo de IDs, la codificación de `data` y **vectores de prueba**.
+* Pruebas de conformidad que cualquier implementación debe pasar, con una prueba positiva y una negativa por regla (AGENTS.md), más pruebas de propiedades y *fuzzing* del cálculo de IDs y de la autorización.
+* Modelo de amenazas (STRIDE) del núcleo y de cada *resolver*. El tramo 2 del Integration Track del SCF lo pide.
+* Builds reproducibles y verificables del contrato antes de cualquier despliegue público.
+* Auditoría externa antes de mainnet. El Soroban Security Audit Bank solo atiende proyectos financiados por el SCF y pide un 5 % del costo por adelantado, que se reembolsa si los hallazgos se corrigen en 20 días hábiles.
 
-| Cambio | Por qué |
-|---|---|
-| **El esquema solo guarda `revocable` y el tipo de almacenamiento.** `name`, `description` y `schema_definition` salen de la cadena: van en un JSON público ligado por su hash, que es el ID del esquema | Hoy se guarda texto libre en la cadena, lo que cuesta y va contra D5 de ADR-004 (lo mínimo en la cadena) |
-| **Al crear un esquema solo firma el administrador.** Se quita `issuer_authority`; los emisores se agregan o quitan con `add_issuer` y `remove_issuer` | Con varios emisores por esquema, un solo emisor fijo no tiene sentido. Hoy cada grupo necesitaría su propio esquema |
-| **El contrato calcula los IDs** con un prefijo de dominio y los datos de la atestación, **sin contador** | Hoy quien llama elige el ID y podría ocupar uno ajeno. Sin contador, la misma atestación repetida se rechaza sola |
-| **Se quita `AttestationCount`** | Se escribe en `instance` en cada emisión, así que todas las llamadas compiten por esa entrada, y no la usa nadie |
-| **El sujeto es `subject: BytesN<32>`** (el hash del código del lote) en lugar de `recipient: Address` | Liga la atestación al lote para `listForLot`. La dirección de la artesana ya está ligada al lote en `lot_passport`, así que no se repite |
-| **Se quita `signature`** | Parece una firma verificada y no lo es; la autenticidad ya la da `require_auth` del emisor |
-| **`revoked_at: Option<u64>`** en lugar de `revoked: bool` | Un solo campo dice si se revocó y cuándo |
-| **`expires_at: Option<u64>`** en lugar de `expiration_time = 0`, y se rechaza una fecha que ya pasó | Quita el valor mágico; rechazar el vencimiento pasado es igual que en Attest Protocol |
-| **El registro no repite su propio ID ni campos que ya son la llave** | El ID es la llave con que se guarda |
-| Se **mantienen** `payload_hash`, el registro de esquemas solo por el administrador, `verify_attestation()` y el tipo de almacenamiento por esquema de #100 | Protegen la privacidad, evitan basura en el contrato y facilitan verificar |
-| Una función pública para extender el TTL | El constructor y `upgrade` ya los pide #110 para los tres contratos; aquí solo falta el TTL |
+## 5. Consecuencias
 
-*Consecuencia del ID sin contador:* para volver a emitir una atestación que se revocó hay que cambiar el contenido (por ejemplo, incluir la fecha en lo que se resume en `payload_hash`). Es lo deseado: una revocación no se puede deshacer en silencio.
-
-*Pendiente para la pregunta 5:* si una atestación necesita también la firma de la artesana, se agrega un `co_signer: Option<Address>` con su `require_auth()`. No se incluye hasta decidirlo.
-
-**D4. El verificador lee la red directamente.** Para comprobar una atestación consulta el contrato por RPC, sin pasar por el servidor de Yucu: así el resultado no depende de confiar en Yucu. El servidor agrega una **API de solo lectura** (índice) únicamente para listados e historial. Esa API no firma ni guarda llaves.
-
-**D5. Privacidad en el verificador.** Muestra el producto, el emisor, el municipio o región y las fechas. Nunca el nombre de la artesana ni coordenadas.
-
-**D6. Alta de emisores.** El administrador agrega un emisor a un esquema después de verificar fuera de la cadena quién es. En la cadena el emisor es una dirección `G…`. Cómo se verifica a un emisor queda en la sección 5.
-
-## 3. Consecuencias
-
-* Se crean issues nuevas para los alumnos: `AttestationPort` con su versión simulada, cambios a `attestation_registry`, el verificador público y la consola mínima de emisores. Cada una con pruebas positivas y negativas.
-* Los cambios al contrato exigen redesplegar `attestation_registry`. Conviene hacerlo en el mismo redespliegue de #110 para que los IDs cambien una sola vez.
+* El `attestation_registry` actual queda como material de prueba y no se despliega a mainnet. Su reemplazo (propio o Attest Protocol) entra en el mismo redespliegue de #110, para que los IDs cambien una sola vez.
+* Issues nuevas para alumnos: especificación y vectores; núcleo (solo si aplica D10.3); *resolvers* de Yucu; `AttestationPort` con su versión simulada; verificador público; consola mínima de emisores.
+* Los documentos de `docs/standards/` sobre atestaciones quedan obsoletos hasta reescribirlos con esta ADR.
 * El widget de #79 se vuelve parte del verificador.
-* El plan de trabajo crece en unas 20 a 25 semanas-alumno. Con dos semestres se recomienda el verificador completo y una consola mínima: un emisor emite y revoca.
+* El plan de trabajo crece. Con dos semestres se recomienda: especificación, *resolvers*, `AttestationPort` y el verificador completo, más una consola mínima donde un emisor emite y revoca.
 
-## 4. Alternativa descartada: usar Attest Protocol
+## 6. Alternativas descartadas
 
-Se revisó el código y la actividad en la red al 27 de octubre de 2026. Los puntos de código salen de la lectura, no de pruebas ejecutadas.
+* **Un registro solo para Yucu** (la versión anterior de esta ADR, con administrador de Yucu y reglas fijas). Sirve para Yucu, pero ningún otro proyecto lo adoptaría.
+* **Usar Attest Protocol tal como está** (commit `c0c4529`). Revisado en el código:
+  * en `attest()` directo el sujeto es siempre el emisor (`let subject = attester.clone();`), así que un grupo no puede atestar sobre un lote ni sobre otra cuenta sin la delegación;
+  * la delegación usa firmas BLS12-381, que WebCrypto no soporta (no sirve con la llave no exportable de #91);
+  * los esquemas se guardan en `instance`, que se carga en cada llamada y tiene un tamaño máximo común;
+  * no llama `extend_ttl`, y tiene `initialize` con administrador.
+  Si esos puntos se corrigen, esta alternativa pasa a ser la preferida (D10).
+* **Solo atestaciones fuera de la cadena.** Son baratas y sirven sin conexión, pero `fair_escrow` y `perpetual_royalties` no las pueden leer. Se mantienen como complemento (D6).
 
-* **Cualquiera puede registrar esquemas, y se guardan en almacenamiento `instance`** (`instructions/schema.rs`). Ese almacenamiento se carga en cada llamada y tiene un tamaño máximo, así que se podría llenar de esquemas basura.
-* **Sin un *resolver*, cualquiera puede atestar con cualquier esquema:** el contrato no revisa que el autor sea la autoridad del esquema.
-* **En `attest()` el sujeto es siempre el mismo autor.** Atestar sobre otra persona exige delegación con firmas BLS12-381, que WebCrypto no soporta. No sirve con la llave no exportable de la artesana (#91).
-* **No llama `extend_ttl`** en ninguna parte.
-* **Uso en mainnet:** el contrato v1 tiene 49 eventos, del 5 al 9 de noviembre de 2025, de dos cuentas. El contrato actual (v2) solo tiene su inicialización. Los contratos aparecen como "unverified" en stellar.expert.
+## 7. Preguntas abiertas
 
-Se toma su modelo (esquema, emisor, sujeto, revocación, vencimiento e IDs calculados en el contrato) para poder interoperar o migrar después, sin depender de su contrato.
-
-## 5. Preguntas abiertas
-
-1. ¿Cómo se verifica a un emisor antes de darlo de alta, y quién lo decide?
-2. ¿Quién paga las comisiones de red de los emisores? ¿El patrocinio de #94 también los cubre?
+1. ¿Cómo se verifica a un grupo o a una marca antes de darlo de alta en un *resolver* de Yucu, y quién lo decide?
+2. ¿Quién paga las comisiones de red y la renta de las atestaciones de origen? ¿El patrocinio de #94 las cubre?
 3. ¿Se cobra a los emisores por el servicio (ADR-004, D11)? ¿Cuánto, y lo cobra la misma entidad con RFC?
-4. ¿Qué esquemas hay al inicio? Propuesta: "origen comunitario" (lo emite el grupo) y "colaboración con consentimiento" (lo emite la marca, con la firma de la artesana).
-5. ¿Una atestación puede requerir también la firma de la artesana? La segunda propuesta de la pregunta 4 lo necesita.
+4. ¿Qué plazo se le da a Attest Protocol para responder (D10)?
+5. ¿El núcleo, si se construye, vive en este repositorio o en uno aparte de la organización para que otros lo adopten sin la app?
+
+## 8. Fuentes revisadas (28 de octubre de 2026)
+
+* Stellar Docs, [State archival](https://developers.stellar.org/docs/learn/fundamentals/contract-development/storage/state-archival): tipos de almacenamiento, archivado y restauración automática desde el protocolo 23.
+* Stellar Docs, [Authorization](https://developers.stellar.org/docs/learn/fundamentals/contract-development/authorization): `require_auth`, firmante distinto de quien paga, multifirma con umbral medio, cuentas de contrato.
+* [SEP-53](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0053.md): firma de mensajes, Final v1.0.0, y su limitación con multifirma.
+* [Proceso de los SEP](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/README.md).
+* [Soroban Security Audit Bank](https://stellar.org/grants-and-funding/soroban-audit-bank).
+* [Stellar Attestation Service en el SCF](https://communityfund.stellar.org/project/stellar-attestation-service-lda) y el código de [`daccred/attestprotocol`](https://github.com/daccred/attestprotocol) (commit `c0c4529`).
+* EAS, [`IEAS.sol`](https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/IEAS.sol): modelo de atestación, `refUID`, delegación, `timestamp` y `revokeOffchain`.
