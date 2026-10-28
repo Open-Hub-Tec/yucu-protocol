@@ -36,13 +36,13 @@ Los porcentajes de comisión, regalía y Tequio salen de [`src/config/protocolFe
 | `PayoutPort` | Por construir | W18 #112 |
 | Simulado y red | Por construir | W5 #95 · W16 #109 · W24 #118 |
 | Servidor | Existe | W2 #92 · W13 #106 · W14 #107 · API de lectura (nuevo) |
-| Contratos | Por cambiar | W10 #100 · W11 #101 · W17 #110 · `attestation_registry` con varios emisores e IDs calculados (nuevo) |
+| Contratos | Por cambiar | W10 #100 · W11 #101 · W17 #110 · `attestation_registry` simplificado: varios emisores, IDs calculados, sin textos ni contador en la cadena (nuevo) |
 
 ## 5. Qué cambia respecto a hoy
 
 * Dos apps nuevas para clientes de infraestructura: el verificador público y la consola de emisores.
 * Un puerto nuevo, `AttestationPort`, para que esas apps sigan la regla 4.
-* `attestation_registry` acepta varios emisores por esquema, calcula los IDs y liga cada atestación a un lote.
+* `attestation_registry` se simplifica: acepta varios emisores por esquema, calcula los IDs, liga cada atestación a un lote y deja fuera de la cadena los textos, el contador y la firma que no se verificaba.
 * El servidor suma una API de solo lectura. No firma ni guarda llaves.
 
 ## 6. Lo que falta antes de mainnet

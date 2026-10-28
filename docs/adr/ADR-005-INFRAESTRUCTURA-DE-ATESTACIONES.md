@@ -1,7 +1,7 @@
 # ADR-005: Infraestructura de atestaciones para emisores y verificadores externos
 
 * **Estado:** Propuesta (borrador). No se construye nada de aquí hasta que los mantenedores la acepten.
-* **Fecha:** 27 de octubre de 2026
+* **Fecha:** 27 de octubre de 2026 (D3 simplificada el 28 de octubre de 2026)
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
 * **Relación:** Se apoya en [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (no custodial, puertos) y [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (D5: lo mínimo en la cadena; D11: servicios para compradores y marcas). Los diagramas están en [`docs/arquitectura/`](../arquitectura/README.md).
 
@@ -14,7 +14,7 @@ Hoy Yucu tiene una sola app, la PWA, pensada para la artesana y el comprador. Lo
 * **Emisores:** grupos, cooperativas, certificadoras, marcas o instituciones que afirman algo sobre un lote ("este lote es de origen comunitario", "esta colaboración tuvo consentimiento").
 * **Verificadores:** cualquier comprador o tienda que escanea el QR y quiere saber si esa afirmación es válida, sin cuenta ni billetera.
 
-Nada de eso existe. Además, `contracts/attestation_registry` acepta **un solo emisor por esquema**, recibe los IDs desde fuera y guarda un campo `signature` que no verifica.
+Nada de eso existe. Además, `contracts/attestation_registry` acepta **un solo emisor por esquema**, recibe los IDs desde fuera, guarda textos libres en la cadena, lleva un contador que no usa nadie y guarda un campo `signature` que no verifica.
 
 Antes de decidir se revisó la única infraestructura de atestaciones en Soroban con despliegue en mainnet: Attest Protocol ([`daccred/attestprotocol`](https://github.com/daccred/attestprotocol), commit `c0c4529`). Lo que se encontró está en la sección 4.
 
@@ -43,21 +43,47 @@ export interface AttestationPort {
 }
 ```
 
-`AttestRequest` lleva el esquema, el emisor, el lote al que se refiere, el hash del contenido y una fecha de vencimiento opcional. Nunca lleva nombres. El emisor firma con su propia billetera (`ExternalWalletPort` o `DeviceWalletPort`).
+`AttestRequest` lleva el esquema, el emisor, el código del lote, el hash del contenido y una fecha de vencimiento opcional. Nunca lleva nombres. El puerto convierte el código del lote en el `subject` que guarda el contrato (D3). El emisor firma con su propia billetera (`ExternalWalletPort` o `DeviceWalletPort`).
 
-**D3. Cambios en `attestation_registry`.**
+**D3. Un registro más simple en `attestation_registry`.** El contrato guarda solo lo que el verificador necesita para responder "vigente" o "revocado". Ninguna parte de la app llama hoy a `register_schema` ni a `create_attestation`, así que el cambio no rompe nada.
+
+Forma propuesta (los nombres son orientativos; los alumnos la ajustan en su issue):
+
+```rust
+// El administrador crea el esquema. El ID es sha256(definición) y lo calcula el contrato.
+fn register_schema(env, definition_hash: BytesN<32>, revocable: bool, storage: StorageKind) -> BytesN<32>;
+fn add_issuer(env, schema_id: BytesN<32>, issuer: Address);
+fn remove_issuer(env, schema_id: BytesN<32>, issuer: Address);
+
+// El emisor firma. El ID es sha256(esquema, sujeto, emisor, payload_hash) y lo calcula el contrato.
+fn create_attestation(env, issuer: Address, schema_id: BytesN<32>, subject: BytesN<32>,
+                      payload_hash: BytesN<32>, expires_at: Option<u64>) -> BytesN<32>;
+fn revoke_attestation(env, issuer: Address, attestation_id: BytesN<32>);
+fn verify_attestation(env, attestation_id: BytesN<32>) -> bool;
+fn extend_ttl(env, attestation_id: BytesN<32>);
+
+struct Schema      { revocable: bool, storage: StorageKind }
+struct Attestation { schema_id, subject, issuer, payload_hash, issued_at: u64,
+                     expires_at: Option<u64>, revoked_at: Option<u64> }
+```
 
 | Cambio | Por qué |
 |---|---|
-| **Varios emisores por esquema:** el administrador agrega o quita emisores autorizados a una lista por esquema | Hoy cada grupo necesitaría su propio esquema |
-| **El contrato calcula los IDs** (prefijo de dominio + dirección del contrato + esquema + sujeto + emisor + número de secuencia) | Hoy quien llama elige el ID y podría ocupar uno ajeno |
-| **Referencia al lote** (`lot_code`) | Para ligar la atestación con `lot_passport` y listar las de un lote |
+| **El esquema solo guarda `revocable` y el tipo de almacenamiento.** `name`, `description` y `schema_definition` salen de la cadena: van en un JSON público ligado por su hash, que es el ID del esquema | Hoy se guarda texto libre en la cadena, lo que cuesta y va contra D5 de ADR-004 (lo mínimo en la cadena) |
+| **Al crear un esquema solo firma el administrador.** Se quita `issuer_authority`; los emisores se agregan o quitan con `add_issuer` y `remove_issuer` | Con varios emisores por esquema, un solo emisor fijo no tiene sentido. Hoy cada grupo necesitaría su propio esquema |
+| **El contrato calcula los IDs** con un prefijo de dominio y los datos de la atestación, **sin contador** | Hoy quien llama elige el ID y podría ocupar uno ajeno. Sin contador, la misma atestación repetida se rechaza sola |
+| **Se quita `AttestationCount`** | Se escribe en `instance` en cada emisión, así que todas las llamadas compiten por esa entrada, y no la usa nadie |
+| **El sujeto es `subject: BytesN<32>`** (el hash del código del lote) en lugar de `recipient: Address` | Liga la atestación al lote para `listForLot`. La dirección de la artesana ya está ligada al lote en `lot_passport`, así que no se repite |
 | **Se quita `signature`** | Parece una firma verificada y no lo es; la autenticidad ya la da `require_auth` del emisor |
-| **Se rechaza un vencimiento pasado** y se guarda `revoked_at` | Igual que hace Attest Protocol |
-| Se **mantienen** `payload_hash`, el registro de esquemas solo por el administrador, el almacenamiento `persistent` y `verify_attestation()` | Protegen la privacidad, evitan basura en el contrato y facilitan verificar |
+| **`revoked_at: Option<u64>`** en lugar de `revoked: bool` | Un solo campo dice si se revocó y cuándo |
+| **`expires_at: Option<u64>`** en lugar de `expiration_time = 0`, y se rechaza una fecha que ya pasó | Quita el valor mágico; rechazar el vencimiento pasado es igual que en Attest Protocol |
+| **El registro no repite su propio ID ni campos que ya son la llave** | El ID es la llave con que se guarda |
+| Se **mantienen** `payload_hash`, el registro de esquemas solo por el administrador, `verify_attestation()` y el tipo de almacenamiento por esquema de #100 | Protegen la privacidad, evitan basura en el contrato y facilitan verificar |
 | Una función pública para extender el TTL | El constructor y `upgrade` ya los pide #110 para los tres contratos; aquí solo falta el TTL |
 
-El tipo de almacenamiento por esquema (temporal o persistente) ya es la issue #100, y se mantiene.
+*Consecuencia del ID sin contador:* para volver a emitir una atestación que se revocó hay que cambiar el contenido (por ejemplo, incluir la fecha en lo que se resume en `payload_hash`). Es lo deseado: una revocación no se puede deshacer en silencio.
+
+*Pendiente para la pregunta 5:* si una atestación necesita también la firma de la artesana, se agrega un `co_signer: Option<Address>` con su `require_auth()`. No se incluye hasta decidirlo.
 
 **D4. El verificador lee la red directamente.** Para comprobar una atestación consulta el contrato por RPC, sin pasar por el servidor de Yucu: así el resultado no depende de confiar en Yucu. El servidor agrega una **API de solo lectura** (índice) únicamente para listados e historial. Esa API no firma ni guarda llaves.
 
