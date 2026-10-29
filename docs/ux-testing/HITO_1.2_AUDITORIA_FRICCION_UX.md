@@ -30,7 +30,7 @@
 * **Problema:** En la primera tarea se observó una duda de varios segundos buscando dónde comenzar. Los íconos abstractos o menús multinivel generan incertidumbre en usuarios rurales mayores.
 * **Mejora Aplicada en Yucu:** 
   * Botones grandes (>48px táctil y hasta 112px en Modo Abuelo) con texto descriptivo explícito (*"Ver mi huipil"*, *"Mi historia"*, *"Información"*).
-  * Principio *Zero-Typing*: Navegación guiada por voz en Mixteco (Tu'un Savi) y español.
+  * Principio *Zero-Typing*: Navegación guiada por voz en Mixteco (Tu'un Savi) y español. *(Propuesta; no implementada al 29 de octubre de 2026.)*
 
 ### 2. Tamaño de letra y contraste visual
 * **Problema:** Los textos complementarios (fechas, especificaciones técnicas) provocaron fatiga visual y lectura forzada en pantalla de 5-6 pulgadas.
@@ -63,7 +63,17 @@ Las pruebas de usabilidad y fricción se extendieron a **4 comunidades indígena
 ---
 
 ## 🏆 Conclusión
-La prueba multicomunitaria demostró que el diseño centrado en el productor indígena y adulto mayor funciona con una tasa de éxito del 100% (todas las tareas completadas sin intervención externa). La barrera de usabilidad y fricción tecnológica fue **plenamente superada** gracias a:
-1. El botón de micrófono gigante de 112px con un solo toque (*Single Tap*).
-2. La captura y normalización por voz en lengua originaria (*Tu'un Savi* / Español).
-3. La etiqueta física Hang-Tag con código QR, que cualquier artesano y campesino comprende en menos de 10 segundos.
+
+> **Revisión del 29 de octubre de 2026.** Esta conclusión se corrigió para que diga solo lo que muestran las pruebas (regla 8 de [`AGENTS.md`](../../AGENTS.md)). La versión anterior decía "100 % sin intervención externa" y "fricción plenamente superada".
+
+**Lo que sí muestran las pruebas** (unas 7 personas en 4 comunidades; muestra pequeña y cualitativa, sin SUS):
+1. **El QR y la etiqueta colgante se entienden rápido:** entre 5 y 15 segundos, y las participantes los relacionaron con defenderse del intermediario y de la ropa de fábrica.
+2. **Grabar una nota de voz es viable:** quienes ya usan notas de voz en WhatsApp lo hicieron en segundos; una participante narró en Tu'un Savi.
+3. **Primero quieren ver quién lo hizo y de dónde es**, antes que cualquier dato técnico.
+
+**Lo que también apareció y sigue abierto:**
+* Vacilación al empezar, miedo a "borrar" o "romper" el teléfono, y una participante de 61 años necesitó ayuda (TEST_03).
+* El sello se confundió con un trámite de Hacienda o un cobro (TEST_02 y TEST_03).
+* La letra chica y en gris claro no se lee con el sol.
+
+**Lo que estas pruebas no cubrieron**, porque esas pantallas todavía no funcionan de verdad: registrar un lote hablando, firmar con PIN, cobrar en pesos y medir el SUS con artesanas. La navegación por voz en mixteco descrita arriba es una propuesta, no una función de la app; el mixteco se evalúa en [#158](https://github.com/Open-Hub-Tec/yucu-protocol/issues/158).

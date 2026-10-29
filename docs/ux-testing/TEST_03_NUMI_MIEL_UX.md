@@ -12,7 +12,7 @@
 
 | Participante | Comunidad | Edad | Rol / Ocupación | Dispositivo | Experiencia Tecnológica Previa |
 | :--- | :--- | :---: | :--- | :--- | :--- |
-| **Participante 1 (Rogelio M.)** | San Juan Ñumí | 54 | Apicultor / Presidente de la Unión | Smartphone básico Android | Básica (WhatsApp, llamadas y notas de voz) |
+| **Participante 1 (Presidente)** | San Juan Ñumí | 54 | Apicultor / Presidente de la Unión | Smartphone básico Android | Básica (WhatsApp, llamadas y notas de voz) |
 | **Participante 2 (Ventas)** | San Juan Ñumí | 48 | Apicultor / Encargado de Ventas | Smartphone gama baja | Básica (WhatsApp, notas de voz y cámara) |
 | **Participante 3 (Socio Mayor)** | San Juan Ñumí | 61 | Apicultor tradicional | Teléfono básico de teclas | Nula / Casi nula |
 | **Participante 4 (Socio Joven)** | San Juan Ñumí | 39 | Apicultor / Miembro activo | Smartphone gama media | Intermedia (Redes sociales y mensajería) |
