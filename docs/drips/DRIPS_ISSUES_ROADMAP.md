@@ -1,3 +1,5 @@
+> **Roadmap histórico (octubre de 2026). Las issues vigentes están en GitHub y en #152 ("Por dónde empezar").** La arquitectura vigente está en [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) (atestaciones sobre Attest Protocol; `attestation_registry` es solo material de práctica) y [ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) (motor de voz: la IA prepara, la persona firma; ningún oráculo emite ni certifica). Donde este documento los contradiga, mandan los ADR.
+
 # 💧 Yucu Protocol: Decentralized Attestation, AI Oracle & Trustless Work Escrow Roadmap
 ### *Engineering Tasks & Milestones for Open-Source Contributors, Drips Network & Stellar Community Fund*
 

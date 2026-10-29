@@ -138,8 +138,8 @@
           <rect class="box" x="268" y="472" width="654" height="82" rx="8"/>
           <text class="t" x="284" y="494">Servidor · server.ts</text>
           <text class="warn" x="906" y="494" text-anchor="end">Nunca recibe llaves ni dinero</text>
-          <text class="s" x="284" y="516">prepara transacciones sin firmar (W2) · patrocina comisiones (W4) · asistente con IA, Gemini</text>
-          <text class="s new" x="284" y="538">sin indexador: los listados de atestaciones se leen de listas en el contrato (ADR-005)</text>
+          <text class="s" x="284" y="516">prepara transacciones sin firmar (W2) · patrocina comisiones (W4) · motor de voz e IA (ADR-007)</text>
+          <text class="s new" x="284" y="538">sin indexador: los listados de atestaciones se leen del índice de Yucu en la cadena (ADR-005)</text>
 
           <!-- Servidor → Stellar -->
           <line class="ar" x1="300" y1="554" x2="202" y2="611" marker-end="url(#ah1)"/>
@@ -160,9 +160,9 @@
           <text class="t" x="371" y="640" text-anchor="middle">lot_passport</text>
           <text class="s" x="371" y="660" text-anchor="middle">pasaporte del lote · W17</text>
 
-          <rect class="box todo" x="492" y="614" width="206" height="66" rx="8"/>
-          <text class="t" x="595" y="640" text-anchor="middle">Núcleo de atestaciones</text>
-          <text class="s new" x="595" y="660" text-anchor="middle">inmutable · + resolvers de Yucu</text>
+          <rect class="box ext" x="492" y="614" width="206" height="66" rx="8"/>
+          <text class="t" x="595" y="640" text-anchor="middle">Attest Protocol</text>
+          <text class="s new" x="595" y="660" text-anchor="middle">+ índice y reglas de Yucu</text>
 
           <rect class="box ext" x="716" y="614" width="206" height="66" rx="8"/>
           <text class="t" x="819" y="640" text-anchor="middle">Trustless Work</text>

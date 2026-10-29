@@ -161,6 +161,8 @@ W11 Pruebas negativas de contratos (independiente, Rust)
 
 ## W10 · `attestation_registry`: almacenamiento temporal y persistente — **Medium** (Rust)
 
+> **Cerrada (29 de octubre de 2026):** las atestaciones pasan a Attest Protocol y `attestation_registry` no se redespliega ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md)).
+
 **Qué hacer.** Las atestaciones de tránsito (pesaje, humedad) van a `temporary()` con TTL corto; las de origen van a `persistent()`. Agrega el tipo de almacenamiento al esquema y extiende el TTL de forma coherente.
 
 **Criterios de aceptación.**

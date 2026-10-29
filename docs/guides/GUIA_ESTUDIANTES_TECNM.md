@@ -13,11 +13,11 @@ Una red blockchain (como una gran libreta contable mundial compartida) diseñada
 El motor de **Smart Contracts** (contratos inteligentes) de Stellar. Está programado en **Rust**. Es código que se ejecuta en la blockchain y que nadie puede alterar ni apagar. Por ejemplo: *"Si el comprador deposita el dinero, no se lo entregues al vendedor hasta que el líder comunal y el oráculo confirmen que entregó la cosecha con calidad acordada"*.
 
 ### ¿Qué es una Atestación (*Attestation*)?
-Es un **"sello o acta notarial digital"** firmado con criptografía. En vez de que un inspector viaje 8 horas a la sierra a firmar un papel que se puede mojar o falsificar, el Oráculo de Inteligencia Artificial analiza la foto o el satélite y estampa una atestación matemática en la blockchain.
+Es un **"sello o acta notarial digital"** firmado con criptografía: una persona o un grupo afirma algo ("este lote es de la Mixteca") y lo firma con su llave. En vez de un papel que se puede mojar o falsificar, queda en la blockchain y cualquiera lo puede verificar. En Yucu se guardan en **Attest Protocol** ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md)). La IA puede ayudar a llenarla a partir de la voz, pero **siempre la firma una persona**, nunca la IA ([ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md)).
 
 ### ¿Qué es un Oráculo de IA?
 Un programa que conecta el mundo real con la blockchain.
-- **AIVoiceOracle:** Escucha el mixteco (*Tu'un Savi*) y lo traduce a datos limpios.
+- **AIVoiceOracle:** Escucha a la persona y propone los datos; ella los escucha, los corrige y los firma. El mixteco (*Tu'un Savi*) todavía está en evaluación (#158).
 - **AIQualityOracle:** Revisa la foto del grano de café y dice si tiene más de 85 puntos de calidad.
 - **AIEUDRSatelliteOracle:** Revisa las fotos del satélite de la Unión Europea y confirma que no se taló selva.
 

@@ -27,7 +27,7 @@ Yucu gives each artisan three things, without ever showing her a wallet, a crypt
 2. **Payment in pesos, directly to her.** Buyers in Mexico pay her directly in pesos. Buyers abroad pay into a protected escrow that releases to her own account, and she cashes out in pesos at a local shop.
 3. **Royalties on resales.** When a piece is resold through the contract, a share goes back to her, and a community share (Tequio) goes to an account the community controls.
 
-Around this core, Yucu is growing into **open attestation infrastructure** ([ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), draft): known issuers (community groups, cooperatives, certifiers) sign verifiable claims about physical goods, and anyone can verify them. The person a claim is about can revoke her consent, other contracts can check schema and subject (not just "exists"), and lists live in the contract, so there is no indexer to trust. The core contract is first proposed to Attest Protocol ([daccred/attestprotocol#126–#129](https://github.com/daccred/attestprotocol/issues/126)).
+Around this core, Yucu is designing a **voice-first attestation engine** on top of [Attest Protocol](https://github.com/daccred/attestprotocol) (drafts: [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-007](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md)). Attest Protocol is the audited base that stores and revokes attestations; Yucu adds an open index (lists by lot, issuer and account, with no indexer to trust), its own rules (who may issue, consent, co-signing), and an engine where a person speaks, AI drafts the claim from a public per-schema manifest and reads it back, and **the person signs**. AI never signs or certifies. Attest Protocol accepted the changes Yucu proposed for its v3 ([daccred/attestprotocol#126–#129](https://github.com/daccred/attestprotocol/issues/126)). Nothing of this is built yet.
 
 The name comes from *yuku*, "mountain" in Tu'un Savi (Mixtec). The project is developed by students of the Instituto Tecnológico de Tlaxiaco (TecNM) through GitHub issues.
 
@@ -87,7 +87,7 @@ The apps talk **only to the ports** in [`src/core/chain/ports.ts`](./src/core/ch
 | `LotRegistryPort` | Register and read lot passports | [#92](https://github.com/Open-Hub-Tec/yucu-protocol/issues/92), [#93](https://github.com/Open-Hub-Tec/yucu-protocol/issues/93) |
 | `EscrowPort` | Protected purchase on Trustless Work | [#96](https://github.com/Open-Hub-Tec/yucu-protocol/issues/96) |
 | `PayoutPort` | Cash-out in pesos | [#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112), [#114](https://github.com/Open-Hub-Tec/yucu-protocol/issues/114), [#145](https://github.com/Open-Hub-Tec/yucu-protocol/issues/145), [#146](https://github.com/Open-Hub-Tec/yucu-protocol/issues/146) |
-| `AttestationPort` | Issue, revoke, verify and list attestations | [#141](https://github.com/Open-Hub-Tec/yucu-protocol/issues/141) (design in ADR-005) |
+| `AttestationPort` | Issue, revoke, verify and list attestations on Attest Protocol and the Yucu index | [#141](https://github.com/Open-Hub-Tec/yucu-protocol/issues/141) (design in ADR-005) |
 
 Each port has a demo implementation ([`SimulatedChain.ts`](./src/core/chain/SimulatedChain.ts)) so the UI can be built before the real one exists. More diagrams, including the signing flow and the money flow, are in [`docs/arquitectura/`](./docs/arquitectura/README.md).
 
@@ -99,7 +99,7 @@ Soroban contracts in Rust, in a single workspace under [`contracts/`](./contract
 |---|---|---|
 | `lot_passport` | Lot registration signed by the producer and the certifier | [`CAPXWY…`](https://stellar.expert/explorer/testnet/contract/CAPXWYKU5GESGPZ57LNRCLOVHSBGDOZQVAWC6CWIQ655RSZ2ZGZI2BO7) |
 | `perpetual_royalties` | Heritage items, resales, royalty and Tequio | [`CCNPTD…`](https://stellar.expert/explorer/testnet/contract/CCNPTDDVW3RW53YQACZ2UFFHVLUJXNCMZ3TSK7TB552SUU6DDL26FRKU) |
-| `attestation_registry` | Attestations by schema. **Test material**: replaced under ADR-005, not for mainnet | [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT) |
+| `attestation_registry` | **Practice material only.** Not redeployed and not for mainnet: attestations move to Attest Protocol (ADR-005) | [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT) |
 | `fair_escrow` | **Teaching material only.** The real escrow is Trustless Work | [`CCVDEQ…`](https://stellar.expert/explorer/testnet/contract/CCVDEQ64Q4PJX73HLLPL3OYXLW4ARA652I34ZYIDQDXYQDQVJNLFSAQB) |
 
 A single redeployment is planned once [#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110) lands (constructors, closed data fields, admin-only `upgrade`, token allow-list, royalty checks).
@@ -150,7 +150,7 @@ Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verificatio
 | **Phase 1: lot passport** | Accepted design; app integration in progress | #91, #92, #93, #97, #99, #110 |
 | **Phase 2: protected purchase and cash-out** | Testnet design | #96, #112, #114, #115, #116, #119, #145, #146 |
 | **Resale royalties** | Contract on testnet; hardening open | #110, #137 |
-| **Attestation infrastructure** | Draft ADR; core waits on Attest Protocol's answer | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), #140, #141, #142, #143, #148, #151 |
+| **Attestations and voice engine** | Draft ADRs; built on Attest Protocol, whose v3 changes were accepted | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-007](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md), #140, #141, #142, #143, #148, #151, #154, #155 |
 | **Validation** | Field work | Buyers ([#68](https://github.com/Open-Hub-Tec/yucu-protocol/issues/68)), brands ([#131](https://github.com/Open-Hub-Tec/yucu-protocol/issues/131)), disputes ([#103](https://github.com/Open-Hub-Tec/yucu-protocol/issues/103)) |
 | **Before mainnet** | Open | Legal entity, tax and legal opinion, threat model, audit, community consent |
 
@@ -210,8 +210,9 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | ADR-002: offline-first PWA and rural identity; communication channels | [`ADR-002 (PWA)`](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md), [`ADR-002 (channels)`](./docs/adr/ADR-002-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) |
 | ADR-003: non-custodial design and Trustless Work | [`ADR-003`](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |
 | ADR-004: payments in pesos without a wallet | [`ADR-004`](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) |
-| ADR-005: attestation infrastructure (draft) | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
+| ADR-005: attestations on Attest Protocol, with an open index (draft) | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
 | ADR-006: off-chain data and AI (draft) | [`ADR-006`](./docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) |
+| ADR-007: voice and text attestation engine (draft) | [`ADR-007`](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) |
 | Sustainability: open tax and legal questions | [`docs/sostenibilidad/`](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md) |
 | Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
 | Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |

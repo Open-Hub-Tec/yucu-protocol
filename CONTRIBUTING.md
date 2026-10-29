@@ -58,7 +58,7 @@ The repository is organized modularly by domain:
 | **🧠 AI Oracles & Verification** | `src/core/ai/RaizAIOracles.ts` | SCAA coffee cupping analysis, Sentinel-2 EUDR satellite anti-deforestation proofs, Gemini multimodal prompts. |
 | **🔐 Cryptography & Identity** | `src/core/crypto/`<br>`src/core/auth/` | Canonical SHA-256 Community Digest, Ed25519 signatures, zero-seed physical QR card authentication. |
 | **💳 Payments & Escrow** | `src/core/blockchain/TrustlessWorkEscrowAdapter.ts`<br>`src/core/settlement/` | Trustless Work Soroban escrow integration, Etherfuse SPEI off-ramps (Banco del Bienestar) and rural cash rails. |
-| **🦀 Smart Contracts in Rust (Soroban)** | `contracts/` | Soroban smart contracts: `attestation_registry/`, `fair_escrow/`, `lot_passport/`, `perpetual_royalties/`. |
+| **🦀 Smart Contracts in Rust (Soroban)** | `contracts/` | Soroban smart contracts: `lot_passport/`, `perpetual_royalties/`, and the attestation index and rules on top of Attest Protocol (ADR-005). `attestation_registry/` and `fair_escrow/` are practice material only. |
 
 ---
 

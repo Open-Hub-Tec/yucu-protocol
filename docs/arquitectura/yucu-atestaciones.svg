@@ -1,4 +1,4 @@
-<svg viewBox="0 0 1200 656" role="img" xmlns="http://www.w3.org/2000/svg" width="1200" height="656" aria-label="Infraestructura de atestaciones: los emisores firman en su dispositivo; un núcleo genérico, inmutable y sin administrador guarda esquemas y atestaciones y consulta a los resolvers de cada esquema; el verificador público, los contratos y la artesana leen la red directamente, con listas guardadas en el contrato y sin indexador. En la cadena solo van hashes con sal, direcciones y fechas.">
+<svg viewBox="0 0 1200 780" role="img" xmlns="http://www.w3.org/2000/svg" width="1200" height="780" aria-label="Motor de atestaciones sobre Attest Protocol: la persona habla o escribe; el motor transcribe, arma un borrador solo con los campos del manifiesto del esquema y lo lee en voz alta; ella confirma y firma en su dispositivo, y un patrocinador puede pagar la comisión; Attest Protocol, la base auditada, guarda la atestación y llama al índice de Yucu, que guarda listas y contadores y consulta las reglas del esquema; el verificador conversacional, otros contratos, la pantalla de la artesana y los agentes de IA leen la red directamente, sin indexador. La IA prepara y nunca firma. En la cadena solo van hashes con sal, direcciones y fechas.">
 <style>
 .band { fill: #E8EAF1; }
 .bl { fill: #586078; font: 600 10.5px 'Source Sans 3','Segoe UI',system-ui,sans-serif; letter-spacing: .14em; }
@@ -12,129 +12,166 @@
 .m { fill: #586078; font: 400 11px 'JetBrains Mono',ui-monospace,Menlo,monospace; }
 .tag { font: 700 10px 'Source Sans 3','Segoe UI',system-ui,sans-serif; letter-spacing: .08em; fill: #586078; }
 .tag.new, .s.new { fill: #2C4799; }
+.tag.ext { fill: #9A6A0C; }
 .warn { fill: #A8213C; font: 700 11.5px 'Source Sans 3','Segoe UI',system-ui,sans-serif; }
 .ar { stroke: currentColor; stroke-width: 1.4; fill: none; }
 .ar.dash { stroke-dasharray: 5 4; }
 .al { fill: #1B1F2E; font: 600 11px 'Source Sans 3','Segoe UI',system-ui,sans-serif; }
  svg{color:#1B1F2E}</style>
-<rect width="1200" height="656" fill="#FFFFFF"/>
+<rect width="1200" height="780" fill="#FFFFFF"/>
 <g color="#1B1F2E">
           <defs>
             <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
           </defs>
 
           <!-- Bandas -->
-          <rect class="band" x="10" y="10" width="1170" height="96" rx="10"/>
-          <rect class="band" x="10" y="122" width="1170" height="104" rx="10"/>
-          <rect class="band" x="10" y="242" width="1170" height="190" rx="10"/>
-          <rect class="band" x="10" y="448" width="1170" height="120" rx="10"/>
-          <rect class="band" x="10" y="584" width="1170" height="62" rx="10"/>
-          <text class="bl" text-anchor="middle" transform="translate(27 58) rotate(-90)">EMITEN</text>
-          <text class="bl" text-anchor="middle" transform="translate(27 174) rotate(-90)">FIRMAN</text>
-          <text class="bl" text-anchor="middle" transform="translate(27 337) rotate(-90)">EN STELLAR</text>
-          <text class="bl" text-anchor="middle" transform="translate(27 508) rotate(-90)">LEEN</text>
-          <text class="bl" text-anchor="middle" transform="translate(27 615) rotate(-90)">DATOS</text>
+          <rect class="band" x="10" y="10" width="1170" height="80" rx="10"/>
+          <rect class="band" x="10" y="106" width="1170" height="104" rx="10"/>
+          <rect class="band" x="10" y="226" width="1170" height="104" rx="10"/>
+          <rect class="band" x="10" y="346" width="1170" height="190" rx="10"/>
+          <rect class="band" x="10" y="552" width="1170" height="138" rx="10"/>
+          <rect class="band" x="10" y="706" width="1170" height="64" rx="10"/>
+          <text class="bl" text-anchor="middle" transform="translate(27 50) rotate(-90)">HABLAN</text>
+          <text class="bl" text-anchor="middle" transform="translate(27 158) rotate(-90)">MOTOR</text>
+          <text class="bl" text-anchor="middle" transform="translate(27 278) rotate(-90)">FIRMAN</text>
+          <text class="bl" text-anchor="middle" transform="translate(27 441) rotate(-90)">EN STELLAR</text>
+          <text class="bl" text-anchor="middle" transform="translate(27 621) rotate(-90)">LEEN</text>
+          <text class="bl" text-anchor="middle" transform="translate(27 738) rotate(-90)">DATOS</text>
 
-          <!-- Emisores -->
-          <text class="p" x="175" y="48" text-anchor="middle">Grupo o cooperativa</text>
-          <text class="s" x="175" y="68" text-anchor="middle">origen comunitario · tránsito</text>
-          <text class="p" x="457" y="48" text-anchor="middle">Marca</text>
-          <text class="s" x="457" y="68" text-anchor="middle">colaboración, con la cofirma de la artesana</text>
-          <text class="p" x="739" y="48" text-anchor="middle">Certificadora o institución</text>
-          <text class="s" x="739" y="68" text-anchor="middle">sus propios esquemas</text>
-          <text class="p" x="1021" y="48" text-anchor="middle">Otro proyecto de Stellar</text>
-          <text class="s" x="1021" y="68" text-anchor="middle">usa el mismo núcleo, sin Yucu</text>
-          <line class="ar" x1="175" y1="80" x2="175" y2="135" marker-end="url(#ah2)"/>
-          <line class="ar" x1="457" y1="80" x2="234" y2="135" marker-end="url(#ah2)"/>
-          <line class="ar" x1="739" y1="80" x2="300" y2="135" marker-end="url(#ah2)"/>
-          <line class="ar" x1="1021" y1="80" x2="969" y2="135" marker-end="url(#ah2)"/>
+          <!-- Quienes emiten -->
+          <text class="p" x="175" y="40" text-anchor="middle">Artesana</text>
+          <text class="s" x="175" y="60" text-anchor="middle">su consentimiento · sus lotes</text>
+          <text class="p" x="457" y="40" text-anchor="middle">Grupo o cooperativa</text>
+          <text class="s" x="457" y="60" text-anchor="middle">origen comunitario · tránsito</text>
+          <text class="p" x="739" y="40" text-anchor="middle">Marca</text>
+          <text class="s" x="739" y="60" text-anchor="middle">colaboración, si hay consentimiento</text>
+          <text class="p" x="1021" y="40" text-anchor="middle">Otro negocio</text>
+          <text class="s" x="1021" y="60" text-anchor="middle">solo escribe su manifiesto (ADR-007 D7)</text>
+          <line class="ar" x1="175" y1="70" x2="175" y2="119" marker-end="url(#ah2)"/>
+          <line class="ar" x1="457" y1="70" x2="380" y2="119" marker-end="url(#ah2)"/>
+          <line class="ar" x1="739" y1="70" x2="560" y2="119" marker-end="url(#ah2)"/>
+          <line class="ar dash" x1="1021" y1="70" x2="1021" y2="119" marker-end="url(#ah2)"/>
+
+          <!-- Motor -->
+          <rect class="box new" x="44" y="122" width="726" height="74" rx="8"/>
+          <text class="t" x="64" y="144">Motor de voz y texto</text>
+          <text class="tag new" x="226" y="144">NUEVO · ADR-007 D2 · #154 · #155</text>
+          <text class="s" x="64" y="164">transcribe → borrador solo con los campos del manifiesto → lo lee en voz alta: «¿Es correcto?»</text>
+          <text class="warn" x="64" y="184">La IA prepara y explica; nunca firma ni certifica</text>
+
+          <rect class="box new" x="786" y="122" width="366" height="74" rx="8"/>
+          <text class="t" x="806" y="144">Manifiesto del esquema</text>
+          <text class="tag new" x="1136" y="144" text-anchor="end">ADR-007 D1 · #140</text>
+          <text class="s" x="806" y="164">cada campo: público · solo hash · prohibido</text>
+          <text class="s" x="806" y="182">voz por idioma · quién firma · hash en el esquema</text>
+          <line class="ar" x1="786" y1="159" x2="773" y2="159" marker-end="url(#ah2)"/>
+          <text class="al" x="778" y="116" text-anchor="middle">guía</text>
+
+          <line class="ar" x1="234" y1="196" x2="234" y2="239" marker-end="url(#ah2)"/>
+          <text class="al" x="242" y="222">confirmó</text>
 
           <!-- Firma -->
-          <rect class="box" x="44" y="138" width="380" height="74" rx="8"/>
-          <text class="t" x="234" y="160" text-anchor="middle">Firma en su propio dispositivo</text>
-          <text class="s" x="234" y="178" text-anchor="middle">require_auth · Freighter, llave del teléfono o multifirma</text>
-          <text class="s" x="234" y="196" text-anchor="middle">nadie firma por el emisor</text>
+          <rect class="box" x="44" y="242" width="380" height="74" rx="8"/>
+          <text class="t" x="234" y="264" text-anchor="middle">Firma en su propio dispositivo</text>
+          <text class="s" x="234" y="282" text-anchor="middle">require_auth · llave del teléfono, tarjeta QR o Freighter</text>
+          <text class="s" x="234" y="300" text-anchor="middle">nadie firma por ella</text>
 
-          <rect class="box todo" x="440" y="138" width="330" height="74" rx="8"/>
-          <text class="t" x="605" y="160" text-anchor="middle">Patrocinador (opcional)</text>
-          <text class="s" x="605" y="178" text-anchor="middle">envía la transacción y paga la comisión</text>
-          <text class="s" x="605" y="196" text-anchor="middle">no puede cambiar lo firmado · W4 #94</text>
+          <rect class="box todo" x="440" y="242" width="330" height="74" rx="8"/>
+          <text class="t" x="605" y="264" text-anchor="middle">Patrocinador (opcional)</text>
+          <text class="s" x="605" y="282" text-anchor="middle">envía y paga la comisión, sin BLS</text>
+          <text class="s" x="605" y="300" text-anchor="middle">no puede cambiar lo firmado · #94 · Attest #127</text>
 
-          <rect class="box todo" x="786" y="138" width="366" height="74" rx="8"/>
-          <text class="t" x="969" y="160" text-anchor="middle">Fuera de la cadena</text>
-          <text class="s" x="969" y="178" text-anchor="middle">firma SEP-53 · lotes con raíz de Merkle</text>
-          <text class="s" x="969" y="196" text-anchor="middle">sin conexión (#21); solo llaves de una firma</text>
+          <rect class="box todo" x="786" y="242" width="366" height="74" rx="8"/>
+          <text class="t" x="969" y="264" text-anchor="middle">Fuera de la cadena</text>
+          <text class="s" x="969" y="282" text-anchor="middle">firma SEP-53 · muchas en una raíz de Merkle</text>
+          <text class="s" x="969" y="300" text-anchor="middle">sin conexión (#21); solo llaves de una firma</text>
 
-          <line class="ar" x1="234" y1="212" x2="234" y2="255" marker-end="url(#ah2)"/>
-          <text class="al" x="242" y="238">attest · revoke</text>
-          <line class="ar dash" x1="605" y1="212" x2="520" y2="255" marker-end="url(#ah2)"/>
-          <line class="ar dash" x1="969" y1="212" x2="640" y2="255" marker-end="url(#ah2)"/>
-          <text class="al" x="820" y="238">timestamp · revoke_offchain</text>
+          <line class="ar" x1="234" y1="316" x2="234" y2="359" marker-end="url(#ah2)"/>
+          <text class="al" x="242" y="342">attest · revoke</text>
+          <line class="ar dash" x1="605" y1="316" x2="380" y2="359" marker-end="url(#ah2)"/>
+          <line class="ar dash" x1="969" y1="316" x2="404" y2="380" marker-end="url(#ah2)"/>
+          <text class="al" x="740" y="342">una atestación con la raíz</text>
 
-          <!-- Núcleo -->
-          <rect class="box new" x="44" y="258" width="640" height="158" rx="8"/>
-          <text class="t" x="64" y="282">Núcleo de atestaciones</text>
-          <text class="tag new" x="64" y="299">NUEVO · INMUTABLE · SIN ADMINISTRADOR · ADR-005 D2–D5</text>
-          <text class="s" x="64" y="322">esquemas sin permiso (quien lo crea paga su renta) · atestaciones · revocación · vencimiento</text>
-          <text class="s" x="64" y="340">IDs calculados en el contrato · nonce por emisor · ref_uid para encadenar</text>
-          <text class="s" x="64" y="358">is_valid_for(uid, esquema, sujeto) · listas por lote y por emisor · extend_ttl</text>
-          <text class="m" x="64" y="380">persistent: origen · temporary: tránsito (#100)</text>
-          <text class="s new" x="64" y="403">D10: Attest Protocol con correcciones (preferido) o núcleo propio con la misma interfaz</text>
+          <!-- Attest Protocol -->
+          <rect class="box ext" x="44" y="362" width="360" height="158" rx="8"/>
+          <text class="t" x="64" y="386">Attest Protocol</text>
+          <text class="tag ext" x="64" y="403">EXTERNO · BASE AUDITADA · v2 EN MAINNET</text>
+          <text class="s" x="64" y="426">esquemas · atestaciones · revocación</text>
+          <text class="s" x="64" y="444">vencimiento · IDs calculados en el contrato</text>
+          <text class="s" x="64" y="462">solo el emisor revoca</text>
+          <text class="m" x="64" y="484">v3: attest_for · is_valid_for</text>
+          <text class="m" x="64" y="502">extend_ttl · esquemas persistent</text>
 
-          <!-- Núcleo ↔ resolvers -->
-          <line class="ar" x1="684" y1="314" x2="757" y2="314" marker-end="url(#ah2)"/>
-          <text class="al" x="720" y="304" text-anchor="middle">onattest</text>
-          <line class="ar" x1="757" y1="350" x2="687" y2="350" marker-end="url(#ah2)"/>
-          <text class="al" x="720" y="330" text-anchor="middle">onrevoke</text>
-          <text class="al" x="720" y="368" text-anchor="middle">sí / no</text>
+          <!-- Attest ↔ índice -->
+          <line class="ar" x1="404" y1="418" x2="467" y2="418" marker-end="url(#ah2)"/>
+          <text class="al" x="436" y="408" text-anchor="middle">onattest</text>
+          <line class="ar" x1="404" y1="452" x2="467" y2="452" marker-end="url(#ah2)"/>
+          <text class="al" x="436" y="442" text-anchor="middle">onrevoke</text>
+          <text class="al" x="436" y="472" text-anchor="middle">sí / no</text>
 
-          <!-- Resolvers -->
-          <rect class="box todo" x="760" y="258" width="392" height="158" rx="8"/>
-          <text class="t" x="780" y="282">Resolvers de Yucu</text>
-          <text class="tag" x="780" y="299">POR CONSTRUIR · ADMIN MULTIFIRMA DECLARADO · D4 · D8</text>
-          <text class="s" x="780" y="322">origen: solo grupos dados de alta</text>
-          <text class="s" x="780" y="340">consentimiento: cofirma de la artesana; ella revoca</text>
-          <text class="s" x="780" y="358">entrega: exige ref_uid a la venta</text>
-          <text class="s" x="780" y="376">tránsito · dictamen de IA (nunca certificación)</text>
-          <text class="s" x="780" y="394">corte por llave robada · cobro solo al emisor</text>
+          <!-- Índice -->
+          <rect class="box new" x="470" y="362" width="380" height="158" rx="8"/>
+          <text class="t" x="490" y="386">Índice de Yucu</text>
+          <text class="tag new" x="490" y="403">NUEVO · SIN ADMINISTRADOR · PARA CUALQUIER PROYECTO</text>
+          <text class="s" x="490" y="426">listas por lote, por emisor y por cuenta</text>
+          <text class="s" x="490" y="444">contadores por esquema: emitidas y revocadas</text>
+          <text class="s" x="490" y="462">solo acepta llamadas de Attest Protocol</text>
+          <text class="s" x="490" y="480">pasa a las reglas el estado del ref_uid</text>
+          <text class="m" x="490" y="502">ADR-005 D2 · sin indexador</text>
 
-          <!-- Núcleo → lectores -->
-          <line class="ar" x1="175" y1="416" x2="175" y2="461" marker-end="url(#ah2)"/>
-          <text class="al" x="183" y="442">RPC directo</text>
-          <line class="ar" x1="457" y1="416" x2="457" y2="461" marker-end="url(#ah2)"/>
-          <text class="al" x="465" y="442">is_valid_for</text>
-          <line class="ar" x1="660" y1="416" x2="739" y2="461" marker-end="url(#ah2)"/>
-          <text class="al" x="712" y="436">listas</text>
-          <line class="ar dash" x1="1021" y1="461" x2="1021" y2="416" marker-end="url(#ah2)"/>
-          <text class="al" x="1013" y="442" text-anchor="end">preparar → firmar → enviar</text>
+          <!-- Índice ↔ reglas -->
+          <line class="ar" x1="850" y1="418" x2="883" y2="418" marker-end="url(#ah2)"/>
+          <line class="ar" x1="883" y1="452" x2="853" y2="452" marker-end="url(#ah2)"/>
+
+          <!-- Reglas -->
+          <rect class="box todo" x="886" y="362" width="266" height="158" rx="8"/>
+          <text class="t" x="904" y="386">Reglas por esquema</text>
+          <text class="tag" x="904" y="403">POR CONSTRUIR · D5</text>
+          <text class="s" x="904" y="426">origen: solo grupos dados de alta</text>
+          <text class="s" x="904" y="444">colaboración: exige consentimiento</text>
+          <text class="s" x="904" y="462">cofirma · corte por llave robada</text>
+          <text class="s" x="904" y="480">admin multifirma declarado</text>
+          <text class="s" x="904" y="502">otro proyecto: sus propias reglas</text>
+
+          <!-- Stellar → lectores -->
+          <line class="ar" x1="175" y1="520" x2="175" y2="565" marker-end="url(#ah2)"/>
+          <text class="al" x="183" y="546">RPC directo</text>
+          <line class="ar" x1="457" y1="520" x2="457" y2="565" marker-end="url(#ah2)"/>
+          <text class="al" x="465" y="546">is_valid_for · índice</text>
+          <line class="ar" x1="660" y1="520" x2="739" y2="565" marker-end="url(#ah2)"/>
+          <text class="al" x="712" y="540">listas</text>
+          <line class="ar" x1="830" y1="520" x2="1000" y2="565" marker-end="url(#ah2)"/>
 
           <!-- Lectores -->
-          <rect class="box new" x="44" y="464" width="262" height="88" rx="8"/>
-          <text class="t" x="175" y="488" text-anchor="middle">Verificador público</text>
-          <text class="s" x="175" y="508" text-anchor="middle">sin cuenta · no depende de Yucu</text>
-          <text class="s" x="175" y="526" text-anchor="middle">vigente · revocado · vencido</text>
-          <text class="s" x="175" y="544" text-anchor="middle">archivado, se puede restaurar</text>
+          <rect class="box new" x="44" y="568" width="262" height="106" rx="8"/>
+          <text class="t" x="175" y="592" text-anchor="middle">Verificador conversacional</text>
+          <text class="s" x="175" y="612" text-anchor="middle">contesta solo con atestaciones</text>
+          <text class="s" x="175" y="630" text-anchor="middle">y cita cada una · #142</text>
+          <text class="s" x="175" y="648" text-anchor="middle">vigente · revocada · vencida · archivada</text>
+          <text class="warn" x="175" y="666" text-anchor="middle">«eso no está probado»</text>
 
-          <rect class="box" x="326" y="464" width="262" height="88" rx="8"/>
-          <text class="t" x="457" y="488" text-anchor="middle">Otros contratos</text>
-          <text class="s" x="457" y="508" text-anchor="middle">perpetual_royalties: procedencia</text>
-          <text class="s" x="457" y="526" text-anchor="middle">comprueban esquema y sujeto,</text>
-          <text class="s" x="457" y="544" text-anchor="middle">no solo «vigente» · W17 #110</text>
+          <rect class="box" x="326" y="568" width="262" height="106" rx="8"/>
+          <text class="t" x="457" y="592" text-anchor="middle">Otros contratos</text>
+          <text class="s" x="457" y="612" text-anchor="middle">perpetual_royalties: procedencia</text>
+          <text class="s" x="457" y="630" text-anchor="middle">comprueban esquema y sujeto,</text>
+          <text class="s" x="457" y="648" text-anchor="middle">no solo «vigente» · W17 #110</text>
 
-          <rect class="box new" x="608" y="464" width="262" height="88" rx="8"/>
-          <text class="t" x="739" y="488" text-anchor="middle">Pantalla de la artesana</text>
-          <text class="s" x="739" y="508" text-anchor="middle">ve lo que se dice de sus lotes</text>
-          <text class="s" x="739" y="526" text-anchor="middle">revoca su consentimiento</text>
-          <text class="warn" x="739" y="544" text-anchor="middle">sin indexador ni servidor</text>
+          <rect class="box new" x="608" y="568" width="262" height="106" rx="8"/>
+          <text class="t" x="739" y="592" text-anchor="middle">Pantalla de la artesana</text>
+          <text class="s" x="739" y="612" text-anchor="middle">ve lo que se dice de sus lotes</text>
+          <text class="s" x="739" y="630" text-anchor="middle">revoca su consentimiento:</text>
+          <text class="s" x="739" y="648" text-anchor="middle">ella lo emitió (ADR-005 D6)</text>
+          <text class="m" x="739" y="666" text-anchor="middle">W36 #148</text>
 
-          <rect class="box new" x="890" y="464" width="262" height="88" rx="8"/>
-          <text class="t" x="1021" y="488" text-anchor="middle">AttestationPort</text>
-          <text class="s" x="1021" y="508" text-anchor="middle">consola de emisores y PWA</text>
-          <text class="s" x="1021" y="526" text-anchor="middle">calcula sujeto, sal y hash</text>
-          <text class="m" x="1021" y="544" text-anchor="middle">src/core/chain · D9</text>
+          <rect class="box new todo" x="890" y="568" width="262" height="106" rx="8"/>
+          <text class="t" x="1021" y="592" text-anchor="middle">Agentes de IA (MCP)</text>
+          <text class="s" x="1021" y="612" text-anchor="middle">verificar · listar · explicar_esquema</text>
+          <text class="s" x="1021" y="630" text-anchor="middle">preparar_atestacion sin firmar</text>
+          <text class="s" x="1021" y="648" text-anchor="middle">de compradores, tiendas y marcas</text>
+          <text class="m" x="1021" y="666" text-anchor="middle">ADR-007 D5</text>
 
           <!-- Datos -->
-          <text class="s" x="64" y="612">En la cadena: hashes con sal aleatoria, direcciones G…, IDs y fechas. La definición de cada esquema es un JSON público ligado por su hash.</text>
-          <text class="warn" x="64" y="632">Nunca nombres, teléfonos ni coordenadas.</text>
+          <text class="s" x="64" y="734">En la cadena: hashes con sal aleatoria, direcciones G…, IDs y fechas. El manifiesto de cada esquema es un JSON público ligado por su hash.</text>
+          <text class="warn" x="64" y="754">Nunca nombres, teléfonos ni coordenadas. El audio no se guarda.</text>
         </g>
 </svg>
