@@ -1,9 +1,9 @@
 # ADR-006: Datos fuera de la cadena e inteligencia artificial
 
-* **Estado:** Propuesta (borrador). No se construye nada de aquí hasta que los mantenedores la acepten.
+* **Estado:** **Aceptada** el 29 de octubre de 2026 para construir en testnet. Sigue abierto: el proveedor de voz se elige con la prueba de campo (D6, #158); con datos de personas reales, antes hay que pasar a una IA de pago (D1); el aviso de privacidad y la región de los datos esperan la opinión del abogado (sección 4).
 * **Fecha:** 29 de octubre de 2026
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
-* **Relación:** Se apoya en [ADR-002](./ADR-002-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) (chat propio en lugar de WhatsApp), [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (puertos, preparar → firmar → enviar) y [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (D5: lo mínimo en la cadena; D9: los datos de KYC no pasan por Yucu). Privacidad: [`docs/research/PRIVACIDAD.md`](../research/PRIVACIDAD.md).
+* **Relación:** Se apoya en [ADR-008](./ADR-008-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) (chat propio en lugar de WhatsApp), [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (puertos, preparar → firmar → enviar) y [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (D5: lo mínimo en la cadena; D9: los datos de KYC no pasan por Yucu). Privacidad: [`docs/research/PRIVACIDAD.md`](../research/PRIVACIDAD.md).
 
 ---
 

@@ -1,6 +1,6 @@
-# Arquitectura final de Yucu (propuesta)
+# Arquitectura de Yucu (v2)
 
-* **Estado:** propuesta, octubre de 2026 (revisada el 29 de octubre). Se decide en el [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) y el [ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md), que todavía son borradores. Mientras tanto mandan [`ARCHITECTURE.md`](../ARCHITECTURE.md) y los ADR: si algo de aquí los contradice, manda el ADR.
+* **Estado:** arquitectura v2, aceptada el 29 de octubre de 2026 junto con [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-006](../adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) y [ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md), para construir en testnet. Si algo de aquí contradice un ADR, manda el ADR.
 * **Qué agrega:** las piezas que no estaban contempladas: las atestaciones sobre **Attest Protocol** (base auditada) con un **índice abierto** y las reglas de Yucu como *resolvers*; un **motor de atestaciones por voz y texto** (la IA habla, la persona firma, la cadena prueba); el **verificador público**, la **consola de emisores**, `AttestationPort` y la pantalla de la artesana para sus atestaciones. No hay indexador: las listas viven en el índice.
 * **Supuesto abierto:** el diagrama dibuja el verificador y la consola como apps separadas de la PWA de la artesana. La otra opción es una sola PWA con roles.
 

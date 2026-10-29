@@ -1,4 +1,6 @@
-# Architecture Decision Record (ADR-002)
+# Architecture Decision Record (ADR-008)
+
+> Renumbered on 29 October 2026: this record was also numbered ADR-002, like the offline-first PWA record. The content did not change.
 ## Evaluation of Rural Interaction Channels and Decoupling from WhatsApp
 
 * **Status:** Accepted / Implemented

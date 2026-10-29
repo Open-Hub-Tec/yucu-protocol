@@ -1,7 +1,7 @@
 # Arquitectura de Yucu Protocol
 
 * **Estado:** prototipo en Stellar **testnet**. La tabla "Qué es real y qué es simulado" del [`README.md`](../README.md) dice el estado de cada módulo.
-* **Decisiones que manda este documento:** [ADR-001](./adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) (escrow con Trustless Work), [ADR-002](./adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md) (PWA sin señal y tarjeta QR), [ADR-003](./adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (no custodial) y [ADR-004](./adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (la artesana cobra en pesos con una cuenta invisible). Si algo de aquí contradice un ADR, manda el ADR.
+* **Decisiones que manda este documento:** [ADR-001](./adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) (escrow con Trustless Work), [ADR-002](./adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md) (PWA sin señal y tarjeta QR), [ADR-003](./adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (no custodial) y [ADR-004](./adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (la artesana cobra en pesos con una cuenta invisible), [ADR-005](./adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) (atestaciones en Attest Protocol, con el índice y las reglas de Yucu), [ADR-006](./adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) (datos fuera de la cadena e IA), [ADR-007](./adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) (motor de atestaciones por voz y texto) y [ADR-008](./adr/ADR-008-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) (chat propio en lugar de WhatsApp). Si algo de aquí contradice un ADR, manda el ADR.
 
 ---
 
@@ -12,30 +12,37 @@
 3. **La artesana solo ve pesos.** Su cuenta Stellar es invisible: la interfaz nunca muestra "billetera", USDC, XLM, direcciones, hashes ni llaves.
 4. **Lo mínimo en la cadena.** Municipio o región, catálogos cerrados, volumen por rangos, hash de la foto y ningún monto ni nombre.
 5. **La UI solo habla con los puertos** de `src/core/chain/`. Así se puede pasar de la versión simulada a testnet sin cambiar pantallas.
+6. **La IA habla, la persona firma, la cadena prueba.** La persona habla o escribe; la IA prepara un borrador y lo lee en voz alta; la persona confirma y firma. La IA nunca firma ni certifica (ADR-007).
+7. **Atestaciones sobre Attest Protocol.** Yucu no despliega un registro propio: agrega un índice abierto (listas y contadores, sin indexador) y sus reglas (ADR-005).
 
 ## 2. Capas
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │ Teléfono (PWA, React)                                                │
-│  Pantallas para personas mayores · funciona sin señal (IndexedDB)    │
+│  Chat por voz o texto · pantallas para personas mayores              │
+│  Funciona sin señal (IndexedDB)                                      │
 │  Llave de la artesana cifrada con su PIN, o en su tarjeta QR         │
 └───────────────────────────────┬──────────────────────────────────────┘
                                 │ solo a través de los puertos
 ┌───────────────────────────────▼──────────────────────────────────────┐
 │ Puertos (src/core/chain/ports.ts)                                    │
-│  WalletPort · LotRegistryPort · EscrowPort · PayoutPort              │
+│  WalletPort · LotRegistryPort · AttestationPort · EscrowPort         │
+│  PayoutPort · puertos de IA, catálogo y sesión (src/core/)           │
 │  Versión simulada (SimulatedChain.ts, source: 'simulated')           │
 │  Versión testnet (en construcción)                                   │
 └───────┬──────────────────────┬──────────────────────┬────────────────┘
         │                      │                      │
 ┌───────▼────────┐   ┌─────────▼─────────┐   ┌────────▼──────────────┐
 │ Servidor       │   │ Trustless Work    │   │ Salida a pesos        │
-│ (server.ts)    │   │ (API, testnet)    │   │ MicoPay (efectivo)    │
+│ (server.ts y   │   │ (API, testnet)    │   │ MicoPay (efectivo)    │
+│ src/server/)   │   │                   │   │                       │
 │ Prepara sin    │   │ Escrow multi-     │   │ Etherfuse (SPEI)      │
 │ firmar; firma  │   │ release; prepara  │   │ Desde la cuenta de    │
 │ solo como      │   │ sin firmar        │   │ la artesana           │
-│ certificador   │   │                   │   │                       │
+│ certificador;  │   │                   │   │                       │
+│ IA que prepara;│   │                   │   │                       │
+│ PostgreSQL     │   │                   │   │                       │
 └───────┬────────┘   └─────────┬─────────┘   └───────────────────────┘
         │                      │
 ┌───────▼──────────────────────▼───────────────────────────────────────┐
@@ -60,12 +67,19 @@
 
 ### Fase 1: registrar un lote (aceptada)
 
-1. La artesana llena su lote en el teléfono. Sin señal, los **datos** quedan en IndexedDB; no se guardan transacciones firmadas, porque vencen en minutos.
+1. La artesana **habla o escribe** en el chat ("Tengo 20 kilos de café de Yosondúa"). La IA transcribe y llena solo los campos permitidos; lo que no entendió lo deja vacío y lo vuelve a preguntar. La app le lee en voz alta lo que entendió, con botones Sí y No, y ella puede corregir con voz o con el dedo (ADR-006 D3, #155). Sin señal, los **datos** quedan en IndexedDB y el audio solo hasta transcribirlo; no se guardan transacciones firmadas, porque vencen en minutos.
 2. Con señal, el servidor prepara `register_lot` y firma **solo como certificador**.
 3. El teléfono arma el resumen a partir de la transacción y la artesana firma con su PIN (o con su tarjeta QR en el celular de la promotora).
 4. Se envía. La artesana ve "Tu pieza quedó registrada" y el QR de origen de su lote.
 
 **Compradores en México:** pagan directo en pesos (SPEI o efectivo). Ese dinero no pasa por Stellar; en la cadena solo va el pasaporte del lote.
+
+### Atestaciones (testnet)
+
+1. Cualquier afirmación con su manifiesto (consentimiento, origen comunitario, colaboración, entrega, pesaje) sigue el mismo flujo: habla o escribe → la IA prepara → lectura en voz alta → firma con `AttestationPort`.
+2. La atestación queda en Attest Protocol. El índice de Yucu la agrega a sus listas y, si el esquema tiene reglas, las consulta (por ejemplo, una colaboración exige el consentimiento vigente de la artesana).
+3. Cualquiera la comprueba en el verificador público (#142), que lee la red directamente, o pregunta en lenguaje natural y recibe una respuesta que cita la prueba (#165). Los asistentes de IA de tiendas y marcas usan el servidor MCP (#166).
+4. La artesana puede revocar su consentimiento; desde ese momento, las colaboraciones que dependen de él dejan de valer.
 
 ### Fase 2: compra protegida (solo testnet)
 
@@ -86,7 +100,7 @@ Los porcentajes, el plazo y las comisiones salen de [`src/config/protocolFees.ts
 | `src/core/chain/` | Puertos y su versión simulada. Aquí se agregan las versiones de testnet |
 | `src/core/` | Lógica de negocio: cripto, políticas de comercio justo, IA, sincronización |
 | `src/config/protocolFees.ts` | Porcentajes oficiales del protocolo |
-| `server.ts` | Servidor Express: IA (Gemini) y preparación de transacciones sin firmar |
+| `server.ts`, `src/server/` | Servidor Express: IA (Gemini) y preparación de transacciones sin firmar. Reglas en [`arquitectura/SERVIDOR.md`](./arquitectura/SERVIDOR.md) y tablas en [`arquitectura/BASE_DE_DATOS.md`](./arquitectura/BASE_DE_DATOS.md) |
 | `contracts/` | Contratos Soroban en Rust |
 | `contracts/deployments/testnet.json` | IDs de los contratos desplegados en testnet |
 | `docs/adr/` | Decisiones de arquitectura |
@@ -95,4 +109,4 @@ Los porcentajes, el plazo y las comisiones salen de [`src/config/protocolFees.ts
 
 El trabajo pendiente está en las issues de GitHub con la etiqueta `drips-eligible`. El [ADR-004](./adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (sección 4) dice qué issue cubre cada pieza, y su sección 5 dice qué hay que resolver antes de usar dinero real.
 
-La propuesta de arquitectura completa, con el verificador público y la consola de emisores que todavía no tienen issue, está en [`arquitectura/`](./arquitectura/README.md). Es una propuesta: se decide en el [ADR-005](./adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), todavía en borrador.
+Los diagramas de la arquitectura v2 (capas, firma, dinero y atestaciones) y cada pieza con sus issues están en [`arquitectura/`](./arquitectura/README.md). La issue fijada "Por dónde empezar (estudiantes)" (#152) dice el orden de trabajo.
