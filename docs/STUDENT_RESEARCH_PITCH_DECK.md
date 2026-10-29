@@ -68,7 +68,7 @@
   * **Direct Quote:** *“Clients commission a huipil and force me to wait weeks or months to get paid.”*
 * **Brigade 3 – San Juan Ñumí (Wild Honey Union):**
   * **Student Researchers:** Luis Alexis Morales & eduScrum / UMIZOOMI Team.
-  * **Field Finding:** Interview with Union President Rogelio Martínez Cruz: All records are kept by hand in notebooks. Transcribing member lists takes 3 days; harvest slips are frequently misplaced; batches were accidentally double-sold due to lack of real-time digital inventory.
+  * **Field Finding:** Interview with the Union President: All records are kept by hand in notebooks. Transcribing member lists takes 3 days; harvest slips are frequently misplaced; batches were accidentally double-sold due to lack of real-time digital inventory.
 * **Brigade 4 – San Pablo Tijaltepec & Yucuhiti (Coffee & Textiles):**
   * **Student Lead:** Nallely López García.
   * **Field Finding:** An embroiderer from San Pablo Tijaltepec immediately recognized the physical Hang-Tag QR code as legal proof to protect authentic deer blouses against cheap factory knockoffs.

@@ -10,7 +10,7 @@
 
 | Campo | Detalle |
 | :--- | :--- |
-| **Entrevistado** | C. Rogelio Martínez Cruz |
+| **Entrevistado** | Presidente de la Unión (nombre omitido, ver [`PRIVACIDAD.md`](./PRIVACIDAD.md)) |
 | **Cargo** | Presidente de la Unión de Productores de Miel de San Juan Ñumí |
 | **Equipo Entrevistador** | Equipo de Desarrollo eduScrum (TecNM) |
 | **Fecha** | 24 de agosto de 2026 |
@@ -86,7 +86,7 @@
 
 | Campo | Detalle |
 | :--- | :--- |
-| **Entrevistada** | C. Guadalupe Ramírez Ortiz |
+| **Entrevistada** | Encargada de comercialización (nombre omitido, ver [`PRIVACIDAD.md`](./PRIVACIDAD.md)) |
 | **Cargo** | Encargada de Comercialización e Inventarios de la Unión de Productores de Miel de San Juan Ñumí |
 | **Equipo Entrevistador** | Equipo de Desarrollo eduScrum (TecNM) |
 | **Fecha** | 24 de agosto de 2026 |

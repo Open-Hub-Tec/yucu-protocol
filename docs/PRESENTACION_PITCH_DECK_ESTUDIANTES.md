@@ -68,7 +68,7 @@
   * **Cita Testimonial:** *“Yo termino mi trabajo y tengo que esperar semanas o meses para recibir mi dinero... quieren descontarme por cualquier detalle.”*
 * **Brigada 3 – San Juan Ñumí (Miel Virgen Flor de la Mixteca):**
   * **Alumnos Investigadores:** Luis Alexis Morales & Equipo UMIZOOMI (eduScrum / Residencia TecNM).
-  * **Hallazgo Crítico:** Entrevista con C. Rogelio Martínez Cruz (Presidente): Toda la producción de colmenas se anota en libretas viejas. Se requieren 3 días para transcribir listas para asambleas; hojas sueltas de cosecha se extravían; se han vendido lotes de miel dos veces a clientes por falta de inventario digital en tiempo real.
+  * **Hallazgo Crítico:** Entrevista con el presidente de la Unión: Toda la producción de colmenas se anota en libretas viejas. Se requieren 3 días para transcribir listas para asambleas; hojas sueltas de cosecha se extravían; se han vendido lotes de miel dos veces a clientes por falta de inventario digital en tiempo real.
 * **Brigada 4 – San Pablo Tijaltepec y Santa María Yucuhiti (Café y Bordado):**
   * **Líder Estudiantil:** Nallely López García.
   * **Hallazgo Crítico:** Una bordadora de San Pablo Tijaltepec identificó de inmediato el valor de la etiqueta QR física para coserla a su blusa bordada de venados y blindarla legalmente contra copias industriales chinas.
