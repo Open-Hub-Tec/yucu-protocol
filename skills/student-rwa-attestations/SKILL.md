@@ -9,6 +9,8 @@ Esta guía enseña a los estudiantes de Sistemas Computacionales cómo convertir
 
 > En la cadena va **lo mínimo** ([ADR-004](../../docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), D5): municipio o región (nunca la comunidad exacta), categoría y variedad de una lista cerrada, volumen por rangos, hash de la foto y ningún monto. Nunca nombres de personas.
 
+> Las atestaciones se emiten en **Attest Protocol**, con el índice y las reglas de Yucu ([ADR-005](../../docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md)). La IA prepara un borrador guiado por el manifiesto del esquema y la persona lo confirma y lo firma ([ADR-007](../../docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md)). Ningún oráculo emite una atestación por su cuenta.
+
 ---
 
 ## 1. La Fórmula del "Community Digest" SHA-256
@@ -46,7 +48,7 @@ export function calcularDigestLote(params: {
 
 1. **Oráculo de Voz en Tu'un Savi:**
    * Utiliza la API de audio multimodal para transcribir el relato oral del campesino grabado en la parcela.
-   * Extrae automáticamente kilos, variedad y comunidad.
+   * Propone kilos, variedad y municipio (nunca la comunidad exacta); la persona lo escucha, lo corrige y lo firma.
 2. **Oráculo Óptico de Calidad SCAA:**
    * Evalúa la fotografía de la muestra sobre fondo blanco o jícara tradicional.
    * Podría clasificar granos con broca, vanos o fermentados y sugerir un puntaje. La calificación SCAA la da una persona catadora, no la IA.

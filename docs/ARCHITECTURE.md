@@ -40,7 +40,7 @@
         │                      │
 ┌───────▼──────────────────────▼───────────────────────────────────────┐
 │ Stellar / Soroban (testnet)                                          │
-│  lot_passport · attestation_registry · perpetual_royalties           │
+│  lot_passport · perpetual_royalties · Attest Protocol + índice Yucu  │
 │  (fair_escrow es material didáctico: la app no lo usa)               │
 └──────────────────────────────────────────────────────────────────────┘
 ```

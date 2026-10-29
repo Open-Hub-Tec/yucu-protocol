@@ -47,6 +47,8 @@ En el servidor, cada trabajo tiene un adaptador por proveedor, así que cambiar 
 
 La foto del producto sigue el flujo actual (su hash va en `photoHashHex`).
 
+Este flujo es el primer caso del motor de [ADR-007](./ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md): allí la extracción deja de estar escrita para lotes y se guía por el manifiesto de cada esquema. Las reglas de esta ADR (D1, D4 y D5) no cambian.
+
 **D4. Respuestas honestas.** Si la IA no está disponible o no entendió, la app lo dice ("No te escuché bien. ¿Lo intentamos otra vez o lo escribes?"). Nunca devuelve una transcripción, un diagnóstico, un precio ni una certificación inventados. Los "agentes" de guion del chat (tesorería, agrónomo, comercial) se reducen a un asistente con flujos reales; lo simulado lleva `source: 'simulated'` y `<DemoBadge />`.
 
 **D5. El audio no se guarda.** Se transcribe y se borra, en el teléfono y en el servidor. Sin señal, se guarda en el teléfono solo hasta transcribirlo al volver la conexión (#99). Antes de grabar por primera vez, consentimiento informado leído en voz alta (#107), que diga a qué proveedor se manda la voz.
