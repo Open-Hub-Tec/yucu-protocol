@@ -76,7 +76,7 @@ git push origin feat/issue-<número>-<tema>
 ## 6. Revisión y acreditación
 
 Para que tu PR se fusione:
-1. Cumple **todos** los criterios de aceptación de la issue y la "Definición de terminado".
+1. Cumple **todos** los criterios de aceptación de la issue y su sección "Definición de terminado" (está al final de cada issue).
 2. `lint`, `test` y `build` pasan sin errores.
 3. **Puedes explicar cada parte de tu código.** En la revisión te harán preguntas; un PR que no sepas explicar no se fusiona, aunque funcione. Esto también lo exige Drips Wave para el código hecho con ayuda de IA.
 4. No rompe ninguna regla de `AGENTS.md`: nada custodial, nada inventado, nada de datos personales ni secretos, y los textos para personas mayores.

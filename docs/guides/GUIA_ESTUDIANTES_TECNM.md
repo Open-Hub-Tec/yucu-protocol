@@ -16,7 +16,7 @@ El motor de **Smart Contracts** (contratos inteligentes) de Stellar. Está progr
 Es un **"sello o acta notarial digital"** firmado con criptografía: una persona o un grupo afirma algo ("este lote es de la Mixteca") y lo firma con su llave. En vez de un papel que se puede mojar o falsificar, queda en la blockchain y cualquiera lo puede verificar. En Yucu se guardan en **Attest Protocol** ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md)). La IA puede ayudar a llenarla a partir de la voz, pero **siempre la firma una persona**, nunca la IA ([ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md)).
 
 ### ¿Qué es Attest Protocol?
-El registro de atestaciones que ya existe en Stellar, auditado y en mainnet. Yucu **no** tiene uno propio: guarda sus atestaciones ahí y agrega encima un **índice** (listas de lo que se dice de un lote, de un emisor o de una cuenta) y sus **reglas** (quién puede emitir, el consentimiento de la artesana). Ver [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md).
+El registro de atestaciones que ya existe en Stellar, auditado y en mainnet ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), sección 1). Yucu **no** tiene uno propio: guarda sus atestaciones ahí y agrega encima un **índice** (listas de lo que se dice de un lote, de un emisor o de una cuenta) y sus **reglas** (quién puede emitir, el consentimiento de la artesana). Ver [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md).
 
 ### ¿Qué hace la IA en Yucu?
 **La IA habla, la persona firma, la cadena prueba** ([ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md)). La persona habla o escribe en el chat, como en WhatsApp; la IA transcribe, entiende qué pide y llena un borrador; la app se lo lee en voz alta y ella confirma con su PIN. La IA **nunca** firma, nunca emite por su cuenta y nunca certifica. Si no entendió, lo dice. El mixteco (*Tu'un Savi*) todavía está en evaluación (#158). Los "oráculos" de `src/core/ai/` son demostraciones.
@@ -28,7 +28,7 @@ El escrow que usamos para la **compra protegida** (solo testnet): el comprador d
 Una red de tiendas que entregan **efectivo**. La artesana va a la tienda, confirma con su PIN y recibe un QR que vale 15 minutos; si nadie lo cobra, el dinero regresa a su cuenta (#114).
 
 ### ¿Qué es Etherfuse?
-Un proveedor que convierte a pesos y los manda por **SPEI** a una cuenta de banco con CLABE a nombre de la artesana. Pide CURP, RFC y verificación de identidad, que se hacen en su página, no en Yucu (#145, #146).
+Un proveedor que convierte a pesos y los manda por **SPEI** a una cuenta de banco con CLABE a nombre de la artesana. Pide CURP, RFC, INE y una selfie. Con la promotora, **la app revisa antes los datos en el teléfono** (#145) y el servidor los manda a Etherfuse **sin guardarlos**; a ella solo le queda tomarse la selfie en la página de Etherfuse (#146). Ver [ADR-004](../adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), D9.
 
 ---
 

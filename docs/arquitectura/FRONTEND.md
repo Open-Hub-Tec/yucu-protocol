@@ -6,7 +6,7 @@ Donde una issue diga algo distinto, manda la issue; si te parece que la issue es
 
 ## 1. Lo que dijo el campo
 
-Pruebas con unas 7 personas en 4 comunidades ([`HITO_1.2`](../ux-testing/HITO_1.2_AUDITORIA_FRICCION_UX.md), `TEST_02` a `TEST_05`):
+Pruebas con unas 7 personas en 4 comunidades ([`HITO_1.2`](../ux-testing/HITO_1.2_AUDITORIA_FRICCION_UX.md) y los archivos de su matriz: `TIJALTEPEC_FRICTION_AUDIT.md`, `TEST_02` y `TEST_03`):
 
 | Hallazgo | Qué exige a la app |
 |---|---|
@@ -39,19 +39,21 @@ Lo que dijo o escribió la persona
 1. En el teléfono, sin señal ni IA ─── números del menú ("2") y frases conocidas
         │ no reconoció                  ("mis pagos", "cobrar", "registrar")
         ▼
-2. IA en el servidor ─────────────── interpretRequest(texto) → una función de la
+2. IA en el servidor (W52) ───────── interpretRequest(texto) → una función de la
         │ no está segura                lista cerrada + sus datos + qué tan segura está
         ▼
 3. Preguntar ─────────────────────── "¿Quieres registrar un producto o ver tus
                                         pagos?" con 2 o 3 botones, o el menú
 ```
 
+`interpretRequest` es un **cuarto trabajo de IA**, nuevo, que construye W52 sobre el puerto de #154 (ADR-006, D2, ampliada). #154 no lo construye.
+
 **El catálogo de funciones es cerrado.** La IA solo puede elegir de esta lista; si devuelve otra cosa, se descarta:
 
 | Función | Ejemplos de lo que dice la persona | ¿Firma? | Issue |
 |---|---|---|---|
 | `registrar_producto` | "Tengo 20 kilos de café", "quiero subir mi huipil" | Sí | #155 |
-| `ver_mis_productos` | "¿Qué tengo registrado?", "mis lotes" | No | #93 |
+| `ver_mis_productos` | "¿Qué tengo registrado?", "mis lotes" | No | #156 (lista) · #93 (cada lote en la cadena) |
 | `ver_mis_pagos` | "¿Ya me pagaron?", "¿cuánto tengo?" | No | #96 |
 | `recibir_pago` | "Ya me dijeron que me pagaron" | Sí | #96 |
 | `cobrar_en_efectivo` | "Quiero cobrar", "ya estoy en la tienda" | Sí | #114 |
@@ -82,7 +84,7 @@ Reglas del motor:
 
 Reglas:
 * **La elección se guarda en el teléfono** y sigue al volver a abrir la app. Hoy se apaga cada vez.
-* **Todo tamaño de letra va en `rem`** (por ejemplo, las clases `text-base`, `text-lg` de Tailwind), para que cambie con el tamaño elegido y con el del sistema de Android. **Prohibido `text-[11px]` y cualquier tamaño fijo en píxeles en código nuevo.** Hoy hay 1,361 tamaños fijos, 427 de ellos de 10 u 11 px: W51 los cambia.
+* **Todo tamaño de letra va en `rem`** (por ejemplo, las clases `text-base`, `text-lg` de Tailwind), para que cambie con el tamaño elegido y con el del sistema de Android. **Prohibido `text-[11px]`, `text-[10.5px]` y cualquier tamaño fijo en píxeles, entero o decimal, en código nuevo.** Hoy hay 1,417 tamaños fijos en `src/components/` y `src/App.tsx`, y 453 son de 10 a 11.5 px: W51 los cambia.
 * **Ningún texto debajo de 16 px** en el tamaño Normal.
 * **Contraste de al menos 7:1** para texto (nivel AAA de WCAG), porque se usa con sol. Nada de gris claro sobre blanco.
 * **Con letra Muy grande y una pantalla de 360 px de ancho, nada se corta ni se encima** y no hay desplazamiento horizontal.
