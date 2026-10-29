@@ -28,7 +28,7 @@ Revisión del código el 28 y 29 de octubre de 2026:
 
 **D1. Nunca datos reales en el nivel gratuito de AI Studio.** Para cualquier prueba con artesanas reales, la IA corre en **Vertex AI** (Google Cloud) o en la **API de Gemini de pago**. En Vertex AI, según su documentación de gobierno de datos, Google no entrena con los datos sin permiso; además se desactivan el registro de solicitudes y la caché duradera, y se usa un endpoint regional. El nivel gratuito queda solo para desarrollo con datos inventados. La llave va en `.env` (regla 6).
 
-**D2. La IA detrás de puertos, igual que Stellar.** La UI no llama a un proveedor de IA. Se separan tres trabajos, cada uno con su versión simulada (ampliado el 29 de octubre de 2026 con un cuarto, **interpretar el pedido**: de un texto a una función de una lista cerrada, para el motor de pedidos de [`FRONTEND.md`](../arquitectura/FRONTEND.md), sección 3; lo construye W52):
+**D2. La IA detrás de puertos, igual que Stellar.** La UI no llama a un proveedor de IA. Se separan tres trabajos, cada uno con su versión simulada (ampliado el 29 de octubre de 2026 con un cuarto, **interpretar el pedido**: de un texto a una función de una lista cerrada, para el motor de pedidos de [`FRONTEND.md`](../arquitectura/FRONTEND.md), sección 3; lo construye W52 #181):
 
 | Trabajo | Entra | Sale |
 |---|---|---|
