@@ -1,245 +1,226 @@
 <div align="center">
 
-# 🌿 Yucu Protocol
-### *Decentralized Attestation & AI Oracle Infrastructure for Agricultural Provenance, Fair Escrow & Real-World Assets (RWA) on Stellar & Soroban*
+# Yucu Protocol
 
+**Non-custodial provenance and payments for artisans and smallholder producers of the Mixteca region of Oaxaca, built on Stellar and Soroban.**
+
+[![CI](https://github.com/Open-Hub-Tec/yucu-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/Open-Hub-Tec/yucu-protocol/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Stellar: Built on Soroban](https://img.shields.io/badge/Stellar-Soroban%20%7C%20Horizon-black.svg?logo=stellar)](https://stellar.org)
-[![Escrow: Trustless Work Standard](https://img.shields.io/badge/Escrow-Trustless%20Work%20ADR--001-blueviolet.svg)](https://trustlesswork.com)
-[![Institution: TecNM Campus Tlaxiaco](https://img.shields.io/badge/Development-TecNM%20Tlaxiaco-b45309.svg)](http://tlaxiaco.tecnm.mx/)
-[![Tests: 80+ Passing](https://img.shields.io/badge/Tests-80%2B%20Passing%20(0%20Failures)-success.svg)]()
+[![Network: Stellar testnet](https://img.shields.io/badge/Stellar-testnet%20only-black.svg?logo=stellar)](./contracts/deployments/testnet.json)
+[![Status: prototype](https://img.shields.io/badge/status-prototype-orange.svg)](#implementation-status)
 
-<p align="center">
-  <b>Open-source decentralized public goods infrastructure on Stellar: Connecting unbanked smallholder coffee growers, beekeepers, and indigenous artisans from the Mixteca region of Oaxaca with global ethical buyers through verifiable on-chain attestations.</b>
-  <br>
-  <i>Researched, designed, and engineered by indigenous Computer Systems Engineering student-researchers at <b>Instituto Tecnológico de Tlaxiaco (Oaxaca, Mexico)</b></i>
-</p>
-
-[Overview](#-overview) • [Empirical Field Research](#-the-empirical-field-research-moat) • [Architecture & Engineering Status](#-engineering-status-what-is-live-vs-sandbox-simulation) • [Unified Settlement Stack](#-unified-3-tier-settlement-architecture) • [Quickstart](#-quickstart) • [Documentation Center](#-documentation-center)
-
----
+[What it is](#what-yucu-is) · [Principles](#design-principles) · [How it works](#how-it-works) · [Architecture](#architecture) · [Status](#implementation-status) · [Roadmap](#roadmap) · [Quickstart](#quickstart) · [Contributing](#contributing) · [Docs](#documentation)
 
 </div>
 
-## 📌 Overview
-
-**Yucu Protocol** (named after *Yuku*, the Mixtec word for sacred mountain and forest, honoring Santa María Yucuhiti) is an open-source decentralized protocol for **Traceability, Visibility, and Verifiable Provenance (RWA)** built on the **Stellar Network** and **Soroban Smart Contracts**.
-
-Conceived in the mountainous Mixteca Highlands of Oaxaca (**Heroica Ciudad de Tlaxiaco, San José Xochixtlán, San Pablo Tijaltepec, San Juan Mixtepec, San Juan Ñumí, and Santa María Yucuhiti**), Yucu Protocol eliminates digital and financial exclusion for smallholders and ancestral artisans through an **Offline-First PWA** operated by voice in their native language (*Tu'un Savi* / Mixteco).
+> **Prototype.** Yucu runs on Stellar **testnet** only. The contracts have not been audited, no fees are charged, and several modules are still simulated. The [status table](#implementation-status) says exactly what is real.
 
 ---
 
-## 🧪 Implementation Status · Qué es real y qué es simulado (audit, Oct 2026)
+## What Yucu is
 
-> This repository is a **working prototype**. The table below says which parts run for real today and which are demonstrations. Keep it updated in every PR that changes a module's status.
+Artisans and small producers in the Mixteca highlands sell through intermediaries who set the price, while their work is copied and resold without attribution. Most have no bank account, and many are older people with little digital experience.
+
+Yucu gives each artisan three things, without ever showing her a wallet, a crypto asset or a key:
+
+1. **A lot passport.** She registers her lot (a textile, a harvest) and signs it herself. Anyone who scans the QR on the piece can check its origin on Stellar without trusting Yucu.
+2. **Payment in pesos, directly to her.** Buyers in Mexico pay her directly in pesos. Buyers abroad pay into a protected escrow that releases to her own account, and she cashes out in pesos at a local shop.
+3. **Royalties on resales.** When a piece is resold through the contract, a share goes back to her, and a community share (Tequio) goes to an account the community controls.
+
+Around this core, Yucu is growing into **open attestation infrastructure** ([ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), draft): known issuers (community groups, cooperatives, certifiers) sign verifiable claims about physical goods, and anyone can verify them. The person a claim is about can revoke her consent, other contracts can check schema and subject (not just "exists"), and lists live in the contract, so there is no indexer to trust. The core contract is first proposed to Attest Protocol ([daccred/attestprotocol#126–#129](https://github.com/daccred/attestprotocol/issues/126)).
+
+The name comes from *yuku*, "mountain" in Tu'un Savi (Mixtec). The project is developed by students of the Instituto Tecnológico de Tlaxiaco (TecNM) through GitHub issues.
+
+---
+
+## Design principles
+
+These rules are binding for every contribution ([`AGENTS.md`](./AGENTS.md)).
+
+| Principle | What it means in practice | Decided in |
+|---|---|---|
+| **Non-custodial** | The server never generates, stores or receives private keys, and never holds funds. Every transaction follows **prepare → sign on the phone → submit**. | [ADR-003](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |
+| **The artisan only sees pesos** | She has her own Stellar account, but the interface never shows "wallet", USDC, addresses or hashes. | [ADR-004](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) D1 |
+| **She signs, nobody signs for her** | With her own phone, or with her QR card on a field promoter's phone; the key is erased afterwards. The group never receives her money. | ADR-004 D3, D4, D10 |
+| **Minimum data on chain** | Municipality (not the exact community), closed categories, volume ranges, a photo hash. No names, no amounts. | ADR-004 D5, [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
+| **The artisan never pays** | Platform fees are added on top of her price and paid by buyers or businesses. | ADR-004 D11 |
+| **Nothing fake** | Simulated results carry `source: 'simulated'` and a visible demo badge. Hashes, ledgers and certifications are never invented. | `AGENTS.md` rule 3 |
+| **One source for percentages** | Fees, royalties and Tequio come only from [`src/config/protocolFees.ts`](./src/config/protocolFees.ts), which must match the contracts. | `AGENTS.md` rule 7 |
+
+---
+
+## How it works
+
+### Who signs what
+
+| Actor | Role | Signs with |
+|---|---|---|
+| **Artisan** | Registers her lots, receives and releases payments, cashes out | Her phone (non-exportable key + PIN) or her QR card on a promoter's phone ([#91](https://github.com/Open-Hub-Tec/yucu-protocol/issues/91), [#117](https://github.com/Open-Hub-Tec/yucu-protocol/issues/117)) |
+| **Certifier** | Co-signs the lot registration | Their own account (ADR-003 D6) |
+| **Community group** | Accompanies registration, marks orders as shipped, seals heritage items | Its own account; **never receives sales money** |
+| **Buyer** | Pays; approves delivery in a protected purchase | Their own wallet, e.g. Freighter ([#115](https://github.com/Open-Hub-Tec/yucu-protocol/issues/115)) |
+| **Dispute resolver** | Decides disputed escrows | A trusted third party, never Yucu ([#103](https://github.com/Open-Hub-Tec/yucu-protocol/issues/103)) |
+| **Yucu server** | Prepares unsigned transactions and runs optional AI features | **No keys, no funds** |
+
+### Where the money goes
+
+| Situation | Path | On Stellar |
+|---|---|---|
+| **Buyer in Mexico** | Pays the artisan directly in pesos (SPEI or cash on delivery) | Only the lot passport |
+| **Buyer abroad (protected purchase)** | USDC from the buyer's wallet → [Trustless Work](https://trustlesswork.com) escrow → released to the artisan's own account → cash-out in pesos | Passport + escrow |
+| **Cash-out in pesos** | Behind a single `PayoutPort` ([#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112)): cash at a local agent shop (MicoPay, in development), SPEI for artisans with RFC and a bank account (Etherfuse, with on-device data checks and assisted onboarding: [#145](https://github.com/Open-Hub-Tec/yucu-protocol/issues/145), [#146](https://github.com/Open-Hub-Tec/yucu-protocol/issues/146)); MoneyGram Ramps and Pago46 are being evaluated | Withdrawal signed by the artisan |
+| **Resale of a piece** | Through `perpetual_royalties`: royalty to the artisan and Tequio to a community account. Only a resale that pays the royalty transfers ownership in the passport ([#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110), [#137](https://github.com/Open-Hub-Tec/yucu-protocol/issues/137)) | Royalty payment + new owner |
+
+The default protected purchase has **one milestone**: the group marks it shipped, the buyer approves, and the artisan releases the payment to herself. Platform fees go to a legally constituted entity, and **no fee will be charged on mainnet** before a tax and legal review ([questions](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md)).
+
+---
+
+## Architecture
+
+![Layers: people, apps, ports, prepare and sign, Stellar, and payments outside Stellar](./docs/arquitectura/yucu-capas.svg)
+
+The apps talk **only to the ports** in [`src/core/chain/ports.ts`](./src/core/chain/ports.ts). No component imports `@stellar/stellar-sdk` or calls Trustless Work directly.
+
+| Port | Responsibility | Real implementation |
+|---|---|---|
+| `WalletPort` | Device key, QR card or external wallet (`kind`) | [#91](https://github.com/Open-Hub-Tec/yucu-protocol/issues/91), [#117](https://github.com/Open-Hub-Tec/yucu-protocol/issues/117), [#115](https://github.com/Open-Hub-Tec/yucu-protocol/issues/115) |
+| `LotRegistryPort` | Register and read lot passports | [#92](https://github.com/Open-Hub-Tec/yucu-protocol/issues/92), [#93](https://github.com/Open-Hub-Tec/yucu-protocol/issues/93) |
+| `EscrowPort` | Protected purchase on Trustless Work | [#96](https://github.com/Open-Hub-Tec/yucu-protocol/issues/96) |
+| `PayoutPort` | Cash-out in pesos | [#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112), [#114](https://github.com/Open-Hub-Tec/yucu-protocol/issues/114), [#145](https://github.com/Open-Hub-Tec/yucu-protocol/issues/145), [#146](https://github.com/Open-Hub-Tec/yucu-protocol/issues/146) |
+| `AttestationPort` | Issue, revoke, verify and list attestations | [#141](https://github.com/Open-Hub-Tec/yucu-protocol/issues/141) (design in ADR-005) |
+
+Each port has a demo implementation ([`SimulatedChain.ts`](./src/core/chain/SimulatedChain.ts)) so the UI can be built before the real one exists. More diagrams, including the signing flow and the money flow, are in [`docs/arquitectura/`](./docs/arquitectura/README.md).
+
+### Smart contracts
+
+Soroban contracts in Rust, in a single workspace under [`contracts/`](./contracts/). Deployed on **testnet** on 2026-10-26 (IDs in [`testnet.json`](./contracts/deployments/testnet.json)).
+
+| Contract | Purpose | Testnet ID |
+|---|---|---|
+| `lot_passport` | Lot registration signed by the producer and the certifier | [`CAPXWY…`](https://stellar.expert/explorer/testnet/contract/CAPXWYKU5GESGPZ57LNRCLOVHSBGDOZQVAWC6CWIQ655RSZ2ZGZI2BO7) |
+| `perpetual_royalties` | Heritage items, resales, royalty and Tequio | [`CCNPTD…`](https://stellar.expert/explorer/testnet/contract/CCNPTDDVW3RW53YQACZ2UFFHVLUJXNCMZ3TSK7TB552SUU6DDL26FRKU) |
+| `attestation_registry` | Attestations by schema. **Test material**: replaced under ADR-005, not for mainnet | [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT) |
+| `fair_escrow` | **Teaching material only.** The real escrow is Trustless Work | [`CCVDEQ…`](https://stellar.expert/explorer/testnet/contract/CCVDEQ64Q4PJX73HLLPL3OYXLW4ARA652I34ZYIDQDXYQDQVJNLFSAQB) |
+
+A single redeployment is planned once [#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110) lands (constructors, closed data fields, admin-only `upgrade`, token allow-list, royalty checks).
+
+---
+
+## Implementation status
+
+This is a working prototype. Every PR that changes a module's status must update this table.
 
 | Module | Status | What it really does today |
 |---|---|---|
 | PWA (React + Vite, service worker) | ✅ Real | Installable app; assets cached for offline use. |
-| Offline storage (`src/utils/offlineStorage.ts`) | ✅ Real | Saves lots in IndexedDB (localStorage fallback). |
-| Chat, image analysis, audio transcription (`server.ts`) | ✅ Real, needs `GEMINI_API_KEY` | Calls Gemini. Without a key it returns responses marked `isSimulated: true`. |
-| Soroban contracts (`contracts/`) | ✅ Real, **deployed on testnet** | 4 contracts with 23 passing tests. ⚠️ The deployed `lot_passport` predates the separate `certifier` role (ADR-003 D6); it must be redeployed with `contracts/scripts/deploy-testnet.sh`. IDs in [`contracts/deployments/testnet.json`](./contracts/deployments/testnet.json): lot_passport [`CAPXWY…`](https://stellar.expert/explorer/testnet/contract/CAPXWYKU5GESGPZ57LNRCLOVHSBGDOZQVAWC6CWIQ655RSZ2ZGZI2BO7), attestation_registry [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT), perpetual_royalties [`CCNPTD…`](https://stellar.expert/explorer/testnet/contract/CCNPTDDVW3RW53YQACZ2UFFHVLUJXNCMZ3TSK7TB552SUU6DDL26FRKU). `fair_escrow` [`CCVDEQ…`](https://stellar.expert/explorer/testnet/contract/CCVDEQ64Q4PJX73HLLPL3OYXLW4ARA652I34ZYIDQDXYQDQVJNLFSAQB) is **teaching material only**; real escrow is Trustless Work ([ADR-003](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md)). Not on mainnet. |
-| Chain ports (`src/core/chain/`) | 🟡 Architecture ready | Non-custodial ports (`WalletPort`, `LotRegistryPort`, `EscrowPort`): prepare → user signs on device → submit. Only the demo implementation exists; the real ones are student issues. |
-| `src/core/blockchain/SorobanAdapter.ts` | 🔴 Simulated | Builds fake tx hashes and ledger numbers; does not call the network. |
-| `src/core/blockchain/StellarLiveClient.ts` | 🟡 Partial | Real Stellar SDK objects, but contract invocations return `simulated: true`; not used by the UI. |
-| `src/core/blockchain/TrustlessWorkEscrowAdapter.ts` | 🔴 Simulated | Escrows live in an in-memory `Map`; no deposit happens. To be replaced by a real `EscrowPort` on the Trustless Work API. |
-| `src/core/settlement/HybridSettlementOrchestrator.ts` | 🔴 Simulated | Fixed exchange rates; SPEI folios generated locally. No real MXN on/off-ramp. |
-| `src/core/ai/RaizAIOracles.ts` | 🔴 Simulated | Rule-based: fixed quality scores (e.g. 88.75) and EUDR always "no deforestation"; no satellite data. |
-| `src/core/agents/YucuAgentSwarm.ts` | 🔴 Simulated | Returns fixed `CERTIFIED` results. |
-| `src/core/sync/SyncEngine.ts` | 🔴 Simulated | "Sending" is a `setTimeout`; not wired to any screen yet. |
-| `src/core/auth/RaizAuthEngine.ts` | 🔴 Simulated | Fixed OTP (`7421`) and placeholder `GBRAIZ…` addresses (not valid Stellar accounts). |
-| `RaizProtocolSDK.getMetrics()` | 🔴 Simulated | Hard-coded figures; not real settlements or communities. |
+| Offline storage ([`offlineStorage.ts`](./src/utils/offlineStorage.ts)) | ✅ Real | Saves lots in IndexedDB (localStorage fallback). |
+| Soroban contracts ([`contracts/`](./contracts/)) | ✅ Real, testnet | 4 contracts with tests. Not audited, not on mainnet; redeployment pending [#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110). |
+| Chain ports ([`src/core/chain/`](./src/core/chain/)) | 🟡 Architecture ready | Ports and demo implementation with tests. The real implementations are open issues. |
+| Protocol fees ([`protocolFees.ts`](./src/config/protocolFees.ts)) | 🟡 Test values | Aligned with the contracts; final values depend on the tax and legal review. |
+| Chat, image analysis, transcription ([`server.ts`](./server.ts)) | 🟡 Experimental | Calls Gemini when `GEMINI_API_KEY` is set; otherwise responses are marked `isSimulated: true`. |
+| Public API `/api/v1/*`, `useYucuProtocol` hooks, `YucuPassportBadge` | 🔴 Simulated | The endpoints return fixed or random values; the hooks and the badge consume them. Not a real verification service yet. |
+| `SorobanAdapter.ts`, `StellarLiveClient.ts` | 🔴 Simulated / partial | Fake hashes or `simulated: true`; to be replaced by the ports ([#105](https://github.com/Open-Hub-Tec/yucu-protocol/issues/105), [#109](https://github.com/Open-Hub-Tec/yucu-protocol/issues/109)). |
+| `TrustlessWorkEscrowAdapter.ts` | 🔴 Simulated | In-memory escrows; to be replaced by the real `EscrowPort` ([#96](https://github.com/Open-Hub-Tec/yucu-protocol/issues/96)). |
+| `HybridSettlementOrchestrator.ts` | 🔴 Simulated | Fixed exchange rates and locally generated SPEI folios; to be replaced by `PayoutPort`. |
+| `RaizAIOracles.ts`, `YucuAgentSwarm.ts` | 🔴 Simulated | Fixed scores and `CERTIFIED` results; no satellite or lab data. |
+| `SyncEngine.ts`, `RaizAuthEngine.ts` | 🔴 Simulated | `setTimeout` sync; fixed OTP and placeholder addresses. |
+| `CryptoEngine.ts` | 🔴 To fix | Hash fallback is not real SHA-256 ([#120](https://github.com/Open-Hub-Tec/yucu-protocol/issues/120)). |
 
-**Not a certification:** quality, EUDR and "AI certified" labels in the app are demonstrations until a human validator and a real data source are connected.
-
----
-
-## ⚡ Executive Summary in 60 Seconds
-
-* **The Problem:** Smallholder indigenous coffee farmers, beekeepers, and textile artisans in Oaxaca lose a large share of their product value to middlemen (*coyotes*), face systematic counterfeiting from industrial knockoffs, and face deep barriers to digital banking (no internet in parcels, no credit cards, language barriers in *Tu'un Savi*).
-* **The Solution:** An **Offline-First Voice PWA** that allows an elder artisan to register a harvest by voice without typing. The system computes a cryptographic SHA-256 digest, prints a physical ISO/IEC 18004 hang-tag QR, anchors verifiable attestations on Stellar/Soroban, and, for protected purchases, locks funds in a Trustless Work milestone escrow.
-* **The Impact (target design, [ADR-004](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md)):** Buyers in Mexico pay the artisan directly in pesos (SPEI or cash); only the lot passport goes on Stellar. Foreign buyers pay in USDC into an escrow that releases to the artisan's own account, and she cashes out in pesos (MicoPay cash or Etherfuse SPEI). The artisan never pays a fee; the escrow takes **no Tequio**. On resales that go through the contract: **10% royalty to the original artisan + 2% Tequio** to a community account (single source of truth: [`src/config/protocolFees.ts`](./src/config/protocolFees.ts)). Today the payout rails are simulated; see the status table above.
+**Not a certification.** Quality, EUDR, carbon or "AI certified" labels shown in the app are demonstrations. Yucu does not issue official certifications.
 
 ---
 
-## 🗺️ End-to-End User Journey Map
+## Roadmap
 
-How a coffee grower or textile artisan interacts with Yucu Protocol—step by step, with direct links to the implementation code:
+Work is organized as GitHub issues. Implementation order for the non-custodial core:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. PARCEL REGISTRATION ──▶ 2. CRYPTOGRAPHIC TWIN ──▶ 3. ESCROW FUNDING ──▶ 4. SETTLEMENT & PAYOUT      │
-│ (Offline / Voice)          (Hang-Tag QR & Ledger)     (Soroban Milestone)     (Banxico SPEI / Cash)    │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+#110 contracts ─▶ #92 prepare ─┐
+#91 wallet ─────────────────────┼─▶ #93 register a real lot ─▶ #98 / #99
+#94 fee sponsorship ────────────┘
+#91 ─▶ #117 QR card · #112 payouts ─▶ #114 · #145 ─▶ #146 SPEI · #96 escrow ─▶ #119
+#110 ─▶ #137 royalty recipient
+Attestations: #140 spec ─▶ #141 port ─▶ #142 verifier · #143 issuer console · #148 artisan view · #151 impact page
+Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verifications · #108 honest texts
 ```
 
-| Step | User & System Action | Technical Component & Direct Code Link |
-| :---: | :--- | :--- |
-| **1** | **Oral Harvest Log (Offline):** Don Juan presses the 112px voice button in Yucuhiti, speaking in *Tu'un Savi*: *"Kuni yu kiti 120 kilos café pergamino"*. Audio is encoded at 24kbps Opus without cell signal. | [`src/components/RegisterCoffeeLotScreen.tsx`](./src/components/RegisterCoffeeLotScreen.tsx)<br>[`src/utils/offlineStorage.ts`](./src/utils/offlineStorage.ts) |
-| **2** | **Cryptographic Digital Twin:** The system extracts metadata, computes the canonical SHA-256 Community Digest, and generates a printable vector SVG hang-tag QR for the physical coffee sack. | [`src/core/crypto/CryptoEngine.ts`](./src/core/crypto/CryptoEngine.ts)<br>[`src/components/ArtisanQrTagModal.tsx`](./src/components/ArtisanQrTagModal.tsx) |
-| **3** | **Protected Purchase (Trustless Work escrow, testnet):** A buyer abroad inspects the digital lot passport and funds a Trustless Work escrow in USDC from their own wallet. The artisan is the receiver. | [`src/core/chain/ports.ts`](./src/core/chain/ports.ts) (`EscrowPort`)<br>[`src/core/blockchain/TrustlessWorkEscrowAdapter.ts`](./src/core/blockchain/TrustlessWorkEscrowAdapter.ts) *(simulated)* |
-| **4** | **Shipping:** The group marks the milestone as "shipped". By default there is a single milestone (100 %); an "advance" template (e.g. 30 % / 70 %) is only enabled if field research shows artisans need it. | [`docs/standards/SEP_RWA_ATTESTATION_DRAFT.md`](./docs/standards/SEP_RWA_ATTESTATION_DRAFT.md)<br>[`src/core/ai/RaizAIOracles.ts`](./src/core/ai/RaizAIOracles.ts) |
-| **5** | **Delivery & Payout:** The buyer confirms receipt; the artisan releases the payment to her own account with her PIN and cashes out in pesos (MicoPay cash or Etherfuse SPEI, behind `PayoutPort`). | [`src/core/settlement/HybridSettlementOrchestrator.ts`](./src/core/settlement/HybridSettlementOrchestrator.ts) *(simulated)*<br>[`docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md`](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) |
+| Track | Status | Key issues and documents |
+|---|---|---|
+| **Phase 1: lot passport** | Accepted design; app integration in progress | #91, #92, #93, #97, #99, #110 |
+| **Phase 2: protected purchase and cash-out** | Testnet design | #96, #112, #114, #115, #116, #119, #145, #146 |
+| **Resale royalties** | Contract on testnet; hardening open | #110, #137 |
+| **Attestation infrastructure** | Draft ADR; core waits on Attest Protocol's answer | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), #140, #141, #142, #143, #148, #151 |
+| **Validation** | Field work | Buyers ([#68](https://github.com/Open-Hub-Tec/yucu-protocol/issues/68)), brands ([#131](https://github.com/Open-Hub-Tec/yucu-protocol/issues/131)), disputes ([#103](https://github.com/Open-Hub-Tec/yucu-protocol/issues/103)) |
+| **Before mainnet** | Open | Legal entity, tax and legal opinion, threat model, audit, community consent |
 
 ---
 
-## 🏛️ Interactive Architecture Map (With Codebase Links)
+## Quickstart
 
-| Architecture Layer | Responsibilities | Key Files & Modules in Repo |
-| :--- | :--- | :--- |
-| **Layer 1: Rural Client (PWA)** | Voice-first accessible UI ("Modo Abuelo"), 112px touch targets, zero-seed authentication, offline caching. | [`src/App.tsx`](./src/App.tsx)<br>[`src/components/MainMenuScreen.tsx`](./src/components/MainMenuScreen.tsx)<br>[`src/components/VoiceAssistantModal.tsx`](./src/components/VoiceAssistantModal.tsx) |
-| **Layer 2: Core Domain Engine** | ACID outbox persistence, reactive sync listeners, canonical SHA-256 hashing, ISO/IEC 18004 vector QR generation. | [`src/core/crypto/CryptoEngine.ts`](./src/core/crypto/CryptoEngine.ts)<br>[`src/core/sync/IndexedDbOutbox.ts`](./src/core/sync/IndexedDbOutbox.ts)<br>[`src/core/policy/FairTradeEngine.ts`](./src/core/policy/FairTradeEngine.ts) |
-| **Layer 3: Autonomous AI Oracles & Agent Swarm** | 6 specialized agents: Tu'un Savi Voice, SCAA Cupping, Sentinel-2 EUDR, DPP Circularity, Indigenous IP Shield, and Settlement Solver. | [`src/core/agents/YucuAgentSwarm.ts`](./src/core/agents/YucuAgentSwarm.ts)<br>[`src/core/ai/RaizAIOracles.ts`](./src/core/ai/RaizAIOracles.ts)<br>[`src/components/ProtocolInfrastructureModal.tsx`](./src/components/ProtocolInfrastructureModal.tsx) |
-| **Layer 4: Soroban Smart Contracts & Official SDK** | Compact WASM contracts, TTL two-tier rent management, official `@stellar/stellar-sdk` client, and Trustless Work escrow. | [`src/core/blockchain/StellarLiveClient.ts`](./src/core/blockchain/StellarLiveClient.ts)<br>[`contracts/attestation_registry/`](./contracts/attestation_registry/)<br>[`contracts/fair_escrow/`](./contracts/fair_escrow/) |
-| **Layer 5: Third-Party Developer Tools & Embeds** | React Hooks library (`@yucu-protocol/react`), drop-in `<YucuPassportBadge />`, live REST APIs `/api/v1/protocol/*`, and Stellar Raven MCP. | [`src/core/hooks/useYucuProtocol.ts`](./src/core/hooks/useYucuProtocol.ts)<br>[`src/components/YucuPassportBadge.tsx`](./src/components/YucuPassportBadge.tsx)<br>[`.cursor/mcp.json`](./.cursor/mcp.json) |
-| **Layer 6: Multi-Anchor Fiat Settlement Rails** | Atomic swap from on-chain USDC/MXNe to Banxico SPEI interbank transfers and rural cash-in-hand parcel network. | [`src/core/settlement/HybridSettlementOrchestrator.ts`](./src/core/settlement/HybridSettlementOrchestrator.ts) *(simulated)*<br>[`docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md`](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) |
-
----
-
-## 📜 Canonical 8-Schema RWA Attestation Catalog
-
-Yucu Protocol standardizes 8 specialized attestation types anchored on Soroban for global trade, regulatory compliance, and community defense:
-
-| Schema UID | Schema Name | Issuing Authority / Oracle | Regulatory / Industry Standard |
-| :---: | :--- | :--- | :--- |
-| `0x01_VOICE` | **Indigenous Voice & Origin** | Communal Agrarian Assembly + Tu'un Savi Acoustic Notary | W3C Oral Consent / UNESCO Linguistic Heritage |
-| `0x02_SCAA` | **Specialty Quality & Sensory Grade** | Certified Q-Grader Vision AI + TecNM Laboratory | SCAA Cupping Protocols / NMX-F-083-SCFI |
-| `0x03_EUDR` | **Copernicus Anti-Deforestation Proof** | Sentinel-2 Multispectral Satellite Oracle | EU Deforestation Regulation (EUDR 2026) |
-| `0x04_SETT` | **Trustless Work Escrow Clearance** | Audited Soroban Contract + Banxico SPEI | Soroban WASM Milestone Standard (ADR-001) |
-| `0x05_DPP` | **EU Digital Product Passport & Carbon Insetting** | DPPCircularityAgent + Agroforestry Biomass Lab | EU Ecodesign (ESPR 2026) / GS1 Digital Link |
-| `0x06_INDIP` | **Indigenous Collective IP & Perpetual Royalties** | IndigenousIPGuardianAgent + Communal Assembly | Ley Federal Protección Patrimonio Cultural 2022 |
-| `0x07_IOT` | **Cold-Chain & Dynamic Transit Telemetry** | Carrier IoT Mesh (Soroban Temporary Storage TTL 60d) | ISO 22005 Food Traceability / Zero State Bloat |
-| `0x08_USMCA` | **Customs Rules of Origin & Phytosanitary** | SENASICA / USDA Organic Conformity Gateway | USMCA (T-MEC) Origin Rules / Stellar SEP-8 |
-
----
-
-## 🌐 Third-Party Platform Integration (How Other Apps Consume Yucu)
-
-Any external e-commerce store (Shopify, WooCommerce), roaster dApp, fintech, or customs ERP can consume Yucu with three developer-ready options:
-
-### 1. React Hooks (`@yucu-protocol/react`)
-```tsx
-import { useYucuAttestation, useYucuDigitalPassport } from '@yucu-protocol/react';
-
-function SpecialtyLotCard({ lotCode }) {
-  const { verified, dataHash } = useYucuAttestation({ lotCode, expectedSchema: '0x01_SCAA' });
-  const { passport, gs1Url } = useYucuDigitalPassport(lotCode);
-
-  return (
-    <div>
-      <h3>{passport?.credentialSubject?.productName}</h3>
-      <p>Verified on Soroban: {verified ? 'YES' : 'PENDING'}</p>
-      <a href={gs1Url}>GS1 Digital Link Verification</a>
-    </div>
-  );
-}
-```
-
-### 2. Drop-in Trust Badge (`<YucuPassportBadge />`)
-Embed a live cryptographic certification badge into any web page or checkout card:
-```tsx
-import { YucuPassportBadge } from './components/YucuPassportBadge';
-
-<YucuPassportBadge lotCode="MX-2024-884" productTitle="Café Pluma Typica de Altura" qualityScore={89.2} />
-```
-
-### 3. Public REST API Gateway
-* `GET /api/v1/protocol/spec`: Protocol parameters, schemas, and live Soroban contracts.
-* `POST /api/v1/attestations/verify`: Independent cryptographic verification endpoint.
-* `POST /api/v1/attestations/issue`: Mints a signed attestation with 100% sponsored gas.
-* `GET /api/v1/lots/:code/passport`: Full digital twin conforming to W3C VC and GS1 Digital Link.
-
----
-
-## 🦅 Stellar Raven MCP Server Integration
-
-This repository is pre-configured with **Stellar Raven**, the official Model Context Protocol (MCP) server from the Stellar Development Foundation (`https://raven.stellar.buzz/mcp`), in `.cursor/mcp.json` and `mcp.json`.
-
-To connect it to Claude Code:
-```bash
-claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
-```
-
----
-
-## 💳 Unified 3-Tier Settlement Architecture
-
-To resolve ambiguity between on-chain escrow, off-ramps, and cash distribution:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ TIER 1: ON-CHAIN ESCROW (Trustless Work, testnet)                           │
-│ Buyer locks funds in USDC from their own wallet:                            │
-│  • Default: 1 milestone (100%), released when the buyer confirms receipt.   │
-│  • Optional template with advance (e.g. 30% / 70%), off by default.         │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ TIER 2: LAST-MILE PARCEL CASH NETWORK (MicoPay Community Nodes)            │
-│ For unbanked indigenous elders with zero bank accounts:                      │
-│ Local cooperatives and certified transport drivers disburse physical cash   │
-│ in parcel/depot upon verifying the hang-tag QR attestation.                 │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ TIER 3: REGULATED FIAT BANKING RAILS (Etherfuse SPEI / MoneyGram Access)    │
-│ For banked producers, cooperatives, and commercial entities:               │
-│ Atomic conversion from USDC to local currency (MXNe via Etherfuse SPEI,     │
-│ cash pickup via MoneyGram Stellar Access, or Banco del Bienestar debit).    │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🚀 Quickstart
-
-Clone, install, and run Yucu Protocol locally:
+Requires Node 22 ([`.nvmrc`](./.nvmrc)). Rust and the Stellar CLI are only needed for the contracts.
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/Open-Hub-Tec/yucu-protocol.git
 cd yucu-protocol
-
-# 2. Use Node 22 (see .nvmrc) and install the exact dependencies
 nvm use
 npm ci
-
-# 3. Launch local development server
-npm run dev
+cp .env.example .env    # optional: GEMINI_API_KEY for the AI features
+npm run dev             # http://localhost:3000
 ```
 
-Open your browser at `http://localhost:3000`.
+Checks that must pass before opening a PR:
 
-### Verification & Quality Assurance:
 ```bash
-# Run the complete test suite (79 automated tests, 0 failures)
-npm run test
+npm run lint     # TypeScript, no errors
+npm test         # TypeScript tests
+npm run build    # production build
 
-# Compile production bundle
-npm run build
+# Only if you changed contracts/
+cd contracts
+cargo fmt --all
+cargo clippy --locked --all-targets -- -D warnings
+cargo test --locked
 ```
 
 ---
 
-## 📚 Documentation Center
+## Contributing
 
-Technical architecture, field evidence, and academic standards are organized modularly in [`docs/`](./docs/README.md):
+Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributions may be recognized through [Drips Wave](https://www.drips.network/wave) when the issue is part of an active Wave.
 
-* **[Architecture Document](./docs/ARCHITECTURE.md):** capas, puertos, quién firma qué y camino del dinero (ADR-003 y ADR-004).
-* **[ADR-001: Trustless Work Escrow](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md):** Milestone custody specification and rationale.
-* **[ADR-002: Offline-First PWA & Rural Identity](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md):** W3C PWA standards vs. proprietary messaging platforms.
-* **[SEP-XXXX Attestation Draft](./docs/standards/SEP_RWA_ATTESTATION_DRAFT.md):** Verifiable RWA Attestation Standard proposed for Soroban.
-* **[Field Research Dossier](./docs/research/):** Complete field interviews, transcripts, audio recordings, and pain-point validations (Hito 1.1).
-* **[UX Usability Testing](./docs/ux-testing/):** Timed field tests with indigenous elders and friction audit reports (Hito 1.2).
+1. Read [`AGENTS.md`](./AGENTS.md) (it applies to people and AI assistants alike), [`CONTRIBUTING.md`](./CONTRIBUTING.md) and the ADRs the issue mentions.
+2. Ask to be assigned **before** you start; one team per issue.
+3. Work on a branch `feat/issue-<n>-<topic>` or `fix/issue-<n>-<topic>`; `main` is protected.
+4. Add a positive and a negative test for every new rule.
+5. Open the PR with `Resolves #<n>`, and be ready to explain your code: a PR you cannot explain is not merged, even if it works.
+
+**Privacy and security.** Never commit names of interviewed people, phone numbers, addresses, keys (`S…`) or API keys. Audio, video, photos of people and PDFs do not go into `docs/research/`, `docs/ux-testing/` or `public/videos/` (CI rejects them). See [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md).
+
+**AI assistants.** The repository is configured for the [Stellar Raven](https://raven.stellar.buzz/mcp) MCP server ([`mcp.json`](./mcp.json)). AI-generated code is welcome only when it is tested and the contributor understands it.
 
 ---
 
-## 👥 Academic Governance & Team
+## Documentation
 
-* **Institution:** Instituto Tecnológico de Tlaxiaco (TecNM - Oaxaca, Mexico).
-* **Department:** Ingeniería en Sistemas Computacionales.
-* **Faculty Advisor:** Mtro. José Alfredo Román Cruz.
-* **Student Research Fellows:** Open Hub TecNM Campus Tlaxiaco.
-* **License:** [MIT Open Source](./LICENSE).
+| Topic | Document |
+|---|---|
+| Architecture: layers, ports, signing and money flow | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md), [`docs/arquitectura/`](./docs/arquitectura/README.md) |
+| ADR-001: Trustless Work escrow | [`ADR-001`](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) |
+| ADR-002: offline-first PWA and rural identity; communication channels | [`ADR-002 (PWA)`](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md), [`ADR-002 (channels)`](./docs/adr/ADR-002-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) |
+| ADR-003: non-custodial design and Trustless Work | [`ADR-003`](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |
+| ADR-004: payments in pesos without a wallet | [`ADR-004`](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) |
+| ADR-005: attestation infrastructure (draft) | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
+| Sustainability: open tax and legal questions | [`docs/sostenibilidad/`](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md) |
+| Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
+| Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |
+| Student guides | [`docs/guides/`](./docs/guides/), [`docs/estudiantes/`](./docs/estudiantes/) |
+| Earlier attestation drafts (**obsolete**, superseded by ADR-005) | [`docs/standards/`](./docs/standards/) |
+
+---
+
+## Team
+
+* **Institution:** Instituto Tecnológico de Tlaxiaco (TecNM), Ingeniería en Sistemas Computacionales. Oaxaca, Mexico.
+* **Faculty advisor and maintainer:** Mtro. José Alfredo Román Cruz.
+* **Contributors:** student teams of Open Hub TecNM Campus Tlaxiaco ([contributors](https://github.com/Open-Hub-Tec/yucu-protocol/graphs/contributors)).
+* **License:** [MIT](./LICENSE).
