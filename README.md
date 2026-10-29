@@ -117,7 +117,8 @@ This is a working prototype. Every PR that changes a module's status must update
 | Soroban contracts ([`contracts/`](./contracts/)) | ✅ Real, testnet | 4 contracts with tests. Not audited, not on mainnet; redeployment pending [#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110). |
 | Chain ports ([`src/core/chain/`](./src/core/chain/)) | 🟡 Architecture ready | Ports and demo implementation with tests. The real implementations are open issues. |
 | Protocol fees ([`protocolFees.ts`](./src/config/protocolFees.ts)) | 🟡 Test values | Aligned with the contracts; final values depend on the tax and legal review. |
-| Chat, image analysis, transcription ([`server.ts`](./server.ts)) | 🟡 Experimental | Calls Gemini when `GEMINI_API_KEY` is set; otherwise responses are marked `isSimulated: true`. |
+| Chat, image analysis, transcription ([`server.ts`](./server.ts)) | 🟡 Experimental | Records real audio and calls Gemini when `GEMINI_API_KEY` is set. Voice does **not** register a lot yet ([#155](https://github.com/Open-Hub-Tec/yucu-protocol/issues/155)). Without the key, some replies are invented (a "verified" transcription, fixed image diagnoses); to be fixed in [#154](https://github.com/Open-Hub-Tec/yucu-protocol/issues/154). Use the free Google AI Studio tier only with invented data ([ADR-006](./docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md), D1). |
+| Catalog and data ([`mockData.ts`](./src/data/mockData.ts)) | 🔴 Demo only | No database yet: buyer products are fictional demo data, and registered lots live only in app state ([#156](https://github.com/Open-Hub-Tec/yucu-protocol/issues/156)). |
 | Public API `/api/v1/*`, `useYucuProtocol` hooks, `YucuPassportBadge` | 🔴 Simulated | The endpoints return fixed or random values; the hooks and the badge consume them. Not a real verification service yet. |
 | `SorobanAdapter.ts`, `StellarLiveClient.ts` | 🔴 Simulated / partial | Fake hashes or `simulated: true`; to be replaced by the ports ([#105](https://github.com/Open-Hub-Tec/yucu-protocol/issues/105), [#109](https://github.com/Open-Hub-Tec/yucu-protocol/issues/109)). |
 | `TrustlessWorkEscrowAdapter.ts` | 🔴 Simulated | In-memory escrows; to be replaced by the real `EscrowPort` ([#96](https://github.com/Open-Hub-Tec/yucu-protocol/issues/96)). |
@@ -164,7 +165,7 @@ git clone https://github.com/Open-Hub-Tec/yucu-protocol.git
 cd yucu-protocol
 nvm use
 npm ci
-cp .env.example .env    # optional: GEMINI_API_KEY for the AI features
+cp .env.example .env    # optional: GEMINI_API_KEY for the AI features (free tier: invented data only, ADR-006 D1)
 npm run dev             # http://localhost:3000
 ```
 
