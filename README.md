@@ -27,7 +27,7 @@ Yucu gives each artisan three things, without ever showing her a wallet, a crypt
 2. **Payment in pesos, directly to her.** Buyers in Mexico pay her directly in pesos. Buyers abroad pay into a protected escrow that releases to her own account, and she cashes out in pesos at a local shop.
 3. **Royalties on resales.** When a piece is resold through the contract, a share goes back to her, and a community share (Tequio) goes to an account the community controls.
 
-Around this core, Yucu is growing into **open attestation infrastructure** ([ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), draft): known issuers (community groups, cooperatives, certifiers) sign verifiable claims about physical goods, and anyone can verify them.
+Around this core, Yucu is growing into **open attestation infrastructure** ([ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), draft): known issuers (community groups, cooperatives, certifiers) sign verifiable claims about physical goods, and anyone can verify them. The person a claim is about can revoke her consent, other contracts can check schema and subject (not just "exists"), and lists live in the contract, so there is no indexer to trust. The core contract is first proposed to Attest Protocol ([daccred/attestprotocol#126–#129](https://github.com/daccred/attestprotocol/issues/126)).
 
 The name comes from *yuku*, "mountain" in Tu'un Savi (Mixtec). The project is developed by students of the Instituto Tecnológico de Tlaxiaco (TecNM) through GitHub issues.
 
@@ -68,7 +68,7 @@ These rules are binding for every contribution ([`AGENTS.md`](./AGENTS.md)).
 |---|---|---|
 | **Buyer in Mexico** | Pays the artisan directly in pesos (SPEI or cash on delivery) | Only the lot passport |
 | **Buyer abroad (protected purchase)** | USDC from the buyer's wallet → [Trustless Work](https://trustlesswork.com) escrow → released to the artisan's own account → cash-out in pesos | Passport + escrow |
-| **Cash-out in pesos** | Behind a single `PayoutPort` ([#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112)): cash at a local agent shop (MicoPay, in development), SPEI for artisans with RFC and a bank account (Etherfuse); MoneyGram Ramps and Pago46 are being evaluated | Withdrawal signed by the artisan |
+| **Cash-out in pesos** | Behind a single `PayoutPort` ([#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112)): cash at a local agent shop (MicoPay, in development), SPEI for artisans with RFC and a bank account (Etherfuse, with on-device data checks and assisted onboarding: [#145](https://github.com/Open-Hub-Tec/yucu-protocol/issues/145), [#146](https://github.com/Open-Hub-Tec/yucu-protocol/issues/146)); MoneyGram Ramps and Pago46 are being evaluated | Withdrawal signed by the artisan |
 | **Resale of a piece** | Through `perpetual_royalties`: royalty to the artisan and Tequio to a community account. Only a resale that pays the royalty transfers ownership in the passport ([#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110), [#137](https://github.com/Open-Hub-Tec/yucu-protocol/issues/137)) | Royalty payment + new owner |
 
 The default protected purchase has **one milestone**: the group marks it shipped, the buyer approves, and the artisan releases the payment to herself. Platform fees go to a legally constituted entity, and **no fee will be charged on mainnet** before a tax and legal review ([questions](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md)).
@@ -86,7 +86,8 @@ The apps talk **only to the ports** in [`src/core/chain/ports.ts`](./src/core/ch
 | `WalletPort` | Device key, QR card or external wallet (`kind`) | [#91](https://github.com/Open-Hub-Tec/yucu-protocol/issues/91), [#117](https://github.com/Open-Hub-Tec/yucu-protocol/issues/117), [#115](https://github.com/Open-Hub-Tec/yucu-protocol/issues/115) |
 | `LotRegistryPort` | Register and read lot passports | [#92](https://github.com/Open-Hub-Tec/yucu-protocol/issues/92), [#93](https://github.com/Open-Hub-Tec/yucu-protocol/issues/93) |
 | `EscrowPort` | Protected purchase on Trustless Work | [#96](https://github.com/Open-Hub-Tec/yucu-protocol/issues/96) |
-| `PayoutPort` | Cash-out in pesos | [#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112), [#114](https://github.com/Open-Hub-Tec/yucu-protocol/issues/114) |
+| `PayoutPort` | Cash-out in pesos | [#112](https://github.com/Open-Hub-Tec/yucu-protocol/issues/112), [#114](https://github.com/Open-Hub-Tec/yucu-protocol/issues/114), [#145](https://github.com/Open-Hub-Tec/yucu-protocol/issues/145), [#146](https://github.com/Open-Hub-Tec/yucu-protocol/issues/146) |
+| `AttestationPort` | Issue, revoke, verify and list attestations | [#141](https://github.com/Open-Hub-Tec/yucu-protocol/issues/141) (design in ADR-005) |
 
 Each port has a demo implementation ([`SimulatedChain.ts`](./src/core/chain/SimulatedChain.ts)) so the UI can be built before the real one exists. More diagrams, including the signing flow and the money flow, are in [`docs/arquitectura/`](./docs/arquitectura/README.md).
 
@@ -98,7 +99,7 @@ Soroban contracts in Rust, in a single workspace under [`contracts/`](./contract
 |---|---|---|
 | `lot_passport` | Lot registration signed by the producer and the certifier | [`CAPXWY…`](https://stellar.expert/explorer/testnet/contract/CAPXWYKU5GESGPZ57LNRCLOVHSBGDOZQVAWC6CWIQ655RSZ2ZGZI2BO7) |
 | `perpetual_royalties` | Heritage items, resales, royalty and Tequio | [`CCNPTD…`](https://stellar.expert/explorer/testnet/contract/CCNPTDDVW3RW53YQACZ2UFFHVLUJXNCMZ3TSK7TB552SUU6DDL26FRKU) |
-| `attestation_registry` | Attestations by schema (to be redesigned under ADR-005) | [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT) |
+| `attestation_registry` | Attestations by schema. **Test material**: replaced under ADR-005, not for mainnet | [`CAIYZN…`](https://stellar.expert/explorer/testnet/contract/CAIYZNZIFHFU357CVFC5UF2YNHBI7KPVORPOGHOBN2HBI4EDQQGIUNHT) |
 | `fair_escrow` | **Teaching material only.** The real escrow is Trustless Work | [`CCVDEQ…`](https://stellar.expert/explorer/testnet/contract/CCVDEQ64Q4PJX73HLLPL3OYXLW4ARA652I34ZYIDQDXYQDQVJNLFSAQB) |
 
 A single redeployment is planned once [#110](https://github.com/Open-Hub-Tec/yucu-protocol/issues/110) lands (constructors, closed data fields, admin-only `upgrade`, token allow-list, royalty checks).
@@ -134,17 +135,21 @@ This is a working prototype. Every PR that changes a module's status must update
 Work is organized as GitHub issues. Implementation order for the non-custodial core:
 
 ```
-#91 wallet ─▶ #92 / #93 register a real lot ─▶ #110 contracts + redeploy ─▶ #112 / #114 cash-out ─▶ #117 QR card ─▶ #96 escrow
-                                                       └─▶ #137 royalty recipient
-Independent: #120 real SHA-256 · #121 buyer privacy · #97 accessible signing screen · #99 offline queue
+#110 contracts ─▶ #92 prepare ─┐
+#91 wallet ─────────────────────┼─▶ #93 register a real lot ─▶ #98 / #99
+#94 fee sponsorship ────────────┘
+#91 ─▶ #117 QR card · #112 payouts ─▶ #114 · #145 ─▶ #146 SPEI · #96 escrow ─▶ #119
+#110 ─▶ #137 royalty recipient
+Attestations: #140 spec ─▶ #141 port ─▶ #142 verifier · #143 issuer console · #148 artisan view · #151 impact page
+Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verifications · #108 honest texts
 ```
 
 | Track | Status | Key issues and documents |
 |---|---|---|
 | **Phase 1: lot passport** | Accepted design; app integration in progress | #91, #92, #93, #97, #99, #110 |
-| **Phase 2: protected purchase and cash-out** | Testnet design | #96, #112, #114, #115, #116, #119 |
+| **Phase 2: protected purchase and cash-out** | Testnet design | #96, #112, #114, #115, #116, #119, #145, #146 |
 | **Resale royalties** | Contract on testnet; hardening open | #110, #137 |
-| **Attestation infrastructure** | Draft ADR | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), #100 |
+| **Attestation infrastructure** | Draft ADR; core waits on Attest Protocol's answer | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), #140, #141, #142, #143, #148, #151 |
 | **Validation** | Field work | Buyers ([#68](https://github.com/Open-Hub-Tec/yucu-protocol/issues/68)), brands ([#131](https://github.com/Open-Hub-Tec/yucu-protocol/issues/131)), disputes ([#103](https://github.com/Open-Hub-Tec/yucu-protocol/issues/103)) |
 | **Before mainnet** | Open | Legal entity, tax and legal opinion, threat model, audit, community consent |
 
@@ -209,7 +214,7 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
 | Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |
 | Student guides | [`docs/guides/`](./docs/guides/), [`docs/estudiantes/`](./docs/estudiantes/) |
-| Attestation standard (draft proposal) | [`docs/standards/`](./docs/standards/) |
+| Earlier attestation drafts (**obsolete**, superseded by ADR-005) | [`docs/standards/`](./docs/standards/) |
 
 ---
 
