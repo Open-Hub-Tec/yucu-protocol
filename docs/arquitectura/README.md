@@ -34,7 +34,7 @@ Attest Protocol es la base: guarda, revoca y valida, con un contrato auditado qu
 
 | Pieza | Estado | Issues |
 |---|---|---|
-| PWA de la artesana | Existe (prototipo) | W1 #91 · W2 #92 · W3 #93 · W7 #97 · W9 #99 · W20 #114 · W23 #117 · W25 #119 · W51 a W54 (letra grande, motor de pedidos, ajustes de campo, prueba de campo). Reglas para todos los equipos: [`FRONTEND.md`](./FRONTEND.md) |
+| PWA de la artesana | Existe (prototipo) | W1 #91 · W2 #92 · W3 #93 · W7 #97 · W9 #99 · W20 #114 · W23 #117 · W25 #119 · W51 #180 a W54 #183 (letra grande, motor de pedidos, ajustes de campo, prueba de campo). Reglas para todos los equipos: [`FRONTEND.md`](./FRONTEND.md) |
 | Compra protegida | Por construir | W4 #94 · W6 #96 · W21 #115 · W22 #116 |
 | Especificación (formato, manifiesto, vectores) | **Nuevo** | W30 #140 |
 | `AttestationPort` | **Nuevo** | W31 #141 |
