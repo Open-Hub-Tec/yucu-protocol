@@ -210,6 +210,7 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | ADR-003: non-custodial design and Trustless Work | [`ADR-003`](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |
 | ADR-004: payments in pesos without a wallet | [`ADR-004`](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) |
 | ADR-005: attestation infrastructure (draft) | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
+| ADR-006: off-chain data and AI (draft) | [`ADR-006`](./docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) |
 | Sustainability: open tax and legal questions | [`docs/sostenibilidad/`](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md) |
 | Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
 | Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |
