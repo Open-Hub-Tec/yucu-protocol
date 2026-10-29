@@ -1,6 +1,6 @@
 # ADR-005: Atestaciones sobre Attest Protocol, con un índice abierto y las reglas de Yucu
 
-* **Estado:** Propuesta (borrador). No se construye nada de aquí hasta que los mantenedores la acepten.
+* **Estado:** **Aceptada** el 29 de octubre de 2026 para construir en testnet. Sigue abierto: la fecha de Attest Protocol v3 (mientras tanto se construye contra v2 y contra la versión simulada de `AttestationPort`, D10), quién paga la renta (D7) y las preguntas de la sección 8. Mainnet exige lo de la sección 5 de [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) y una auditoría de los contratos de Yucu.
 * **Fecha:** 27 de octubre de 2026. Reescrita el 28 de octubre con fuentes oficiales, y otra vez el 29 de octubre de 2026, cuando Attest Protocol aceptó las propuestas de D10 (sección 1).
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
 * **Relación:** Se apoya en [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) (no custodial, puertos) y [ADR-004](./ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (D5: lo mínimo en la cadena; D11: servicios para compradores y marcas). El motor de voz que usa estas atestaciones está en [ADR-007](./ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md). Los diagramas están en [`docs/arquitectura/`](../arquitectura/README.md).

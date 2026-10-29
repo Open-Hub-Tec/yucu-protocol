@@ -1,6 +1,6 @@
 # ADR-007: Motor de atestaciones por voz y texto
 
-* **Estado:** Propuesta (borrador). No se construye nada de aquí hasta que los mantenedores la acepten.
+* **Estado:** **Aceptada** el 29 de octubre de 2026 para construir en testnet. Sigue abierto: el mixteco está en evaluación (D8, #158); el motor se describe como "para cualquier negocio" solo cuando un segundo negocio funcione con su manifiesto (D7, #167); el cobro por verificación con x402 queda apagado hasta la opinión del contador (D6).
 * **Fecha:** 29 de octubre de 2026
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
 * **Relación:** Generaliza el registro por voz de [ADR-006](./ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) (D2 a D6) y usa las atestaciones de [ADR-005](./ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) (Attest Protocol, índice, manifiesto). Respeta [ADR-003](./ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md): preparar → firmar en el teléfono → enviar.

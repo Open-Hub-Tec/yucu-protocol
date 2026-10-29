@@ -207,7 +207,7 @@ Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verificatio
 | **Phase 1: lot passport** | Accepted design; app integration in progress | #91, #92, #93, #97, #99, #110 |
 | **Phase 2: protected purchase and cash-out** | Testnet design | #96, #112, #114, #115, #116, #119, #145, #146 |
 | **Resale royalties** | Contract on testnet; hardening open | #110, #137 |
-| **Attestations and voice engine** | Draft ADRs; built on Attest Protocol, whose v3 changes were accepted | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-007](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md), #140–#143, #148, #151, #154, #155, #158, #162–#167 |
+| **Attestations and voice engine** | ADRs accepted for testnet; built on Attest Protocol, whose v3 changes were accepted | [ADR-005](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-007](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md), #140–#143, #148, #151, #154, #155, #158, #162–#167 |
 | **Server, data and hosting** | Documented; code open | [`SERVIDOR.md`](./docs/arquitectura/SERVIDOR.md), [`BASE_DE_DATOS.md`](./docs/arquitectura/BASE_DE_DATOS.md), #106, #154, #156, #157, #170 |
 | **Validation** | Field work | The problem is supported by exploratory interviews with artisans and 14 buyers ([`HITO_1.3`](./docs/ux-testing/HITO_1.3_VALIDACION_COMPRADORES.md)). The only usability score measured so far is SUS 55, below the 68 benchmark, with 3 students acting as buyers; to be retested with real users. Buyers ([#68](https://github.com/Open-Hub-Tec/yucu-protocol/issues/68)), brands ([#131](https://github.com/Open-Hub-Tec/yucu-protocol/issues/131)), disputes ([#103](https://github.com/Open-Hub-Tec/yucu-protocol/issues/103)) |
 | **Before mainnet** | Open | Legal entity, tax and legal opinion, threat model, audit, community consent |
@@ -266,12 +266,13 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | Architecture: layers, ports, signing and money flow | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md), [`docs/arquitectura/`](./docs/arquitectura/README.md) |
 | Server guide and database model | [`SERVIDOR.md`](./docs/arquitectura/SERVIDOR.md), [`BASE_DE_DATOS.md`](./docs/arquitectura/BASE_DE_DATOS.md) |
 | ADR-001: Trustless Work escrow | [`ADR-001`](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) |
-| ADR-002: offline-first PWA and rural identity; communication channels | [`ADR-002 (PWA)`](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md), [`ADR-002 (channels)`](./docs/adr/ADR-002-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) |
+| ADR-002: offline-first PWA and rural identity | [`ADR-002`](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md) |
 | ADR-003: non-custodial design and Trustless Work | [`ADR-003`](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |
 | ADR-004: payments in pesos without a wallet | [`ADR-004`](./docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) |
-| ADR-005: attestations on Attest Protocol, with an open index (draft) | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
-| ADR-006: off-chain data and AI (draft) | [`ADR-006`](./docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) |
-| ADR-007: voice and text attestation engine (draft) | [`ADR-007`](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) |
+| ADR-005: attestations on Attest Protocol, with an open index | [`ADR-005`](./docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) |
+| ADR-006: off-chain data and AI | [`ADR-006`](./docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) |
+| ADR-007: voice and text attestation engine | [`ADR-007`](./docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) |
+| ADR-008: communication channels and WhatsApp alternatives | [`ADR-008`](./docs/adr/ADR-008-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) |
 | Sustainability: open tax and legal questions | [`docs/sostenibilidad/`](./docs/sostenibilidad/PREGUNTAS_CONTADOR_Y_ABOGADO.md) |
 | Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
 | Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |
