@@ -25,6 +25,7 @@ Ni Yucu ni el grupo guardan llaves ni dinero de las artesanas. Muchas artesanas 
 6. **Servicios a marcas.** Cobrar por suscripción o por paquete de verificaciones y atestaciones, en pesos y con factura: ¿hay algo especial que cuidar?
 7. **Donativos.** ¿Vale la pena tramitar la autorización como donataria para recibir apoyos? ¿Es compatible con cobrar comisiones y servicios?
 8. **Comisión del retiro.** Si un proveedor (MoneyGram, Pago46, Etherfuse) le cobra a la artesana por retirar en pesos, y la app suma ese costo a lo que paga el comprador, ¿cómo se trata?
+9. **RFC de las artesanas.** Para retirar por SPEI con Etherfuse, la artesana necesita RFC. Si lo saca en línea con su CURP, ¿qué obligaciones fiscales le genera (régimen, declaraciones)? ¿Hay un régimen sin obligaciones para ventas pequeñas?
 
 ## Para el abogado
 
@@ -35,6 +36,7 @@ Ni Yucu ni el grupo guardan llaves ni dinero de las artesanas. Muchas artesanas 
 5. **Tequio.** ¿Quién puede recibir el 2 % de las reventas en nombre de una comunidad que no está constituida?
 6. **Consentimiento.** Para la atestación "colaboración con consentimiento" (ADR-005), ¿qué debe contener para servir como prueba ante la ley federal de protección del patrimonio cultural de los pueblos indígenas?
 7. **Pagos en pesos con un proveedor regulado.** Si en el futuro las compras de México pasan por un proveedor de pagos con pagos divididos, ¿cambia alguna de las respuestas anteriores?
+8. **Datos para el alta en Etherfuse.** Si la app revisa en el teléfono la CURP, el RFC, la CLABE y las fotos de la INE, y el servidor de Yucu solo los reenvía a Etherfuse sin guardarlos, ¿Yucu es responsable o encargada de esos datos bajo la LFPDPPP? ¿Qué debe decir el aviso de privacidad y cómo se documenta el consentimiento de alguien que no lee bien?
 
 ## Respuestas
 

@@ -1,7 +1,7 @@
 # Arquitectura final de Yucu (propuesta)
 
 * **Estado:** propuesta, octubre de 2026. Se decide en el [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), que todavía es un borrador. Mientras tanto mandan [`ARCHITECTURE.md`](../ARCHITECTURE.md) y los ADR: si algo de aquí los contradice, manda el ADR.
-* **Qué agrega:** las piezas de infraestructura que no estaban contempladas: el **verificador público**, la **consola de emisores**, `AttestationPort` y una API de solo lectura en el servidor.
+* **Qué agrega:** las piezas de infraestructura que no estaban contempladas: una **infraestructura de atestaciones abierta para cualquier proyecto de Stellar** (núcleo genérico más los *resolvers* de Yucu), el **verificador público**, la **consola de emisores**, `AttestationPort` y la pantalla de la artesana para sus atestaciones. No hay indexador: las listas viven en el contrato.
 * **Supuesto abierto:** el diagrama dibuja el verificador y la consola como apps separadas de la PWA de la artesana. La otra opción es una sola PWA con roles.
 
 Leyenda de los diagramas: borde continuo = existe (prototipo o demo) · borde punteado = por construir (issue abierta) · azul = nuevo, no estaba contemplado · amarillo = servicio externo.
@@ -24,7 +24,13 @@ Sin celular propio, el paso 3 ocurre en el celular de la promotora con la tarjet
 
 Los porcentajes de comisión, regalía y Tequio salen de [`src/config/protocolFees.ts`](../../src/config/protocolFees.ts) (regla 7). Las disputas las resuelve un tercero de confianza (#103).
 
-## 4. Cada pieza y sus issues
+## 4. Atestaciones: infraestructura abierta para Stellar
+
+![Los emisores firman en su dispositivo; un núcleo inmutable guarda esquemas y atestaciones y consulta a los resolvers; el verificador, los contratos y la artesana leen la red](./yucu-atestaciones.svg)
+
+El núcleo es genérico y no tiene administrador: lo puede usar cualquier proyecto de Stellar, no solo Yucu. Las reglas de Yucu (quién emite el origen, la cofirma de la artesana, quién revoca) viven en sus *resolvers*, con un administrador multifirma declarado. Antes de construir un núcleo propio se proponen las correcciones a Attest Protocol ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), D10). El verificador lee la red directamente, así que su respuesta no depende de confiar en Yucu.
+
+## 5. Cada pieza y sus issues
 
 | Pieza | Estado | Issues |
 |---|---|---|
@@ -32,22 +38,24 @@ Los porcentajes de comisión, regalía y Tequio salen de [`src/config/protocolFe
 | Compra protegida | Por construir | W4 #94 · W6 #96 · W21 #115 · W22 #116 |
 | Verificador público | **Nuevo** | Sin issue todavía. Reutiliza el widget de #79 |
 | Consola de emisores | **Nuevo** | Sin issue todavía. Reutiliza la billetera de W21 |
-| `AttestationPort` | **Nuevo** | Sin issue todavía |
+| `AttestationPort` | **Nuevo** | Sin issue todavía (ADR-005, D9) |
+| Núcleo de atestaciones y *resolvers* de Yucu | **Nuevo** | Sin issue todavía. Primero, las issues en Attest Protocol (ADR-005, D10) |
 | `PayoutPort` | Por construir | W18 #112 |
 | Simulado y red | Por construir | W5 #95 · W16 #109 · W24 #118 |
 | Servidor | Existe | W2 #92 · W13 #106 · W14 #107 · API de lectura (nuevo) |
-| Contratos | Por cambiar | W10 #100 · W11 #101 · W17 #110 · `attestation_registry` con varios emisores e IDs calculados (nuevo) |
+| Contratos | Por cambiar | W10 #100 · W11 #101 · W17 #110. El `attestation_registry` actual queda como material de prueba (ADR-005, sección 5) |
 
-## 5. Qué cambia respecto a hoy
+## 6. Qué cambia respecto a hoy
 
 * Dos apps nuevas para clientes de infraestructura: el verificador público y la consola de emisores.
 * Un puerto nuevo, `AttestationPort`, para que esas apps sigan la regla 4.
-* `attestation_registry` acepta varios emisores por esquema, calcula los IDs y liga cada atestación a un lote.
-* El servidor suma una API de solo lectura. No firma ni guarda llaves.
+* Las atestaciones pasan a una infraestructura abierta para cualquier proyecto de Stellar: un núcleo genérico e inmutable, y las reglas de Yucu en sus propios esquemas y *resolvers*. Antes de construir el núcleo se proponen los cambios a Attest Protocol (ADR-005, D10).
+* No se agrega un indexador: las atestaciones de un lote o de un emisor se leen de listas guardadas en el propio contrato (ADR-005, D2).
+* Una página pública de impacto muestra cuántas atestaciones hay por esquema, con contadores leídos del contrato; cada emisor ve su propio resumen en la consola.
 
-## 6. Lo que falta antes de mainnet
+## 7. Lo que falta antes de mainnet
 
 * Entidad constituida con RFC que cobre la comisión.
-* Auditoría independiente de los contratos, con reporte publicado.
+* Auditoría independiente de los contratos y del núcleo de atestaciones, con reporte publicado, y especificación con vectores de prueba (ADR-005, sección 4).
 * Confirmar la conversión a pesos (MXNe a SPEI) y el piloto de MicoPay.
 * Piloto de campo con consentimiento y revisión de un abogado ([ADR-004](../adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), sección 5).
