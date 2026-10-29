@@ -33,7 +33,7 @@ Arquitectura v2 (ADR-005 a ADR-007, aceptadas el 29 de octubre de 2026): la pers
 | `contracts/deployments/testnet.json` | IDs de los contratos desplegados en testnet |
 | `docs/adr/` | Decisiones de arquitectura: léelas antes de cambiar el diseño. ADR-004: la artesana cobra en pesos y nunca ve nada de cripto. ADR-005: atestaciones en Attest Protocol. ADR-006: datos e IA. ADR-007: motor de voz y texto |
 | `docs/arquitectura/` | Diagramas, guía del servidor (`SERVIDOR.md`) y modelo de la base de datos (`BASE_DE_DATOS.md`) |
-| `skills/` | Guías para estudiantes y asistentes de IA (contratos, atestaciones, PWA sin señal, Git) |
+| `skills/` | Guías para estudiantes y asistentes de IA (contratos, atestaciones, PWA sin señal, Git). `.claude/skills` es un enlace a esta carpeta para que Claude Code las cargue solo; en Windows, clona con `git config --global core.symlinks true` (y modo de desarrollador) o pide al asistente que lea `skills/` |
 | `.claude/agents/yucu-revisor.md` | Agente de Claude Code que revisa un PR o tus cambios contra estas reglas. Solo revisa: no escribe código |
 
 ## Comandos (deben pasar antes de abrir un PR)
