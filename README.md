@@ -264,7 +264,7 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | Topic | Document |
 |---|---|
 | Architecture: layers, ports, signing and money flow | [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md), [`docs/arquitectura/`](./docs/arquitectura/README.md) |
-| Server guide and database model | [`SERVIDOR.md`](./docs/arquitectura/SERVIDOR.md), [`BASE_DE_DATOS.md`](./docs/arquitectura/BASE_DE_DATOS.md) |
+| Front-end guide (chat by voice or text, request engine, large text), server guide and database model | [`FRONTEND.md`](./docs/arquitectura/FRONTEND.md), [`SERVIDOR.md`](./docs/arquitectura/SERVIDOR.md), [`BASE_DE_DATOS.md`](./docs/arquitectura/BASE_DE_DATOS.md) |
 | ADR-001: Trustless Work escrow | [`ADR-001`](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md) |
 | ADR-002: offline-first PWA and rural identity | [`ADR-002`](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md) |
 | ADR-003: non-custodial design and Trustless Work | [`ADR-003`](./docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) |

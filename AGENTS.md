@@ -26,13 +26,13 @@ Arquitectura v2 (ADR-005 a ADR-007, aceptadas el 29 de octubre de 2026): la pers
 |---|---|
 | `src/core/chain/` | Puertos de Stellar y Trustless Work (`ports.ts`) y su versión de demostración |
 | `src/core/` | Lógica de negocio: cripto, políticas de comercio justo, IA, sincronización |
-| `src/components/` | Pantallas React |
+| `src/components/` | Pantallas React. Antes de tocarlas, lee [`docs/arquitectura/FRONTEND.md`](docs/arquitectura/FRONTEND.md): chat por voz o texto, motor de pedidos, letra grande en `rem` |
 | `src/config/protocolFees.ts` | Porcentajes oficiales del protocolo |
 | `server.ts`, `src/server/` | Servidor Express: IA (Gemini) y, en el futuro, preparación de transacciones. Antes de tocarlo, lee [`docs/arquitectura/SERVIDOR.md`](docs/arquitectura/SERVIDOR.md) y, si guardas datos, [`BASE_DE_DATOS.md`](docs/arquitectura/BASE_DE_DATOS.md) |
 | `contracts/` | Contratos Soroban en Rust (workspace) |
 | `contracts/deployments/testnet.json` | IDs de los contratos desplegados en testnet |
 | `docs/adr/` | Decisiones de arquitectura: léelas antes de cambiar el diseño. ADR-004: la artesana cobra en pesos y nunca ve nada de cripto. ADR-005: atestaciones en Attest Protocol. ADR-006: datos e IA. ADR-007: motor de voz y texto |
-| `docs/arquitectura/` | Diagramas, guía del servidor (`SERVIDOR.md`) y modelo de la base de datos (`BASE_DE_DATOS.md`) |
+| `docs/arquitectura/` | Diagramas y guías: pantallas (`FRONTEND.md`), servidor (`SERVIDOR.md`) y base de datos (`BASE_DE_DATOS.md`) |
 | `skills/` | Guías para estudiantes y asistentes de IA (contratos, atestaciones, PWA sin señal, Git). `.claude/skills` es un enlace a esta carpeta para que Claude Code las cargue solo; en Windows, clona con `git config --global core.symlinks true` (y modo de desarrollador) o pide al asistente que lea `skills/` |
 | `.claude/agents/yucu-revisor.md` | Agente de Claude Code que revisa un PR o tus cambios contra estas reglas. Solo revisa: no escribe código |
 
