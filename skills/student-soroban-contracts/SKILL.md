@@ -81,7 +81,7 @@ impl ContratoCosechaMixteca {
 1. **Siempre exigir autorización (`require_auth`):**
    * Nunca modifiques saldo o estado sin invocar `cuenta.require_auth()`. De lo contrario, cualquier persona podría registrar o gastar en nombre del productor.
 2. **Elegir el tipo correcto de almacenamiento:**
-   * Usa `env.storage().temporary()` para datos de tránsito y pesaje que caducarán en 60 días.
+   * Usa `env.storage().temporary()` para datos que pueden desaparecer. Muchos pesajes no se escriben uno por uno: se firman fuera de la cadena y se ancla una sola raíz de Merkle (ADR-005, D8).
    * Usa `env.storage().persistent()` solo para títulos de propiedad y atestaciones de origen.
 3. **Escribir Pruebas Unitarias (`#[test]`):**
    * Soroban permite simular el entorno de blockchain directamente con `cargo test` sin gastar fondos reales ni levantar nodos locales pesados.
@@ -91,6 +91,23 @@ impl ContratoCosechaMixteca {
 5. **Nada de datos personales en la cadena:** ni nombres, ni comunidades exactas, ni montos. Lo que se escribe en la cadena no se puede borrar.
 
 > El escrow de la app es **Trustless Work** (ADR-003). `contracts/fair_escrow` es solo material didáctico.
+
+### Qué contratos son de Yucu (arquitectura v2)
+
+| Contrato | Para qué | Issues |
+|---|---|---|
+| `lot_passport` | Pasaporte del lote, firmado por la productora y el certificador | #110 |
+| `perpetual_royalties` | Regalías y Tequio en reventas | #110, #137 |
+| Índice de Yucu (*resolver*) | Listas y contadores de atestaciones de Attest Protocol, sin indexador | #162 |
+| Reglas de Yucu (*resolver*) | Emisores permitidos, consentimiento de la artesana, cofirma | #163 |
+
+Las atestaciones se guardan en **Attest Protocol**, no en un contrato nuestro ([ADR-005](../../docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md)). `contracts/attestation_registry` es solo para practicar.
+
+Si trabajas en el índice o en las reglas:
+* **Solo acepta llamadas del contrato de Attest Protocol:** guarda su dirección en `__constructor` y llama `require_auth()` sobre ella.
+* **Soroban no permite la reentrada:** mientras Attest espera tu respuesta, no puedes volver a llamarlo. El índice guarda su propio estado de cada atestación y se lo pasa a las reglas (ADR-005, D2).
+* **Sin administrador ni `upgrade`** en el índice: una corrección es otro despliegue.
+* Escribe una prueba que lo demuestre: una llamada que no viene de Attest se rechaza.
 
 ---
 

@@ -1,208 +1,187 @@
 ---
 name: stellar-soroban-rwa
-description: Comprehensive engineering skill guide and architecture patterns for designing, developing, and auditing Real-World Asset (RWA) protocols on Stellar and Soroban. Covers @stellar/stellar-sdk, Soroban Rust WASM contracts, storage TTL rent management, SEP-8/SEP-40/SEP-24 standards, CAP-0015 Fee-Bump gas sponsorship, and Trustless Work milestone escrows.
+description: Engineering guide for Yucu's architecture v2 on Stellar and Soroban. Covers attestations on Attest Protocol with the Yucu index and rules (resolvers), the voice and text attestation engine, @stellar/stellar-sdk on the server, storage TTL, fee-bump sponsorship, SEP-10 sign-in, and Trustless Work milestone escrows.
 ---
 
-# 🌟 Stellar & Soroban RWA Architecture Skill Guide
+# 🌟 Stellar & Soroban Guide for Yucu (architecture v2)
 
-This skill guide provides reference patterns, smart contract examples, and SDK integrations for building Real-World Asset (RWA) and supply chain provenance protocols on **Stellar** and **Soroban (Rust/WASM)**.
+Reference patterns for building Yucu on **Stellar** and **Soroban (Rust/WASM)**.
 
-> **Project rules win over this guide.** Read [`AGENTS.md`](../../AGENTS.md), [ADR-003](../../docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md) and [ADR-004](../../docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) first. Non-custodial: the server never generates, stores or receives user keys; every transaction follows prepare → sign on the phone → submit. The UI only talks to the ports in `src/core/chain/`.
+> **Project rules win over this guide.** Read [`AGENTS.md`](../../AGENTS.md), [ADR-003](../../docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md), [ADR-004](../../docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), [ADR-005](../../docs/adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), [ADR-006](../../docs/adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) and [ADR-007](../../docs/adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) first. Non-custodial: the server never generates, stores or receives user keys; every transaction follows prepare → sign on the phone → submit. The UI only talks to the ports in `src/core/chain/`.
 
 ---
 
-## 1. Dual-Layer RWA Architecture on Stellar
-
-Stellar provides a native dual-layer architecture uniquely suited for real-world assets:
+## 1. The layers
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       CLASSIC STELLAR ASSET LAYER                           │
-│  - Native Issuance & Regulated Trustlines (Flags: auth_required, clawback)  │
-│  - Built-in Decentralized Exchange (DEX) & Path Payments                    │
-│  - SEP-8 Compliance Gateway: Pre-flight transfer approval checks            │
-│  - 3–5 Second Deterministic Settlement with zero block reorgs               │
-└──────────────────────────────────────┬──────────────────────────────────────┘
-                                       │
-                         Soroban Asset Contract (SAC)
-                                       │
-                                       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    SOROBAN SMART CONTRACT LAYER (RUST/WASM)                 │
-│  - Complex RWA Logic: Attestation registries, milestone escrows, oracles    │
-│  - Two-Tier TTL Storage: Temporary (Telemetry) vs. Persistent (Origin)      │
-│  - Zero-Gas Rural Sponsorship via CAP-0015 Fee-Bump Envelopes               │
-│  - Off-ramps (SPEI, cash) run outside Soroban, behind `PayoutPort`          │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────┐
+│ PEOPLE        artisan · group · buyer · brand · AI assistants (MCP)       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ APPS          PWA chat (voice or text) · public verifier · issuer console │
+├───────────────────────────────────────────────────────────────────────────┤
+│ PORTS         WalletPort · LotRegistryPort · AttestationPort · EscrowPort │
+│ (src/core/)   PayoutPort · AI, catalog and session ports                  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ SERVER        prepares unsigned txs · AI drafts · off-chain data          │
+│ (server.ts)   no user keys, no funds  (docs/arquitectura/SERVIDOR.md)     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ STELLAR       lot_passport · perpetual_royalties                          │
+│               Attest Protocol (base) → Yucu index → Yucu rules            │
+│               Trustless Work escrow · MicoPay HTLC                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ OFF STELLAR   pesos: cash (MicoPay) or SPEI (Etherfuse), behind PayoutPort│
+└───────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Principle (ADR-007): AI speaks, the person signs, the chain proves.** AI transcribes and drafts; it never signs, never issues on its own and never certifies.
 
 ---
 
-## 2. Soroban Smart Contract Development Guidelines (Rust)
+## 2. Attestations: Attest Protocol is the base
 
-### 2.1 State & Storage Boundaries (TTL Rent Management)
-Unlike EVM blockchains where storage is eternal, Soroban enforces active State Expiration (TTL). Smart contracts must choose the appropriate storage category:
+Yucu **does not deploy its own attestation registry** (ADR-005, D10). `contracts/attestation_registry` is practice material only.
 
-1. **Temporary Storage (`env.storage().temporary()`):**
-   * Use for ephemeral data: batch transit telemetry, humidity readings, waybills.
-   * Cheaper than persistent storage. Automatically pruned when TTL expires.
-2. **Persistent Storage (`env.storage().persistent()`):**
-   * Use for permanent origin claims: canonical SHA-256 lot digests, authority signatures, token balances.
-   * Must invoke `extend_ttl()` periodically to prevent archival.
-3. **Instance Storage (`env.storage().instance()`):**
-   * Use for contract-wide configuration: admin addresses, oracle public keys, fee treasury accounts.
+| Layer | Who builds it | Issues |
+|---|---|---|
+| [Attest Protocol](https://github.com/daccred/attestprotocol): stores, revokes and validates (audited, v2 on mainnet and testnet; v3 will include the changes Yucu proposed) | daccred | [daccred/attestprotocol#126–#129](https://github.com/daccred/attestprotocol/issues/126) |
+| **Yucu index** (*resolver*): lists by subject, attester and recipient, plus counters, with no indexer | Students | #162 |
+| **Yucu rules** (*resolver* chained by the index): allowed issuers, artisan consent, co-signing | Students | #163 |
+| Spec: `value` format, manifests, test vectors | Students | #140 |
+| `AttestationPort` + simulated version | Students | #141 |
 
-### 2.2 Canonical Soroban Contract Skeleton (Attestation Registry)
+### 2.1 Index rules you must not break (ADR-005, D2)
+
+* **Only accept calls from the Attest Protocol contract.** Store its address in `__constructor` and call `require_auth()` on it. Otherwise anyone could fill the lists with garbage.
+* **No reentrancy.** While Attest waits for `onattest`, neither the index nor the rules can call Attest again, and the rules cannot call the index again. The index keeps its own `Status(uid)` and passes the state of the `ref_uid` attestation to the rules.
+* **No admin, no `upgrade`.** A fix is a new deployment.
+* **No personal data.** Counters and keys never hold region, product or person; content goes as a **salted hash**.
+
+Simplified shape (check the real resolver trait and argument types in Attest Protocol's source before writing code):
 
 ```rust
-#![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env, Symbol};
-
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct RwaAttestation {
-    pub schema_id: Symbol,       // e.g. "SCAA_85", "EUDR_2026"
-    pub lot_uid: BytesN<32>,     // SHA-256 hash of physical batch
-    pub issuer: Address,         // Cooperative or accredited laboratory
-    pub recipient: Address,      // Producer address or escrow vault
-    pub data_hash: BytesN<32>,   // Complete proof dossier hash
-    pub expiration: u64,         // Unix epoch expiration
-    pub revoked: bool,           // Revocation status
-}
-
-#[contract]
-pub struct RwaAttestationRegistry;
-
+// Sketch only: names and types must match Attest Protocol's resolver interface (#162).
 #[contractimpl]
-impl RwaAttestationRegistry {
-    pub fn register_attestation(
-        env: Env,
-        issuer: Address,
-        recipient: Address,
-        schema_id: Symbol,
-        lot_uid: BytesN<32>,
-        data_hash: BytesN<32>,
-        validity_seconds: u64,
-    ) -> BytesN<32> {
-        issuer.require_auth();
-
-        // Never overwrite an existing attestation
-        if env.storage().persistent().has(&lot_uid) {
-            panic!("attestation already exists"); // use a contracterror in real code
-        }
-
-        let expiration = env.ledger().timestamp() + validity_seconds;
-        let attestation = RwaAttestation {
-            schema_id,
-            lot_uid: lot_uid.clone(),
-            issuer,
-            recipient,
-            data_hash,
-            expiration,
-            revoked: false,
-        };
-
-        // Write to persistent storage and bump TTL rent.
-        // TTL is measured in ledgers (~5 s each), not seconds, and capped by the network's `max_entry_ttl`.
-        let ttl_ledgers = (validity_seconds / 5) as u32;
-        env.storage().persistent().set(&lot_uid, &attestation);
-        env.storage().persistent().extend_ttl(&lot_uid, ttl_ledgers, ttl_ledgers);
-
-        lot_uid
+impl YucuIndex {
+    pub fn __constructor(env: Env, attest: Address) {
+        env.storage().instance().set(&Key::Attest, &attest);
     }
 
-    pub fn verify_attestation(env: Env, lot_uid: BytesN<32>) -> bool {
-        if let Some(att) = env.storage().persistent().get::<BytesN<32>, RwaAttestation>(&lot_uid) {
-            if att.revoked || env.ledger().timestamp() > att.expiration {
-                return false;
-            }
-            return true;
-        }
-        false
+    pub fn onattest(env: Env, uid: BytesN<32>, schema_uid: BytesN<32>, attester: Address, recipient: Address, value: String) -> bool {
+        let attest: Address = env.storage().instance().get(&Key::Attest).unwrap();
+        attest.require_auth(); // only Attest Protocol may call
+        // parse `yucu:1:<subject_ref>:<salted hash>[:<ref_uid>]` (spec #140)
+        // append uid to BySubject / ByAttester / ByRecipient, store Status(uid), bump SchemaStats
+        // if the schema has rules: call them with the attestation and the Status of ref_uid
+        true
     }
 }
 ```
 
+### 2.2 The `value` format (ADR-005, D3)
+
+```
+yucu:1:<subject_ref, 64 hex>:<salted hash of the content, 64 hex>[:<ref_uid, 64 hex>]
+```
+
+* `subject_ref = sha256("lot:" + code)`, `"item:"`, `"sale:"`…
+* The salt is **random and mandatory**: values with few options ("25 kg", a municipality) are easy to guess by brute force.
+* `ref_uid` chains origin → sale → delivery → resale.
+
 ---
 
-## 3. Client & Backend Integration via `@stellar/stellar-sdk`
+## 3. The voice and text engine (ADR-007)
 
-### 3.1 Initializing Horizon and Soroban RPC Clients
+Each schema has a public **manifest** (JSON; its hash is stored in the schema definition). The engine follows it, so a new schema needs no new code.
+
+```json
+{
+  "schema": "origen-de-lote",
+  "fields": {
+    "categoria": { "type": "enum", "values": ["cafe", "mezcal", "textil"], "privacy": "public" },
+    "foto":      { "type": "file", "privacy": "hash-only" },
+    "nombre":    { "privacy": "forbidden" }
+  },
+  "voice": { "confirm": { "es": "Entendí: {categoria}. ¿Es correcto?" } },
+  "signer": "producer"
+}
+```
+
+Flow: the person speaks or types → AI transcribes (#154) → the extractor fills **only** the manifest's fields; anything unclear stays empty (#164) → the app reads it back with big Yes / No buttons (#155) → the person signs with `AttestationPort`. `forbidden` fields are dropped even if said aloud. Audio is never stored (ADR-006, D5).
+
+Buyers ask in plain language and get an answer that cites the attestation, or "I don't know" (#165). AI assistants of shops and brands use the **MCP server** (#166).
+
+---
+
+## 4. Soroban storage and rent (TTL)
+
+1. **Persistent** (`env.storage().persistent()`): origin, ownership, index lists. Extend the TTL; an archived entry can be restored, so the verifier says "archived, can be restored", never "does not exist" (ADR-005, D7).
+2. **Instance** (`env.storage().instance()`): contract configuration (for example, the Attest Protocol address).
+3. **Temporary** (`env.storage().temporary()`): data that may disappear. Many transit readings (weight, moisture) are **not** written one by one: an issuer signs them off chain (SEP-53) and anchors one Merkle root (ADR-005, D8).
+
+TTL is measured in ledgers (~5 s each), not seconds, and capped by the network's `max_entry_ttl`. Measure the real cost on testnet before fixing sizes; do not write cost figures without that measurement.
+
+---
+
+## 5. Server side with `@stellar/stellar-sdk`
+
+Only code under `server.ts` and `src/server/` imports the SDK (or the port adapters in `src/core/chain/`). Routes go in `src/server/routes/`, one file per area ([`SERVIDOR.md`](../../docs/arquitectura/SERVIDOR.md)).
 
 ```typescript
-import { Horizon, rpc, Networks, Keypair, Transaction, TransactionBuilder } from '@stellar/stellar-sdk';
+import { rpc, Networks } from '@stellar/stellar-sdk';
 
-const horizonServer = new Horizon.Server('https://horizon-testnet.stellar.org');
 const sorobanServer = new rpc.Server('https://soroban-testnet.stellar.org');
-const networkPassphrase = Networks.TESTNET;
+const networkPassphrase = Networks.TESTNET; // testnet only until ADR-004 section 5 is resolved
 ```
 
-### 3.2 CAP-0015 Fee-Bump Gas Sponsorship (Zero-Gas for Smallholders)
+### 5.1 Fee-bump sponsorship (CAP-15), so the artisan pays nothing
 
-Smallholder producers in rural areas sign inner transactions without owning XLM. A sponsor account wraps the transaction with a Fee-Bump envelope. This runs **only on the server**, with the sponsor's own key from `.env`; it pays fees and never signs for the user. Before wrapping, check that the inner transaction only calls allowed contracts and functions, or anyone could spend the sponsor's XLM (see #94 [W4]).
+The sponsor key belongs to the platform, lives only in the server's `.env` and only pays fees. Before wrapping, check the inner transaction against the allow-list of #94, or anyone could drain the sponsor.
 
 ```typescript
-// 1. Farmer signs the inner transaction (paying 0 fee)
-const innerTx = TransactionBuilder.fromXDR(farmerSignedTxXdr, networkPassphrase);
+import { Keypair, Transaction, TransactionBuilder } from '@stellar/stellar-sdk';
 
-// 2. Protocol treasury wraps with Fee-Bump
+const innerTx = TransactionBuilder.fromXDR(userSignedXdr, networkPassphrase);
 if (!(innerTx instanceof Transaction)) throw new Error('Expected an inner transaction');
-const treasuryKeypair = Keypair.fromSecret(process.env.STELLAR_SPONSOR_SECRET!); // server only, never in the repo
-const feeBumpTx = TransactionBuilder.buildFeeBumpTransaction(
-  treasuryKeypair,
-  '200000', // Max fee in stroops (~0.02 XLM)
-  innerTx,
-  networkPassphrase
-);
-
-feeBumpTx.sign(treasuryKeypair);
-const result = await sorobanServer.sendTransaction(feeBumpTx);
+// assertAllowedByWhitelist(innerTx) (#94)
+const sponsor = Keypair.fromSecret(process.env.STELLAR_SPONSOR_SECRET!); // name proposed in #94
+const feeBump = TransactionBuilder.buildFeeBumpTransaction(sponsor, '200000', innerTx, networkPassphrase);
+feeBump.sign(sponsor);
+await sorobanServer.sendTransaction(feeBump);
 ```
 
-### 3.3 Converting Native Types to Soroban `ScVal`
+Counters (per account, per day) go in shared storage, never in memory: on Vercel each request may hit a different instance ([`BASE_DE_DATOS.md`](../../docs/arquitectura/BASE_DE_DATOS.md), section 4).
 
-```typescript
-import { nativeToScVal, scValToNative, xdr } from '@stellar/stellar-sdk';
+---
 
-// Convert JavaScript string/number to Soroban typed ScVal
-const schemaScVal = nativeToScVal('SCAA_85', { type: 'symbol' });
-const amountScVal = nativeToScVal(10000, { type: 'i128' });
-const addressScVal = nativeToScVal('GPRODUCER_ADDRESS...', { type: 'address' });
+## 6. Standards Yucu uses
+
+| Standard | Use in Yucu |
+|---|---|
+| **CAP-15 fee-bump** | The platform pays fees; the artisan never needs XLM (#94) |
+| **SEP-10** | Sign-in by signing a challenge, with no passwords or phone numbers (#157) |
+| **SEP-53** | Off-chain signed attestations; ed25519 only (ADR-005, D8) |
+| **SEP-41 / Stellar Asset Contract** | USDC in the escrow and in withdrawals |
+| **x402** | Optional pay-per-verification for AI agents, never charged to the artisan (ADR-007, D6) |
+
+Yucu does **not** become an anchor (SEP-24/38): that would mean holding people's money. Pesos go through `PayoutPort` providers (ADR-004, D9).
+
+---
+
+## 7. Trustless Work milestone escrow (ADR-001, ADR-004 D8)
+
+Use **Trustless Work** through `EscrowPort`. `contracts/fair_escrow` is teaching material only.
+
+1. The buyer funds the escrow in USDC from their own wallet, after their app checks receivers, amounts, fee and roles on chain.
+2. Milestones come from a template, 1 to N. The default is **one milestone (100 %)** paid when the buyer confirms receipt. Templates live in `src/config/protocolFees.ts`; never hard-code percentages.
+3. The artisan receives each milestone in her own account and releases it with her PIN; the group marks "shipped" and never touches money; the buyer approves; the platform receives only its fee, on top of the price; a third party resolves disputes.
+4. No Tequio in the escrow (D10). Tequio exists only on resales through `perpetual_royalties`.
+
+---
+
+## 8. Stellar Raven MCP for AI coding assistants
+
+The repository is configured for **Stellar Raven** (`https://raven.stellar.buzz/mcp`, see `mcp.json`): semantic search over Stellar docs and SEPs, and read-only queries against testnet and mainnet state.
+
+```bash
+claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
 ```
-
----
-
-## 4. Key Stellar Ecosystem Proposals (SEPs) for RWAs
-
-* **SEP-8 (Regulated Asset Standard):** Enforces compliance checks before an asset transfer clears. Roasters and importers can only receive RWA asset tokens if their wallet passed sanction and country checks.
-* **SEP-40 (Oracle Standard):** Standardizes how sensory cupping scores (SCAA) and satellite deforestation indices feed directly into Soroban lending and insurance vaults.
-* **SEP-24 & SEP-38 (Anchor Off-Ramp):** Bridges on-chain stablecoins (USDC, MXNe) to local banking rails (Banxico SPEI in Mexico, PIX in Brazil, QR Simple in Bolivia).
-* **CAP-0015 (Fee-Bump Transactions):** Native account abstraction pattern enabling gasless rural UX.
-
----
-
-## 5. Trustless Work Milestone Escrow Pattern (ADR-001)
-
-Rather than maintaining custom custody contracts, use **Trustless Work**'s Soroban escrow contracts through `EscrowPort` (ADR-003). `contracts/fair_escrow` is teaching material only. Roles and milestones follow [ADR-004](../../docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), D8 (testnet, *multi-release*):
-
-1. **Buyer funds the escrow in USDC from their own wallet.** Before funding, the buyer's app reads the escrow on chain and checks receivers, amounts, fee and roles.
-2. **Milestones come from a template, 1 to N.** The default is **a single milestone (100 %)** paid when the buyer confirms receipt. An "advance" template (for example 30 % on shipping and 70 % on receipt) exists but is off unless field research shows artisans need it. Templates live in `src/config/protocolFees.ts`; never hard-code percentages.
-3. **Roles:** the artisan receives each milestone in her own account and releases it with her PIN; the group marks "shipped" and never touches money; the buyer approves; the platform account receives only its fee, on top of the price; a third party trusted by both sides resolves disputes.
-4. **No Tequio in the escrow (D10).** The 2 % Tequio exists only on resales through `perpetual_royalties`, paid to a community account Yucu never controls.
-
----
-
-## 6. Official Stellar Raven MCP Context Layer Integration
-
-To enable AI coding assistants (Claude Code, Cursor, VS Code) to write Soroban contracts without hallucinations, the repository integrates **Stellar Raven** (`https://raven.stellar.buzz/mcp`):
-
-* **Configuration File:** `.cursor/mcp.json` and `mcp.json`
-* **Transport:** HTTP / Model Context Protocol (MCP)
-* **Tools Provided:**
-  * `search`: Real-time semantic search over Algolia Stellar Docs, Protocol 22 specs, and SEPs.
-  * `execute`: Sandboxed query execution against live Soroban Testnet and Mainnet state.
-* **Command to Add to Claude Code:**
-  ```bash
-  claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
-  ```
-
