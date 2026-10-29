@@ -139,7 +139,7 @@
           <text class="t" x="284" y="494">Servidor · server.ts</text>
           <text class="warn" x="906" y="494" text-anchor="end">Nunca recibe llaves ni dinero</text>
           <text class="s" x="284" y="516">prepara transacciones sin firmar (W2) · patrocina comisiones (W4) · asistente con IA, Gemini</text>
-          <text class="s new" x="284" y="538">+ índice de solo lectura: lee los eventos de lotes y atestaciones para listados e historial (nuevo)</text>
+          <text class="s new" x="284" y="538">sin indexador: los listados de atestaciones se leen de listas en el contrato (ADR-005)</text>
 
           <!-- Servidor → Stellar -->
           <line class="ar" x1="300" y1="554" x2="202" y2="611" marker-end="url(#ah1)"/>
