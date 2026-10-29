@@ -59,3 +59,29 @@ El núcleo es genérico y no tiene administrador: lo puede usar cualquier proyec
 * Auditoría independiente de los contratos y del núcleo de atestaciones, con reporte publicado, y especificación con vectores de prueba (ADR-005, sección 4).
 * Confirmar la conversión a pesos (MXNe a SPEI) y el piloto de MicoPay.
 * Piloto de campo con consentimiento y revisión de un abogado ([ADR-004](../adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md), sección 5).
+
+## 8. Un solo repositorio: dónde va cada cosa
+
+`yucu-protocol` ya es un monorepo: la PWA, el servidor y los contratos viven juntos. Se mantiene así, sin reorganizar carpetas por ahora (decisión del 29 de octubre de 2026).
+
+**Por qué un solo repositorio**
+* Drips Wave aprueba cada repositorio por separado y un repositorio rechazado no se puede volver a postular. Separar piezas sería arriesgar esa aprobación y repartir el historial de los estudiantes.
+* El verificador público (#142), la consola de emisores (#143) y la página de impacto (#151) son entradas del mismo proyecto Vite (`verificar.html`, `consola.html`, `impacto.html`) y comparten `src/core/` sin publicar paquetes.
+* Un cambio en un puerto, sus pantallas y sus pruebas va en un solo PR, con un solo CI.
+
+**Por qué no se reorganiza ahora**
+* Las issues abiertas apuntan a rutas concretas (`src/core/chain/ports.ts`, `server.ts`, `src/components/…`). Mover carpetas obligaría a corregirlas todas.
+* Herramientas como Turborepo o Nx agregan configuración que no hace falta con este tamaño.
+
+**Dónde va lo nuevo**
+
+```
+yucu-protocol/
+├── src/            PWA y entradas de Vite (verificar, consola, impacto). No se mueve.
+├── server.ts       Servidor. No se mueve.
+├── contracts/      Workspace de Cargo. Si se construye el núcleo de atestaciones (ADR-005, D10), entra aquí.
+└── packages/       Solo cuando algo se publique para otros proyectos (por ejemplo, un SDK en npm),
+                    con npm workspaces, que ya trae Node.
+```
+
+**Cuándo revisar esta decisión:** cuando se publique el primer paquete en npm, cuando haya más de un servidor, o cuando el CI tarde tanto que convenga correr solo lo que cambió. Si el núcleo de atestaciones necesita su propio repositorio para que otros lo adopten (ADR-005, pregunta 5), se separa con `git subtree split`, que conserva el historial y los commits de los estudiantes.
