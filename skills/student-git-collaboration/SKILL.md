@@ -5,7 +5,7 @@ description: Guía de colaboración en GitHub, Drips Network y flujo de Pull Req
 
 # 🐙 Skill TecNM: Colaboración en GitHub y Drips Wave
 
-Esta guía establece el estándar de ingeniería para que los estudiantes del TecNM contribuyan al repositorio `Open-Hub-Tec/yucu-protocol` y documenten sus avances. Algunas issues del backlog llevan puntos de **Drips Wave**. Lee primero [`AGENTS.md`](../../AGENTS.md): sus reglas mandan sobre esta guía.
+Esta guía establece el estándar de ingeniería para que los estudiantes del TecNM contribuyan al repositorio `Open-Hub-Tec/yucu-protocol` y documenten sus avances. Algunas issues del backlog llevan puntos de **Drips Wave**. Lee primero [`AGENTS.md`](../../AGENTS.md): sus reglas mandan sobre esta guía. Para elegir issue, empieza por la issue fijada **"Por dónde empezar (estudiantes)"** (#152). Si tu issue toca el servidor o la base de datos, lee también [`SERVIDOR.md`](../../docs/arquitectura/SERVIDOR.md) y [`BASE_DE_DATOS.md`](../../docs/arquitectura/BASE_DE_DATOS.md).
 
 ---
 
