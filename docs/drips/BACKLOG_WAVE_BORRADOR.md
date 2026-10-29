@@ -15,7 +15,7 @@ W5 Quitar hashes falsos (independiente)
 W6 Escrow con Trustless Work ◀── W1, W4
 W7 Pantalla de firma ◀── W1
 W9 Cola offline de transacciones ◀── W3
-W10 Almacenamiento temporal en attestation_registry (independiente, Rust)
+W10 (cerrada: las atestaciones pasan a Attest Protocol, ADR-005)
 W11 Pruebas negativas de contratos (independiente, Rust)
 ```
 
@@ -175,7 +175,7 @@ W11 Pruebas negativas de contratos (independiente, Rust)
 
 **Qué hacer.** Agrega pruebas con `try_...` y `assert_eq!(res, Err(Ok(Error::X)))` para casos aún no cubiertos. Por ejemplo:
 - `lot_passport`: registrar sin la firma del productor (usa `mock_auths` selectivo, no `mock_all_auths`).
-- `attestation_registry`: revocar una atestación de un esquema irrevocable.
+- `perpetual_royalties`: registrar dos veces la misma pieza (`ItemAlreadyRegistered`).
 - `perpetual_royalties`: reventa con token sin saldo.
 
 **Criterios de aceptación.**
