@@ -1,7 +1,7 @@
 # Arquitectura final de Yucu (propuesta)
 
 * **Estado:** propuesta, octubre de 2026. Se decide en el [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), que todavía es un borrador. Mientras tanto mandan [`ARCHITECTURE.md`](../ARCHITECTURE.md) y los ADR: si algo de aquí los contradice, manda el ADR.
-* **Qué agrega:** las piezas de infraestructura que no estaban contempladas: una **infraestructura de atestaciones abierta para cualquier proyecto de Stellar** (núcleo genérico más los *resolvers* de Yucu), el **verificador público**, la **consola de emisores**, `AttestationPort` y un índice de solo lectura en el servidor.
+* **Qué agrega:** las piezas de infraestructura que no estaban contempladas: una **infraestructura de atestaciones abierta para cualquier proyecto de Stellar** (núcleo genérico más los *resolvers* de Yucu), el **verificador público**, la **consola de emisores**, `AttestationPort` y la pantalla de la artesana para sus atestaciones. No hay indexador: las listas viven en el contrato.
 * **Supuesto abierto:** el diagrama dibuja el verificador y la consola como apps separadas de la PWA de la artesana. La otra opción es una sola PWA con roles.
 
 Leyenda de los diagramas: borde continuo = existe (prototipo o demo) · borde punteado = por construir (issue abierta) · azul = nuevo, no estaba contemplado · amarillo = servicio externo.
@@ -26,7 +26,7 @@ Los porcentajes de comisión, regalía y Tequio salen de [`src/config/protocolFe
 
 ## 4. Atestaciones: infraestructura abierta para Stellar
 
-![Los emisores firman en su dispositivo; un núcleo inmutable guarda esquemas y atestaciones y consulta a los resolvers; el verificador, los contratos y el índice leen la red](./yucu-atestaciones.svg)
+![Los emisores firman en su dispositivo; un núcleo inmutable guarda esquemas y atestaciones y consulta a los resolvers; el verificador, los contratos y la artesana leen la red](./yucu-atestaciones.svg)
 
 El núcleo es genérico y no tiene administrador: lo puede usar cualquier proyecto de Stellar, no solo Yucu. Las reglas de Yucu (quién emite el origen, la cofirma de la artesana, quién revoca) viven en sus *resolvers*, con un administrador multifirma declarado. Antes de construir un núcleo propio se proponen las correcciones a Attest Protocol ([ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md), D10). El verificador lee la red directamente, así que su respuesta no depende de confiar en Yucu.
 
@@ -50,7 +50,7 @@ El núcleo es genérico y no tiene administrador: lo puede usar cualquier proyec
 * Dos apps nuevas para clientes de infraestructura: el verificador público y la consola de emisores.
 * Un puerto nuevo, `AttestationPort`, para que esas apps sigan la regla 4.
 * Las atestaciones pasan a una infraestructura abierta para cualquier proyecto de Stellar: un núcleo genérico e inmutable, y las reglas de Yucu en sus propios esquemas y *resolvers*. Antes de construir el núcleo se proponen los cambios a Attest Protocol (ADR-005, D10).
-* El servidor suma un índice de solo lectura de los eventos. No firma ni guarda llaves.
+* No se agrega un indexador: las atestaciones de un lote o de un emisor se leen de listas guardadas en el propio contrato (ADR-005, D2).
 
 ## 7. Lo que falta antes de mainnet
 
