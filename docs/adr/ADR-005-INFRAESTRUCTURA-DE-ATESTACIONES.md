@@ -148,6 +148,11 @@ export interface AttestationPort {
 3. Mientras no exista v3, todo se construye contra v2 en testnet y contra la versión simulada de `AttestationPort` (#141). El formato de D3 funciona igual en v2 y en v3.
 4. Si Attest Protocol se abandona, el índice y el adaptador permiten cambiar de base sin tocar las pantallas: el índice recibe las mismas llamadas `onattest` y `onrevoke` de cualquier registro con esa interfaz.
 5. La interfaz del índice y el formato de D3 se pueden proponer como SEP **junto con** ese equipo, siguiendo el proceso oficial: primero una discusión pública, después el borrador.
+6. **Build verificado antes de mainnet.** Al 29 de octubre de 2026, los contratos de Attest Protocol aparecen como *unverified* en StellarExpert: nadie ha comprobado públicamente que el wasm desplegado (`2b699bf3…`, el mismo en testnet y mainnet) salga del código auditado. Se pidió a daccred un release verificado ([daccred/attestprotocol#130](https://github.com/daccred/attestprotocol/issues/130)) y los alumnos intentan reproducir el build (issue W55). Yucu no emite en mainnet hasta que se cumpla una de estas, en orden:
+   1. daccred publica un release y StellarExpert verifica el wasm desplegado;
+   2. el build se reproduce con un commit que incluye las correcciones de la auditoría de Halborn, y el resultado se publica;
+   3. daccred vuelve a desplegar desde un release verificado (cambia la dirección; el adaptador de `AttestationPort` lo absorbe);
+   4. como último recurso, Yucu despliega su propia instancia del código auditado, con build verificado. Se pierde el registro compartido con el resto de Stellar, así que esta opción necesita una decisión explícita del mantenedor.
 
 ## 4. Calidad exigida
 
