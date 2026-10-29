@@ -71,6 +71,7 @@ struct Attestation {
 * **IDs calculados en el contrato.** `schema_uid = sha256(prefijo ‖ definition_hash ‖ creator ‖ resolver ‖ revocable ‖ storage)` y `uid = sha256(prefijo ‖ dirección del contrato ‖ schema_uid ‖ attester ‖ subject ‖ nonce)`. El prefijo de dominio y la dirección del contrato evitan que un ID de otra red o de otro despliegue coincida.
 * **El nonce es por emisor**, guardado en su propia entrada `persistent`. No hay contador global, así que las emisiones no compiten por la misma entrada.
 * **Listas en el contrato, sin indexador.** Cada atestación agrega dos llaves fijas: `BySubject(subject, n) -> uid` (con un contador por sujeto) y `ByAttester(attester, nonce) -> uid`. Así cualquiera puede listar las atestaciones de un lote o de un emisor leyendo el estado del contrato, sin un servidor de índice: `getLedgerEntries` acepta hasta 200 llaves por llamada y un lote tiene pocas atestaciones. No hay listas que crezcan sin límite. La renta de estas dos entradas se mide en testnet en la issue del núcleo.
+* **Contadores por esquema.** Una entrada `SchemaStats(schema_uid) -> { total, revoked }` que suben `attest` y `revoke`. Son dos números por esquema, no listas. Permiten publicar cifras de uso leídas de la cadena (para el SCF y para la página de impacto) sin indexador. No guardan región, producto ni persona: esos datos van en el hash con sal y la cadena no los conoce.
 * **Esquemas sin permiso:** cualquiera registra un esquema y paga su renta. Cada esquema es una entrada `persistent` propia, no `instance` (ver sección 6), así que no hay un límite común que se pueda llenar.
 * **Se quitan** `name`, `description`, el texto de la definición y `signature`. La autenticidad la da `require_auth` del emisor.
 
@@ -89,6 +90,7 @@ fn timestamp(hash) -> u64;                                   // ancla un hash (D
 fn revoke_offchain(revoker, hash) -> u64;                    // revoca una atestación fuera de la cadena (D6)
 fn list_by_subject(subject, start, limit) -> Vec<BytesN<32>>;   // atestaciones de un lote, por páginas
 fn list_by_attester(attester, start, limit) -> Vec<BytesN<32>>; // historial de un emisor, por páginas
+fn schema_stats(schema_uid) -> (u64, u64);                     // emitidas y revocadas de un esquema
 ```
 
 * `attest` rechaza un `expiration_time` que ya pasó, un `ref_uid` que no existe y un `data` más grande que el máximo.
@@ -150,6 +152,7 @@ export interface AttestationPort {
   }>;
   listForLot(lotCode: string): Promise<{ items: AttestationRecord[]; source: ChainSource }>;
   listForIssuer(issuerAddress: string): Promise<{ items: AttestationRecord[]; source: ChainSource }>;
+  schemaStats(schemaId: string): Promise<{ total: number; revoked: number; source: ChainSource }>;
 }
 ```
 
@@ -177,6 +180,7 @@ Así Yucu no compite con un proyecto que el SCF ya financió, y el trabajo de lo
   * una cuenta distinta del emisor paga la transacción sin poder cambiar lo firmado;
   * una llave no exportable del teléfono firma una emisión;
   * `list_by_subject` y `list_by_attester` devuelven exactamente lo emitido, sin servidor;
+  * `schema_stats` sube en 1 al emitir y `revoked` sube en 1 al revocar, y una revocación fallida no cambia nada;
   * el costo real de una emisión, medido en testnet.
 * Auditoría externa antes de mainnet. El Soroban Security Audit Bank solo atiende proyectos financiados por el SCF y pide un 5 % del costo por adelantado, que se reembolsa si los hallazgos se corrigen en 20 días hábiles.
 
@@ -184,7 +188,8 @@ Así Yucu no compite con un proyecto que el SCF ya financió, y el trabajo de lo
 
 * El `attestation_registry` actual queda como material de prueba y no se despliega a mainnet. Su reemplazo (propio o Attest Protocol) entra en el mismo redespliegue de #110, para que los IDs cambien una sola vez.
 * Issues nuevas para alumnos: especificación y vectores (#140); núcleo (solo si aplica D10.3); *resolvers* de Yucu; `AttestationPort` con su versión simulada (#141); verificador público (#142); consola mínima de emisores (#143); y la **pantalla de la artesana**, donde ve lo que se dice de sus lotes y revoca su consentimiento.
-* **No se construye un indexador.** Las listas viven en el contrato (D2).
+* **No se construye un indexador.** Las listas y los contadores viven en el contrato (D2).
+* **Dashboards:** un resumen para cada emisor en su consola (con `list_by_attester`) y una página pública de impacto con los contadores por esquema. Ninguno muestra datos por región, producto o persona, y toda cifra simulada lleva `<DemoBadge />`. Un explorador con búsquedas y gráficas necesitaría un indexador y queda para después.
 * Los documentos de `docs/standards/` sobre atestaciones quedan obsoletos hasta reescribirlos con esta ADR.
 * El widget de #79 se vuelve parte del verificador.
 * El plan de trabajo crece. Con dos semestres se recomienda: especificación, *resolvers*, `AttestationPort` y el verificador completo, más una consola mínima donde un emisor emite y revoca.

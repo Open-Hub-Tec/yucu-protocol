@@ -51,6 +51,7 @@ El núcleo es genérico y no tiene administrador: lo puede usar cualquier proyec
 * Un puerto nuevo, `AttestationPort`, para que esas apps sigan la regla 4.
 * Las atestaciones pasan a una infraestructura abierta para cualquier proyecto de Stellar: un núcleo genérico e inmutable, y las reglas de Yucu en sus propios esquemas y *resolvers*. Antes de construir el núcleo se proponen los cambios a Attest Protocol (ADR-005, D10).
 * No se agrega un indexador: las atestaciones de un lote o de un emisor se leen de listas guardadas en el propio contrato (ADR-005, D2).
+* Una página pública de impacto muestra cuántas atestaciones hay por esquema, con contadores leídos del contrato; cada emisor ve su propio resumen en la consola.
 
 ## 7. Lo que falta antes de mainnet
 
