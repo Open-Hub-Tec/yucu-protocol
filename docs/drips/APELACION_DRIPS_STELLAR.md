@@ -1,3 +1,5 @@
+> **Registro histórico: así se envió la apelación en octubre de 2026; su contenido no se edita.** La arquitectura vigente está en [ADR-005](../adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) (atestaciones sobre Attest Protocol; `attestation_registry` es solo material de práctica) y [ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) (motor de voz: la IA prepara, la persona firma; ningún oráculo emite ni certifica). Donde este documento los contradiga, mandan los ADR.
+
 # 🏛️ Formal Appeal: Yucu Protocol (`Open-Hub-Tec/yucu-protocol`)
 **To:** Drips Review Committee & Stellar Community Fund (SCF) Governance  
 **From:** Open Hub TecNM — Instituto Tecnológico de Tlaxiaco (Oaxaca, Mexico)  

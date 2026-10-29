@@ -17,7 +17,7 @@ Es un **"sello o acta notarial digital"** firmado con criptografía: una persona
 
 ### ¿Qué es un Oráculo de IA?
 Un programa que conecta el mundo real con la blockchain.
-- **AIVoiceOracle:** Escucha el mixteco (*Tu'un Savi*) y lo traduce a datos limpios.
+- **AIVoiceOracle:** Escucha a la persona y propone los datos; ella los escucha, los corrige y los firma. El mixteco (*Tu'un Savi*) todavía está en evaluación (#158).
 - **AIQualityOracle:** Revisa la foto del grano de café y dice si tiene más de 85 puntos de calidad.
 - **AIEUDRSatelliteOracle:** Revisa las fotos del satélite de la Unión Europea y confirma que no se taló selva.
 

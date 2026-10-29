@@ -1,3 +1,5 @@
+> **Presentación histórica (octubre de 2026). Algunas diapositivas describen un diseño anterior.** La arquitectura vigente está en [ADR-005](./adr/ADR-005-INFRAESTRUCTURA-DE-ATESTACIONES.md) (atestaciones sobre Attest Protocol; `attestation_registry` es solo material de práctica) y [ADR-007](./adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) (motor de voz: la IA prepara, la persona firma; ningún oráculo emite ni certifica). Donde este documento los contradiga, mandan los ADR.
+
 # 📽️ Official Slide Deck: Yucu Protocol & TecNM Research Brigades
 ### *Decentralized RWA Attestation, AI Oracles & Smart Escrow Infrastructure on Stellar Soroban*
 

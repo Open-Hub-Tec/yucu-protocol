@@ -34,7 +34,7 @@ Ni Yucu ni el grupo guardan llaves ni dinero de las artesanas. Muchas artesanas 
 3. **Ley antilavado (LFPIORPI).** ¿Recibir comisiones en USDC y cambiarlas a pesos es una actividad vulnerable con activos virtuales? ¿Qué obligaciones tendría la entidad?
 4. **Datos personales.** ¿Una dirección pública por artesana en una cadena de bloques, sin nombre y con datos mínimos (municipio, categoría, rangos), es aceptable?
 5. **Tequio.** ¿Quién puede recibir el 2 % de las reventas en nombre de una comunidad que no está constituida?
-6. **Consentimiento.** Para la atestación "colaboración con consentimiento" (ADR-005), ¿qué debe contener para servir como prueba ante la ley federal de protección del patrimonio cultural de los pueblos indígenas?
+6. **Consentimiento.** Para la atestación de consentimiento, que emite la propia artesana y de la que depende la colaboración con una marca (ADR-005, D6), ¿qué debe contener para servir como prueba ante la ley federal de protección del patrimonio cultural de los pueblos indígenas?
 7. **Pagos en pesos con un proveedor regulado.** Si en el futuro las compras de México pasan por un proveedor de pagos con pagos divididos, ¿cambia alguna de las respuestas anteriores?
 8. **Datos para el alta en Etherfuse.** Si la app revisa en el teléfono la CURP, el RFC, la CLABE y las fotos de la INE, y el servidor de Yucu solo los reenvía a Etherfuse sin guardarlos, ¿Yucu es responsable o encargada de esos datos bajo la LFPDPPP? ¿Qué debe decir el aviso de privacidad y cómo se documenta el consentimiento de alguien que no lee bien?
 
