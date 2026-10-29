@@ -1,27 +1,32 @@
 ### 🌾 Descripción del Cambio
-<!-- Explica brevemente qué cambios realizaste y por qué son importantes -->
+<!-- Explica brevemente qué cambiaste y por qué -->
 
-### 📌 Issue Vinculada (Obligatorio para Seguimiento en Roadmap)
+### 📌 Issue Vinculada (obligatoria)
 <!-- Reemplaza con el número de tu issue asignada -->
-Closes #
+Resolves #
 
 ---
 
 ### 🏛️ Área del Protocolo Modificada
-- [ ] **Frontend / UI Rural:** `src/components/`
-- [ ] **Oráculos de IA / Tu'un Savi:** `src/core/ai/`
-- [ ] **Identidad & Autenticación:** `src/core/auth/`
-- [ ] **Pagos Híbridos (MicoPay / Etherfuse):** `src/core/payments/`
-- [ ] **Smart Contracts Soroban (Rust):** `contracts/`
+- [ ] **Pantallas / UI rural:** `src/components/`
+- [ ] **Puertos y lógica:** `src/core/` (cadena, atestaciones, IA, pagos)
+- [ ] **Servidor y base de datos:** `server.ts`, `src/server/` (sigue [`SERVIDOR.md`](../docs/arquitectura/SERVIDOR.md) y [`BASE_DE_DATOS.md`](../docs/arquitectura/BASE_DE_DATOS.md))
+- [ ] **Contratos Soroban (Rust):** `contracts/`
 - [ ] **Documentación / Pruebas:** `docs/` o `src/tests/`
 
 ---
 
-### 🧪 Lista de Verificación del Estudiante (Checklist)
-- [ ] Ejecuté `npm run test` localmente y todas las pruebas pasaron con 0 fallos.
-- [ ] Ejecuté `npm run lint` y no hay errores de TypeScript.
-- [ ] Probé la aplicación en mi navegador (`npm run dev`) y funciona correctamente.
-- [ ] Si modificó pantallas, verifiqué que no se rompa en teléfonos móviles o en Modo Abuelo.
+### 🧪 Cómo lo probé
+<!-- Pasos para reproducir lo que probaste. Si cambiaste pantallas, una captura en celular -->
+
+### ✅ Lista de verificación
+- [ ] `npm run lint`, `npm test` y `npm run build` pasan (y `cargo fmt`, `clippy`, `cargo test` si toqué `contracts/`).
+- [ ] Agregué una prueba positiva y una negativa por cada regla nueva, y los archivos nuevos de `src/tests/` están en el script `test` de `package.json`.
+- [ ] Nada simulado sin `source: 'simulated'` y `<DemoBadge />`; la IA solo sugiere, nunca firma ni certifica.
+- [ ] Sin nombres de personas entrevistadas, teléfonos, llaves ni secretos en código, pruebas o logs.
+- [ ] Si cambié pantallas, las probé en un celular y en Modo Abuelo.
+- [ ] Puedo explicar cada parte de mi código en la revisión.
+- [ ] (Opcional) Corrí el agente `yucu-revisor` en Claude Code ("revisa mis cambios") y atendí lo que encontró.
 
 ---
 

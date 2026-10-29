@@ -34,6 +34,7 @@ Arquitectura v2 (ADR-005 a ADR-007, aceptadas el 29 de octubre de 2026): la pers
 | `docs/adr/` | Decisiones de arquitectura: léelas antes de cambiar el diseño. ADR-004: la artesana cobra en pesos y nunca ve nada de cripto. ADR-005: atestaciones en Attest Protocol. ADR-006: datos e IA. ADR-007: motor de voz y texto |
 | `docs/arquitectura/` | Diagramas, guía del servidor (`SERVIDOR.md`) y modelo de la base de datos (`BASE_DE_DATOS.md`) |
 | `skills/` | Guías para estudiantes y asistentes de IA (contratos, atestaciones, PWA sin señal, Git) |
+| `.claude/agents/yucu-revisor.md` | Agente de Claude Code que revisa un PR o tus cambios contra estas reglas. Solo revisa: no escribe código |
 
 ## Comandos (deben pasar antes de abrir un PR)
 
@@ -59,7 +60,7 @@ Si agregas un archivo de prueba en `src/tests/`, agrégalo también al script `t
 3. Haz cambios pequeños y enfocados en la issue. No reformatees ni reescribas archivos que no tienen que ver.
 4. Escribe o actualiza pruebas: una positiva y una negativa por cada regla nueva. En contratos usa `try_...` y `assert_eq!(res, Err(Ok(Error::X)))`.
 5. Corre todos los comandos de arriba.
-6. Abre el PR con `Resolves #<número>` en la descripción y explica cómo lo probaste.
+6. Abre el PR con `Resolves #<número>` en la descripción y explica cómo lo probaste. Si usas Claude Code, puedes pedirle antes "revisa mis cambios" al agente `yucu-revisor`.
 
 ## Estilo
 
