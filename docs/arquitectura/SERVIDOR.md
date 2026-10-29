@@ -110,7 +110,7 @@ En Vercel cada petición puede caer en una copia distinta del servidor, y la mem
 | Límites por cuenta y por día | #92 · #94 | Cada copia contaría por su lado |
 | Catálogo, perfiles y pedidos | #156 | Se perderían |
 
-Regla: **cada uno de estos datos va detrás de una interfaz pequeña en `src/server/store/`** con dos versiones: una en memoria, para las pruebas y para trabajar mientras no existe la base de datos, y otra en PostgreSQL cuando se fusione #156. Así nadie se queda esperando a #156, y cambiar de una a otra no toca las rutas. La versión en memoria se nombra para que se note (por ejemplo, `MemoryStore`) y el servidor avisa al arrancar si la está usando.
+Las tablas de cada dato están en [`BASE_DE_DATOS.md`](./BASE_DE_DATOS.md). Regla: **cada uno de estos datos va detrás de una interfaz pequeña en `src/server/store/`** con dos versiones: una en memoria, para las pruebas y para trabajar mientras no existe la base de datos, y otra en PostgreSQL cuando se fusione #156. Así nadie se queda esperando a #156, y cambiar de una a otra no toca las rutas. La versión en memoria se nombra para que se note (por ejemplo, `MemoryStore`) y el servidor avisa al arrancar si la está usando.
 
 ¿Quién escribe la versión PostgreSQL? #156 deja la conexión y las migraciones. Cada equipo agrega la tabla y la versión PostgreSQL de **sus** datos. Si cuando abras tu PR #156 todavía no se ha fusionado, tu PR llega con la versión en memoria y en él dices qué tabla hará falta, para abrir la issue que la complete.
 

@@ -47,7 +47,7 @@ Attest Protocol es la base: guarda, revoca y valida, con un contrato auditado qu
 | Attest Protocol | Externo, auditado | Sus issues #126 a #129 (v3) |
 | `PayoutPort` | Por construir | W18 #112 |
 | Simulado y red | Por construir | W5 #95 · W16 #109 · W24 #118 |
-| Servidor | Existe (prototipo) | W2 #92 · W4 #94 · W13 #106 · W14 #107 · W38 #154 · W40 #156 · W41 #157 · W50 #170. Reglas para todos los equipos: [`SERVIDOR.md`](./SERVIDOR.md). No hay API de lectura propia: se lee la red por los puertos o por MCP |
+| Servidor | Existe (prototipo) | W2 #92 · W4 #94 · W13 #106 · W14 #107 · W38 #154 · W40 #156 · W41 #157 · W50 #170. Reglas para todos los equipos: [`SERVIDOR.md`](./SERVIDOR.md) y tablas en [`BASE_DE_DATOS.md`](./BASE_DE_DATOS.md). No hay API de lectura propia: se lee la red por los puertos o por MCP |
 | Contratos | Por cambiar | W11 #101 · W17 #110. El `attestation_registry` actual queda como material de práctica y no se redespliega; #100 se cierra (ADR-005, sección 6) |
 
 ## 6. Qué cambia respecto a hoy
