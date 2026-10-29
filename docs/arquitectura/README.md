@@ -41,13 +41,13 @@ Attest Protocol es la base: guarda, revoca y valida, con un contrato auditado qu
 | Verificador público, con respuestas citadas | **Nuevo** | W32 #142 · reutiliza el widget de #79 |
 | Consola de emisores | **Nuevo** | W33 #143 · reutiliza la billetera de W21 |
 | Pantalla de la artesana y página de impacto | **Nuevo** | W36 #148 · W37 #151 |
-| Índice y reglas de Yucu (*resolvers*) | **Nuevo** | Issue por abrir (ADR-005, D2 y D5) |
-| Motor de voz: puerto de IA y extractor por manifiesto | **Nuevo** | W38 #154 · W39 #155 · W42 #158 · extractor genérico por abrir (ADR-007) |
-| Servidor MCP | **Nuevo** | Issue por abrir (ADR-007, D5) |
+| Índice y reglas de Yucu (*resolvers*) | **Nuevo** | W43 #162 · W48 #163 (ADR-005, D2 y D5) |
+| Motor de voz: puerto de IA y extractor por manifiesto | **Nuevo** | W38 #154 · W39 #155 · W42 #158 · W44 #164 · W45 #165 (ADR-007) |
+| Servidor MCP | **Nuevo** | W46 #166 (ADR-007, D5) |
 | Attest Protocol | Externo, auditado | Sus issues #126 a #129 (v3) |
 | `PayoutPort` | Por construir | W18 #112 |
 | Simulado y red | Por construir | W5 #95 · W16 #109 · W24 #118 |
-| Servidor | Existe | W2 #92 · W13 #106 · W14 #107 · API de lectura (nuevo) |
+| Servidor | Existe (prototipo) | W2 #92 · W4 #94 · W13 #106 · W14 #107 · W38 #154 · W40 #156 · W41 #157 · W50 #170. Reglas para todos los equipos: [`SERVIDOR.md`](./SERVIDOR.md). No hay API de lectura propia: se lee la red por los puertos o por MCP |
 | Contratos | Por cambiar | W11 #101 · W17 #110. El `attestation_registry` actual queda como material de práctica y no se redespliega; #100 se cierra (ADR-005, sección 6) |
 
 ## 6. Qué cambia respecto a hoy

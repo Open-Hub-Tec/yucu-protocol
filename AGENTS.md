@@ -25,7 +25,7 @@ Yucu Protocol: una PWA para que productores y artesanas de la Mixteca (Oaxaca) r
 | `src/core/` | Lógica de negocio: cripto, políticas de comercio justo, IA, sincronización |
 | `src/components/` | Pantallas React |
 | `src/config/protocolFees.ts` | Porcentajes oficiales del protocolo |
-| `server.ts` | Servidor Express: IA (Gemini) y, en el futuro, preparación de transacciones |
+| `server.ts`, `src/server/` | Servidor Express: IA (Gemini) y, en el futuro, preparación de transacciones. Antes de tocarlo, lee [`docs/arquitectura/SERVIDOR.md`](docs/arquitectura/SERVIDOR.md) |
 | `contracts/` | Contratos Soroban en Rust (workspace) |
 | `contracts/deployments/testnet.json` | IDs de los contratos desplegados en testnet |
 | `docs/adr/` | Decisiones de arquitectura: léelas antes de cambiar el diseño. ADR-004: la artesana cobra en pesos y nunca ve nada de cripto |
