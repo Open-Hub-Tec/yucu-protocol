@@ -107,15 +107,17 @@ async function runCompleteSystemAudit() {
   // -------------------------------------------------------------------------
   console.log('\n📍 3. CRIPTOGRAFÍA INMUTABLE Y ANCLAJE EN STELLAR (SOROBAN)');
 
-  const audioPruebaBase64 = 'UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   const fotoPruebaBase64 = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/';
   const resumenEtapas = listaActualizada.map((e) => `${e.name}:${e.metricValue}`).join('>');
 
   const digestStellar = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila',
+    code: 'TEXTIL-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_CUQUILA_000000000000000000000000000000001',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textil',
+    variety: 'telar_cintura',
+    volumeRange: 1,
     timestamp: 1727008800000,
-    audioBase64: audioPruebaBase64,
     photoBase64: fotoPruebaBase64,
     processStagesSummary: resumenEtapas
   });
@@ -125,10 +127,13 @@ async function runCompleteSystemAudit() {
   // Prueba matemática antifraude: Modificar 1 letra en el proceso invalida el hash
   const resumenAlterado = resumenEtapas.replace('Lana criolla', 'Fibra sintética comercial');
   const digestAlterado = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila',
+    code: 'TEXTIL-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_CUQUILA_000000000000000000000000000000001',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textil',
+    variety: 'telar_cintura',
+    volumeRange: 1,
     timestamp: 1727008800000,
-    audioBase64: audioPruebaBase64,
     photoBase64: fotoPruebaBase64,
     processStagesSummary: resumenAlterado
   });

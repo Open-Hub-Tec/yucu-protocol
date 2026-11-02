@@ -37,8 +37,7 @@ export class YucuAgentSwarm {
   }): Promise<AgentAttestationProof> {
     const isMixteco = params.dialect === 'tuun_savi';
     const digest = await CryptoEngine.generateCommunityDigest({
-      producerName: 'productor-seudonimo',
-      community: params.community,
+      location: params.community,
       timestamp: Date.now(),
       processStagesSummary: params.audioTranscript,
     });

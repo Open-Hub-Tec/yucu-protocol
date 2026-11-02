@@ -7,9 +7,9 @@
 
 import { RaizAIOracles, VoiceParsingResult, QualityAttestation, EUDRComplianceReport, SettlementRouteSolution } from '../ai/RaizAIOracles';
 import { RaizAuthEngine, UserProfile } from '../auth/RaizAuthEngine';
-import { HybridSettlementOrchestrator, SupportedCountry } from '../settlement/HybridSettlementOrchestrator';
+import { HybridSettlementOrchestrator, SupportedCountry, PaymentIntent } from '../settlement/HybridSettlementOrchestrator';
 import { SorobanAdapter } from '../blockchain/SorobanAdapter';
-import { CryptoEngine } from '../crypto/CryptoEngine';
+import { CryptoEngine, CommunityDigestInput } from '../crypto/CryptoEngine';
 
 export interface RaizProtocolConfig {
   network: 'stellar-mainnet' | 'stellar-testnet';
@@ -46,7 +46,7 @@ export class RaizProtocolSDK {
    */
   public get ai() {
     return {
-      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): VoiceParsingResult => {
+      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): Promise<VoiceParsingResult> => {
         return RaizAIOracles.parseAcousticVoiceInput(transcriptOrVoice, language);
       },
 
@@ -54,11 +54,11 @@ export class RaizProtocolSDK {
         productType: 'coffee' | 'textile' | 'honey' | 'chocolate' | 'artesania';
         imageUrlOrBase64?: string;
         sampleMetrics?: { moistureInput?: number; defectRatio?: number; isHandWoven?: boolean };
-      }): QualityAttestation => {
+      }): Promise<QualityAttestation> => {
         return RaizAIOracles.evaluateLotQuality(params);
       },
 
-      verifyEUDR: (community: string, lat?: number, lng?: number): EUDRComplianceReport => {
+      verifyEUDR: (community: string, lat?: number, lng?: number): Promise<EUDRComplianceReport> => {
         return RaizAIOracles.verifyEUDRCompliance({ community, latitude: lat, longitude: lng });
       },
 
@@ -94,7 +94,7 @@ export class RaizProtocolSDK {
    */
   public get settlement() {
     return {
-      routePayment: (intent: any) => {
+      routePayment: (intent: PaymentIntent) => {
         return HybridSettlementOrchestrator.routePayment(intent);
       },
       getCountryConfig: (country: SupportedCountry) => {
@@ -184,11 +184,11 @@ export class RaizProtocolSDK {
    */
   public get crypto() {
     return {
-      computeCommunityDigest: (params: any) => {
+      computeCommunityDigest: (params: CommunityDigestInput): Promise<string> => {
         return CryptoEngine.computeCommunityDigest(params);
       },
-      sha256: (input: string) => {
-        return CryptoEngine.sha256Hex(input);
+      sha256: (input: Uint8Array | ArrayBuffer | string): Promise<string> => {
+        return CryptoEngine.sha256(input);
       },
     };
   }

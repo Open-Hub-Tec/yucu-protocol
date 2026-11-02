@@ -78,8 +78,10 @@ export class SyncEngine {
       try {
         // 1. Validar integridad criptográfica del lote
         const digest = await CryptoEngine.generateCommunityDigest({
-          producerName: lot.producerName,
-          community: lot.community,
+          code: lot.tempId,
+          location: lot.municipality,
+          category: lot.productType,
+          variety: lot.variety,
           timestamp: lot.recordedAt,
           photoBase64: lot.photoDataUrl,
         });

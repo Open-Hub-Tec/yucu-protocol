@@ -84,41 +84,159 @@ assert(chocolateStages.length === 4, 'Lista dinámica de chocolate tradicional e
 console.log('\n--- 2. Criptografía y Sellado Inmutable en Stellar ---');
 
 async function testCrypto() {
-  // Serialización de la lista dinámica para el cálculo del Community Digest
+  // 1. Vectores oficiales NIST SHA-256 (#120)
+  const emptyVec = await CryptoEngine.sha256('');
+  const abcVec = await CryptoEngine.sha256('abc');
+  assert(
+    emptyVec === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    'Vector oficial SHA-256("") coincide con NIST'
+  );
+  assert(
+    abcVec === 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    'Vector oficial SHA-256("abc") coincide con NIST'
+  );
+
+  // 2. Hash sobre los bytes completos de la foto: cambiar el último byte cambia el hash (#120)
+  const fullPhotoA = new Uint8Array(2048);
+  for (let i = 0; i < fullPhotoA.length; i++) {
+    fullPhotoA[i] = i & 0xff;
+  }
+  const fullPhotoB = new Uint8Array(fullPhotoA);
+  fullPhotoB[fullPhotoB.length - 1] ^= 0x01; // Cambio en el último byte (posición 2047 > 100)
+
+  const photoHashA = await CryptoEngine.hashPhoto(fullPhotoA);
+  const photoHashB = await CryptoEngine.hashPhoto(fullPhotoB);
+  assert(
+    photoHashA !== photoHashB,
+    'Cambiar un solo byte al final de la foto modifica el hash SHA-256 completo'
+  );
+
+  // 3. Limpieza de metadatos GPS/EXIF antes del hash (#120, BASE_DE_DATOS.md sección 5)
+  // Imagen JPEG limpia: SOI (FFD8) + APP0 JFIF (FFE0) + SOS (FFDA) + datos de imagen + EOI (FFD9)
+  const cleanJpeg = new Uint8Array([
+    0xff, 0xd8,
+    0xff, 0xe0, 0x00, 0x07, 0x4a, 0x46, 0x49, 0x46, 0x00,
+    0xff, 0xda, 0x00, 0x04, 0x00, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
+    0xff, 0xd9,
+  ]);
+  // Misma imagen pero con segmento APP1 (FFE1) que contiene cabecera Exif y coordenadas GPS
+  const exifGpsSegment = new Uint8Array([
+    0xff, 0xe1, 0x00, 0x16,
+    0x45, 0x78, 0x69, 0x66, 0x00, 0x00, // "Exif\0\0"
+    0x47, 0x50, 0x53, 0x49, 0x6e, 0x66, 0x6f, // "GPSInfo"
+    0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+  ]);
+  const jpegWithGps = new Uint8Array(cleanJpeg.length + exifGpsSegment.length);
+  jpegWithGps.set(cleanJpeg.subarray(0, 2), 0); // SOI
+  jpegWithGps.set(exifGpsSegment, 2);           // APP1 con GPS
+  jpegWithGps.set(cleanJpeg.subarray(2), 2 + exifGpsSegment.length); // Resto de la foto limpia
+
+  assert(
+    CryptoEngine.hasExifOrGpsMetadata(jpegWithGps) === true,
+    'Detecta metadatos EXIF/GPS en la foto original antes de limpiarla'
+  );
+  const { cleanBytes, photoHashHex: strippedPhotoHash } = await CryptoEngine.sanitizeAndHashPhoto(jpegWithGps);
+  const expectedCleanHash = await CryptoEngine.sha256(cleanJpeg);
+  assert(
+    CryptoEngine.hasExifOrGpsMetadata(cleanBytes) === false,
+    'Una foto con GPS sale sin GPS tras limpiar metadatos'
+  );
+  assert(
+    strippedPhotoHash === expectedCleanHash,
+    'El hash de la foto con GPS limpia es idéntico al hash de la foto limpia'
+  );
+
+  // 4. JSON canónico: el mismo lote con las llaves en otro orden da el mismo digest (#120)
+  const lotOrder1 = {
+    code: 'CAFE-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_YUCU_00000000000000000000000000000000001',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'cafe',
+    variety: 'typica',
+    volumeRange: 2,
+    photoHashHex: photoHashA,
+  };
+  const lotOrder2 = {
+    photoHashHex: photoHashA,
+    volumeRange: 2,
+    variety: 'typica',
+    category: 'cafe',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    producerAddress: 'GPRODUCER_DEMO_YUCU_00000000000000000000000000000000001',
+    code: 'CAFE-2026-0001',
+  };
+  const digestOrder1 = await CryptoEngine.generateCommunityDigest(lotOrder1);
+  const digestOrder2 = await CryptoEngine.generateCommunityDigest(lotOrder2);
+  assert(
+    digestOrder1 === digestOrder2,
+    'El mismo lote con las llaves en otro orden produce exactamente el mismo digest'
+  );
+
+  // 5. Prueba negativa: sin WebCrypto, la función lanza un error y no devuelve nada (#120)
+  const originalCryptoDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto');
+  let threwWithoutWebCrypto = false;
+  try {
+    Object.defineProperty(globalThis, 'crypto', {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+    await CryptoEngine.sha256('abc');
+  } catch {
+    threwWithoutWebCrypto = true;
+  } finally {
+    if (originalCryptoDescriptor) {
+      Object.defineProperty(globalThis, 'crypto', originalCryptoDescriptor);
+    }
+  }
+  assert(
+    threwWithoutWebCrypto === true,
+    'Sin WebCrypto, CryptoEngine.sha256 lanza un error y nunca usa respaldo falso'
+  );
+
+  // Serialización de la lista dinámica para el cálculo del Community Digest (sin nombres ni comunidad exacta)
   const stagesSummaryTextile = textileStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
   const stagesSummaryHoney = honeyStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
 
   const digestTextile = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila, Tlaxiaco',
+    code: 'TEXTIL-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_TEXTIL_000000000000000000000000000000001',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textil',
+    variety: 'telar_cintura',
+    volumeRange: 1,
     timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_tuun_savi_sample',
-    photoBase64: 'photo_telar_cintura_coyuchi_sample',
+    photo: fullPhotoA,
     processStagesSummary: stagesSummaryTextile
   });
 
   const digestHoney = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
+    code: 'MIEL-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_MIEL_00000000000000000000000000000000002',
+    location: 'Magdalena Peñasco',
+    category: 'miel',
+    variety: 'multifloral',
+    volumeRange: 2,
     timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
+    photo: fullPhotoB,
     processStagesSummary: stagesSummaryHoney
   });
 
   assert(digestTextile.length === 64, `Digest SHA-256 Textile válido de 64 caracteres: ${digestTextile.slice(0, 16)}...`);
   assert(digestHoney.length === 64, `Digest SHA-256 Miel válido de 64 caracteres: ${digestHoney.slice(0, 16)}...`);
-  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de las etapas del proceso');
+  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de los datos del lote');
 
   // Prueba de Detección de Fraude (Tamper Evidence)
-  // Si un intermediario altera "17.8% humedad" por "22.0% humedad" o cambia el tinte:
   const tamperedStagesSummary = stagesSummaryHoney.replace('17.8%', '22.0%');
   const tamperedDigest = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
+    code: 'MIEL-2026-0001',
+    producerAddress: 'GPRODUCER_DEMO_MIEL_00000000000000000000000000000000002',
+    location: 'Magdalena Peñasco',
+    category: 'miel',
+    variety: 'multifloral',
+    volumeRange: 2,
     timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
+    photo: fullPhotoB,
     processStagesSummary: tamperedStagesSummary
   });
 

@@ -10,6 +10,7 @@
 import { CryptoEngine } from '../crypto/CryptoEngine';
 
 export interface VoiceParsingResult {
+  source: 'simulated';
   rawTranscript: string;
   detectedLanguage: 'tuun_savi' | 'spanish' | 'zapotec';
   confidenceScore: number;
@@ -27,6 +28,7 @@ export interface VoiceParsingResult {
 }
 
 export interface QualityAttestation {
+  source: 'simulated';
   oracleVersion: string;
   analysisTimestamp: number;
   domain: 'agricultural_coffee' | 'indigenous_textile';
@@ -46,6 +48,7 @@ export interface QualityAttestation {
 }
 
 export interface EUDRComplianceReport {
+  source: 'simulated';
   complianceId: string;
   verifiedAt: number;
   parcelPolygon: {
@@ -87,10 +90,10 @@ export class RaizAIOracles {
   /**
    * 1. AIVoiceOracle - Natural Voice & Dialect Normalization to Stellar Soroban Payload
    */
-  public static parseAcousticVoiceInput(
+  public static async parseAcousticVoiceInput(
     transcriptOrVoice: string,
     forcedLanguage?: 'tuun_savi' | 'spanish'
-  ): VoiceParsingResult {
+  ): Promise<VoiceParsingResult> {
     const text = transcriptOrVoice.trim().toLowerCase();
     let detectedLanguage: 'tuun_savi' | 'spanish' | 'zapotec' = forcedLanguage || 'spanish';
 
@@ -149,14 +152,14 @@ export class RaizAIOracles {
       quantity,
       unit,
       community,
-      producerName: 'Don Aurelio López Santiago',
       processType,
     };
 
-    const canonicalJson = JSON.stringify(extractedFields, Object.keys(extractedFields).sort());
-    const payloadDigest = CryptoEngine.sha256Hex(canonicalJson);
+    const canonicalJson = CryptoEngine.canonicalizeJson(extractedFields);
+    const payloadDigest = await CryptoEngine.sha256(canonicalJson);
 
     return {
+      source: 'simulated',
       rawTranscript: transcriptOrVoice,
       detectedLanguage,
       confidenceScore: detectedLanguage === 'tuun_savi' ? 0.94 : 0.98,
@@ -169,7 +172,7 @@ export class RaizAIOracles {
   /**
    * 2. AIQualityOracle - Computer Vision Defect and Authenticity Attestation
    */
-  public static evaluateLotQuality(params: {
+  public static async evaluateLotQuality(params: {
     productType: 'coffee' | 'textile' | 'honey' | 'chocolate' | 'artesania';
     imageUrlOrBase64?: string;
     sampleMetrics?: {
@@ -177,7 +180,7 @@ export class RaizAIOracles {
       defectRatio?: number;
       isHandWoven?: boolean;
     };
-  }): QualityAttestation {
+  }): Promise<QualityAttestation> {
     const isTextile = params.productType === 'textile';
     const analysisTimestamp = Date.now();
 
@@ -189,10 +192,11 @@ export class RaizAIOracles {
         heritagePatternAuthenticity: 0.99,
       };
 
-      const rawAttestation = `AI_QUALITY_TEXTILE:${overallScore}:${JSON.stringify(metrics)}:${analysisTimestamp}`;
-      const attestationHash = CryptoEngine.sha256Hex(rawAttestation);
+      const rawAttestation = `AI_QUALITY_TEXTILE:${overallScore}:${CryptoEngine.canonicalizeJson(metrics)}:${analysisTimestamp}`;
+      const attestationHash = await CryptoEngine.sha256(rawAttestation);
 
       return {
+        source: 'simulated',
         oracleVersion: 'v2.4-soroban-cv-textile',
         analysisTimestamp,
         domain: 'indigenous_textile',
@@ -216,10 +220,11 @@ export class RaizAIOracles {
       uniformityIndex: 0.94,
     };
 
-    const rawAttestation = `AI_QUALITY_COFFEE:${overallScore}:${JSON.stringify(metrics)}:${analysisTimestamp}`;
-    const attestationHash = CryptoEngine.sha256Hex(rawAttestation);
+    const rawAttestation = `AI_QUALITY_COFFEE:${overallScore}:${CryptoEngine.canonicalizeJson(metrics)}:${analysisTimestamp}`;
+    const attestationHash = await CryptoEngine.sha256(rawAttestation);
 
     return {
+      source: 'simulated',
       oracleVersion: 'v3.1-scaa-cv-classifier',
       analysisTimestamp,
       domain: 'agricultural_coffee',
@@ -235,21 +240,22 @@ export class RaizAIOracles {
   /**
    * 3. AIEUDRSatelliteOracle - European Union Deforestation Regulation Verification
    */
-  public static verifyEUDRCompliance(params: {
+  public static async verifyEUDRCompliance(params: {
     community: string;
     latitude?: number;
     longitude?: number;
     harvestYear?: number;
-  }): EUDRComplianceReport {
+  }): Promise<EUDRComplianceReport> {
     const lat = params.latitude || 17.268;
     const lng = params.longitude || -97.681;
     const altitude = 1850;
     const verifiedAt = Date.now();
 
     const reportContent = `EUDR_GEOPROOF:${params.community}:${lat}:${lng}:${altitude}:NO_DEFORESTATION_SINCE_2020`;
-    const certificationDigest = CryptoEngine.sha256Hex(reportContent);
+    const certificationDigest = await CryptoEngine.sha256(reportContent);
 
     return {
+      source: 'simulated',
       complianceId: `EUDR-MX-OAX-${certificationDigest.slice(0, 8).toUpperCase()}`,
       verifiedAt,
       parcelPolygon: {
