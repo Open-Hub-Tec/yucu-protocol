@@ -34,7 +34,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx src/tests/qr.test.ts && tsx src/tests/dynamic_process.test.ts && tsx src/tests/complete_system_audit.test.ts && tsx src/tests/hybrid_architecture_and_auth.test.ts && tsx src/tests/ai_oracles_and_protocol.test.ts && tsx src/tests/trustless_work_escrow.test.ts && tsx src/tests/stellar_live_client.test.ts && tsx src/tests/agent_swarm_and_innovations.test.ts && tsx src/tests/chain_ports.test.ts",
+    "test": "tsx src/tests/qr.test.ts && tsx src/tests/dynamic_process.test.ts && tsx src/tests/complete_system_audit.test.ts && tsx src/tests/hybrid_architecture_and_auth.test.ts && tsx src/tests/ai_oracles_and_protocol.test.ts && tsx src/tests/trustless_work_escrow.test.ts && tsx src/tests/stellar_live_client.test.ts && tsx src/tests/agent_swarm_and_innovations.test.ts && tsx src/tests/chain_ports.test.ts && tsx src/tests/network_config.test.ts",
     "verify": "npm run lint && npm run test && npm run build",
     "scaffold": "tsx scripts/scaffold-product-module.ts"
   },
