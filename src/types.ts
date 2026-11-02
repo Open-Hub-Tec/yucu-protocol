@@ -224,8 +224,6 @@ export interface BuyerLeadRecord {
   timestamp: string;
   studentName?: string;
   studentGroup?: string;
-  buyerName: string;
-  buyerPhone: string;
   buyerCity: string;
   buyerSegment: string;
   interestedProducts: string;

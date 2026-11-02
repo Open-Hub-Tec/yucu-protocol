@@ -98,17 +98,17 @@ async function runTests() {
   check(PRESET_USERS.length >= 6, 'Perfiles listos para campesinos, artesanas, estudiantes y compradores');
 
   // Verificación de derivación de billetera Stellar invisible
-  const derivedKey1 = RaizAuthEngine.deriveStellarPublicKey('+529531248841');
+  const derivedKey1 = RaizAuthEngine.deriveStellarPublicKey('+525500000001');
   const derivedKey2 = RaizAuthEngine.deriveStellarPublicKey('+59178841920');
   check(derivedKey1.startsWith('GBRAIZ') && derivedKey1.length === 56, 'Billetera Stellar abstracta de 56 caracteres para campesino MX');
   check(derivedKey2.startsWith('GBRAIZ') && derivedKey2.length === 56, 'Billetera Stellar abstracta para campesina BO');
   check(derivedKey1 !== derivedKey2, 'Llaves públicas distintas y unívocas por usuario');
 
   // Verificación de flujo OTP telefónico para campo
-  const otpResult = RaizAuthEngine.sendPhoneOtp('+52 953 124 8841', 'MX');
+  const otpResult = RaizAuthEngine.sendPhoneOtp('+52 55 0000 0001', 'MX');
   check(otpResult.success && otpResult.verificationCode === '7421', 'Generación de OTP predecible para pruebas');
 
-  const verifiedUser = RaizAuthEngine.verifyPhoneOtp('+52 953 124 8841', '7421', 'MX');
+  const verifiedUser = RaizAuthEngine.verifyPhoneOtp('+52 55 0000 0001', '7421', 'MX');
   check(verifiedUser.role === 'productor', 'Autenticación exitosa de productor rural sin contraseñas');
   check(verifiedUser.loginMethod === 'phone_otp', 'Método registrado: phone_otp');
 

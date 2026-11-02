@@ -22,7 +22,7 @@ import { RaizAuthModal } from './components/RaizAuthModal';
 import { HybridArchitectureModal } from './components/HybridArchitectureModal';
 import { ProtocolInfrastructureModal } from './components/ProtocolInfrastructureModal';
 import { ResearchPresentationModal } from './components/ResearchPresentationModal';
-import { BuyerResearchIssueModal } from './components/BuyerResearchIssueModal';
+import { BuyerResearchIssueModal, purgeLegacyBuyerLeads } from './components/BuyerResearchIssueModal';
 import { RaizLandingPage } from './components/RaizLandingPage';
 import { RaizAuthEngine, UserProfile } from './core/auth/RaizAuthEngine';
 import { RaizCore } from './core';
@@ -67,6 +67,7 @@ export default function App() {
   // Monitor network status for Modo Parcela (Offline Mode) & Initialize RaizCore
   useEffect(() => {
     RaizCore.init();
+    purgeLegacyBuyerLeads();
 
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);

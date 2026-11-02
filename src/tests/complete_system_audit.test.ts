@@ -8,6 +8,7 @@ import { INITIAL_VERIFIED_LOTS } from '../data/mockData';
 import { CryptoEngine } from '../core/crypto/CryptoEngine';
 import { generateQrSvg, generateQrDataUri } from '../utils/qrCode';
 import { getProductProfile, sanitizeProductName } from '../utils/productUtils';
+import { purgeLegacyBuyerLeads } from '../components/BuyerResearchIssueModal';
 import { ProcessStage, DynamicSpec, DigitalPassportLot } from '../types';
 
 let passed = 0;
@@ -183,6 +184,28 @@ async function runCompleteSystemAudit() {
   check(mockStorageLocal.isOfflineSaved, 'Registro guardado localmente en IndexedDB sin requerir señal de internet');
   check(mockStorageLocal.audioSavedLocally, 'Audio en lengua materna protegido localmente en el dispositivo');
   check(mockStorageLocal.syncStatus === 'pending_to_cloud', 'Mecanismo de sincronización automática listo para cuando haya señal');
+
+  // Privacidad de compradores (#121): borrado automático de la llave heredada al iniciar
+  const legacyKey = ['raiz', 'buyer', 'leads'].join('_');
+  const simulatedStore = new Map<string, string>([
+    [legacyKey, '[{"id":"legacy-1"}]'],
+    ['otra_llave_valida', 'conservada'],
+  ]);
+  const mockBrowserStorage = {
+    removeItem: (key: string) => {
+      simulatedStore.delete(key);
+    },
+  };
+  purgeLegacyBuyerLeads(mockBrowserStorage);
+  check(!simulatedStore.has(legacyKey), 'Al iniciar la app se borra la llave vieja de contactos de compradores en localStorage (#121)');
+  check(simulatedStore.get('otra_llave_valida') === 'conservada', 'El borrado de la llave vieja no afecta otras llaves del almacenamiento local');
+  let safeWhenUnavailable = true;
+  try {
+    purgeLegacyBuyerLeads(undefined);
+  } catch {
+    safeWhenUnavailable = false;
+  }
+  check(safeWhenUnavailable, 'purgeLegacyBuyerLeads no falla cuando localStorage no está disponible');
 
   console.log('\n================================================================================');
   console.log(` AUDITORÍA FINALIZADA CON ÉXITO: ${passed} PRUEBAS APROBADAS, ${failed} FALLOS`);
