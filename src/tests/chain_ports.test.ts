@@ -7,8 +7,10 @@ import {
   SimulatedEscrow,
   SimulatedExternalWallet,
   SimulatedLotRegistry,
+  SimulatedPayout,
   SimulatedWallet,
 } from '../core/chain/SimulatedChain';
+import { chain } from '../core/chain';
 
 let failures = 0;
 function check(cond: boolean, msg: string) {
@@ -118,6 +120,74 @@ async function run() {
   check((await escrow.getStatus('ORD-5')).milestones[0].status === 'resolved', 'Resolver la disputa cierra el hito');
   const badPercent = await escrow.prepareResolveDispute('ORD-5', 0, 'GTERCERO', 120).then(() => false, () => true);
   check(badPercent, 'Se rechaza resolver una disputa con un porcentaje fuera de 0 a 100');
+
+  // Salida a pesos (PayoutPort, #112)
+  const payout = new SimulatedPayout();
+  check(Boolean(chain.payout), 'chain expone payout (PayoutPort)');
+  const quote = await payout.quote(20);
+  check(quote.source === 'simulated' && quote.netAmountMxn === 370 && quote.feeMxn === 0, 'quote devuelve el monto neto en pesos y source simulated');
+
+  const zeroQuote = await payout.quote(0).then(() => false, () => true);
+  const negativeCashout = await payout.prepareCashout({
+    producerAddress: address,
+    amountUsdc: -10,
+    storeId: 'TIENDA-TLAXIACO-01',
+    walletKind: 'device',
+  }).then(() => false, () => true);
+  check(zeroQuote && negativeCashout, 'Un monto menor o igual a cero se rechaza en quote y prepareCashout');
+
+  // Retiro normal: ready -> collected
+  const cashoutTx = await payout.prepareCashout({
+    producerAddress: address,
+    amountUsdc: 20,
+    storeId: 'TIENDA-TLAXIACO-01',
+    walletKind: 'device',
+  });
+  check(cashoutTx.summary.includes('370.00') && cashoutTx.summary.includes('TIENDA-TLAXIACO-01'), 'prepareCashout explica el retiro en pesos y la tienda elegida');
+  const cashoutReceipt = await payout.submit(await wallet.sign(cashoutTx, '1234'));
+  check(
+    cashoutReceipt.source === 'simulated' &&
+      cashoutReceipt.cashoutCode.startsWith('YUCU-COBRO-') &&
+      cashoutReceipt.expiresAt > Date.now(),
+    'submit devuelve comprobante simulado con código de cobro y vencimiento'
+  );
+  const readyState = await payout.getStatus(cashoutReceipt.payoutId);
+  check(readyState.status === 'ready' && readyState.source === 'simulated', 'El retiro inicia en estado ready con source simulated');
+  payout.markCollected(cashoutReceipt.payoutId);
+  const collectedState = await payout.getStatus(cashoutReceipt.payoutId);
+  check(collectedState.status === 'collected' && collectedState.source === 'simulated', 'Un retiro recorre ready -> collected');
+
+  // Retiro vencido -> pasa a refunded
+  const expiredTx = await payout.prepareCashout({
+    producerAddress: address,
+    amountUsdc: 15,
+    storeId: 'TIENDA-TLAXIACO-01',
+    walletKind: 'device',
+  });
+  const expiredReceipt = await payout.submit(await wallet.sign(expiredTx, '1234'));
+  payout.expire(expiredReceipt.payoutId);
+  const refundedState = await payout.getStatus(expiredReceipt.payoutId);
+  check(refundedState.status === 'refunded' && refundedState.source === 'simulated', 'Un retiro vencido pasa a refunded');
+
+  // Tarjeta QR (#117 Corrección 2): con 'card', 15 minutos se acepta y 24 horas se rechaza
+  const cardCashout15m = await payout.prepareCashout({
+    producerAddress: cardAddress,
+    amountUsdc: 10,
+    storeId: 'TIENDA-TLAXIACO-01',
+    walletKind: 'card',
+    expiresInMinutes: 15,
+  });
+  const cardCashoutReceipt = await payout.submit(await card.sign(cardCashout15m, '123456', cardData));
+  check(cardCashoutReceipt.source === 'simulated' && cardCashoutReceipt.netAmountMxn === 185, 'Con walletKind card, un retiro de 15 minutos se acepta');
+
+  const cardCashout24h = await payout.prepareCashout({
+    producerAddress: cardAddress,
+    amountUsdc: 10,
+    storeId: 'TIENDA-TLAXIACO-01',
+    walletKind: 'card',
+    expiresInMinutes: 24 * 60,
+  }).then(() => false, () => true);
+  check(cardCashout24h, 'Con walletKind card, un retiro de 24 horas se rechaza');
 
   if (failures > 0) {
     console.error(`\n${failures} prueba(s) fallaron`);
