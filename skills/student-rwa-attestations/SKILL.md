@@ -60,7 +60,7 @@ Reglas para quien programe el extractor o la pantalla:
 Usa WebCrypto (`crypto.subtle`), que existe en el navegador y en Node 22. Si no hay WebCrypto, **lanza un error**: nunca devuelvas otro cálculo.
 
 ```typescript
-export async function sha256Hex(data: Uint8Array | string): Promise<string> {
+export async function sha256(data: Uint8Array | ArrayBuffer | string): Promise<string> {
   if (!globalThis.crypto?.subtle) throw new Error('WebCrypto no disponible');
   const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
   const digest = await crypto.subtle.digest('SHA-256', bytes);
