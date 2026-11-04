@@ -3,7 +3,7 @@
 // la hacen la revisión cruzada y el docente.
 //
 // Este módulo no llama a GitHub: recibe los datos ya leídos y devuelve el resultado.
-// Así se puede probar con `node --test .github/scripts/`.
+// Así se puede probar con `node --test .github/scripts/validar-entregas.test.mjs`.
 
 export const MARCA = '<!-- validar-entregas-sprint4 -->';
 

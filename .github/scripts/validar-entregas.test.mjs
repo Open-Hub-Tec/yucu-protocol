@@ -1,4 +1,4 @@
-// Pruebas de validar-entregas.mjs. Correr con: node --test .github/scripts/
+// Pruebas de validar-entregas.mjs. Correr con: node --test .github/scripts/validar-entregas.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { validar, formatear, estadoDeCarta } from './validar-entregas.mjs';
