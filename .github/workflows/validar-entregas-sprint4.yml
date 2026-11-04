@@ -1,0 +1,106 @@
+name: Validar entregas del Sprint 4 (TecNM)
+
+# Revisa los requisitos mínimos de las entregas de Gestión de Proyectos
+# (propuesta, plan de informe y carta), revisa la forma que pide cada criterio
+# de la rúbrica de la issue y deja un comentario en el PR.
+# No califica: la nota la ponen el docente y la revisión cruzada.
+#
+# Seguridad: usa pull_request_target para poder comentar en PR que vienen de forks.
+# Por eso NUNCA hace checkout del código del PR ni lo ejecuta: solo lee sus
+# archivos .md como texto por la API. El script que corre es el de main.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'docs/gestion/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: validar-entregas-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Requisitos mínimos de la entrega
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Traer el script de validación (de main, no del PR)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Revisar la entrega y comentar
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { validar, formatear, mapearIssues, MARCA } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/validar-entregas.mjs`);
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const head = { owner: pr.head.repo.owner.login, repo: pr.head.repo.name, ref: pr.head.sha };
+
+            const leer = async (path) => {
+              const { data } = await github.rest.repos.getContent({ ...head, path });
+              return data;
+            };
+
+            // Archivos que cambia el PR.
+            const archivos = (await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 }))
+              .map((f) => ({ path: f.filename, status: f.status }));
+
+            // Carpeta del equipo (si hay una sola) y contenido de sus .md.
+            const equipos = [...new Set(archivos.map((a) => a.path.match(/^docs\/gestion\/(equipo-\d+)\//)?.[1]).filter(Boolean))];
+            const contenidos = {};
+            const archivosDelEquipo = [];
+            if (equipos.length === 1) {
+              const pendientes = [`docs/gestion/${equipos[0]}`];
+              while (pendientes.length) {
+                const dir = pendientes.pop();
+                let lista = [];
+                try { lista = await leer(dir); } catch { continue; }
+                for (const e of lista) {
+                  if (e.type === 'dir') pendientes.push(e.path);
+                  else archivosDelEquipo.push(e.path);
+                }
+              }
+              for (const a of archivos) {
+                if (a.status === 'removed' || !a.path.endsWith('.md') || !a.path.startsWith(`docs/gestion/${equipos[0]}/`)) continue;
+                const f = await leer(a.path);
+                contenidos[a.path] = Buffer.from(f.content, 'base64').toString('utf8');
+              }
+            }
+
+            // Issue principal y sub-issues (propuesta, plan, carta) de cada equipo.
+            const issues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, labels: 'tecnm-sprint-4', state: 'all', per_page: 100 });
+            const issuesPorEquipo = mapearIssues(issues);
+
+            const commits = await github.paginate(github.rest.pulls.listCommits, { owner, repo, pull_number: pr.number, per_page: 100 });
+            const revisiones = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: pr.number, per_page: 100 });
+
+            const resultado = validar({
+              prBody: pr.body || '',
+              archivos,
+              contenidos,
+              archivosDelEquipo,
+              issuesPorEquipo,
+              autor: pr.user.login,
+              autoresCommits: commits.map((c) => c.author?.login || ''),
+              revisiones: revisiones.map((r) => ({ login: r.user?.login || '', state: r.state })),
+            });
+            const { cumple, texto } = formatear(resultado);
+
+            // Un solo comentario por PR: se actualiza en cada push.
+            const comentarios = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
+            const previo = comentarios.find((c) => c.user?.type === 'Bot' && c.body?.includes(MARCA));
+            if (previo) await github.rest.issues.updateComment({ owner, repo, comment_id: previo.id, body: texto });
+            else await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: texto });
+
+            await core.summary.addRaw(texto).write();
+            if (!cumple) core.setFailed('La entrega no cumple los requisitos mínimos. Revisa el comentario en el PR.');
