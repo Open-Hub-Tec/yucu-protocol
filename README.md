@@ -115,7 +115,7 @@ The default protected purchase has **one milestone**: the group marks it shipped
 
 ## Architecture
 
-![Layers: people, apps, ports, prepare and sign, Stellar, and payments outside Stellar](./docs/arquitectura/yucu-capas.svg)
+![Layers: people, apps, ports, prepare and sign, Stellar, and payments outside Stellar](./docs/arquitectura/yucu-capas.en.svg)
 
 The apps talk **only to the ports** in [`src/core/chain/ports.ts`](./src/core/chain/ports.ts). No component imports `@stellar/stellar-sdk` or calls Trustless Work directly.
 
