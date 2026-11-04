@@ -1,8 +1,10 @@
 name: Validar entregas del Sprint 4 (TecNM)
 
 # Revisa los requisitos mínimos de las entregas de Gestión de Proyectos
-# (propuesta, plan de informe y carta) y deja un comentario en el PR.
-# No califica: la rúbrica la aplican la revisión cruzada y el docente.
+# (propuesta, plan de informe y carta), revisa la forma que pide cada criterio
+# de la rúbrica y pide a GitHub Models una sugerencia de nivel por criterio,
+# usando la rúbrica escrita en la issue del equipo. Deja un comentario en el PR.
+# No califica: la nota la ponen el docente y la revisión cruzada.
 #
 # Seguridad: usa pull_request_target para poder comentar en PR que vienen de forks.
 # Por eso NUNCA hace checkout del código del PR ni lo ejecuta: solo lee sus
@@ -18,6 +20,7 @@ permissions:
   contents: read
   pull-requests: write
   issues: read
+  models: read
 
 concurrency:
   group: validar-entregas-${{ github.event.pull_request.number }}
@@ -38,9 +41,12 @@ jobs:
 
       - name: Revisar la entrega y comentar
         uses: actions/github-script@v7
+        env:
+          MODELS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           script: |
             const { validar, formatear, MARCA } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/validar-entregas.mjs`);
+            const { rubricaDeIssue, mensajesIA, interpretarIA } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/rubrica.mjs`);
             const pr = context.payload.pull_request;
             const { owner, repo } = context.repo;
             const head = { owner: pr.head.repo.owner.login, repo: pr.head.repo.name, ref: pr.head.sha };
@@ -98,7 +104,37 @@ jobs:
               autoresCommits: commits.map((c) => c.author?.login || ''),
               revisiones: revisiones.map((r) => ({ login: r.user?.login || '', state: r.state })),
             });
-            const { cumple, texto } = formatear(resultado);
+            // Sugerencia de IA con la rúbrica de la issue. Solo si cumple los mínimos
+            // (así nunca se envían datos personales al modelo).
+            const ia = [];
+            if (resultado.minimos.every((m) => m.cumple) && resultado.issue) {
+              const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number: resultado.issue });
+              const archivoDe = { 'Propuesta Final': 'propuesta.md', 'Plan de informe': 'plan-de-informe.md', 'Carta de entendimiento': 'carta.md' };
+              for (const entrega of resultado.entregas) {
+                const rubrica = rubricaDeIssue(issue.body, entrega);
+                if (!rubrica) { ia.push({ entrega, error: 'no encontré la rúbrica en la issue' }); continue; }
+                try {
+                  const resp = await fetch('https://models.github.ai/inference/chat/completions', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${process.env.MODELS_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      model: 'openai/gpt-4.1-mini',
+                      temperature: 0,
+                      response_format: { type: 'json_object' },
+                      messages: mensajesIA(entrega, rubrica, contenidos[resultado.carpeta + archivoDe[entrega]]),
+                    }),
+                  });
+                  if (!resp.ok) throw new Error(`GitHub Models respondió ${resp.status}`);
+                  const json = await resp.json();
+                  ia.push({ entrega, ...interpretarIA(json.choices[0].message.content) });
+                } catch (e) {
+                  core.warning(`IA para ${entrega}: ${e.message}`);
+                  ia.push({ entrega, error: e.message });
+                }
+              }
+            }
+
+            const { cumple, texto } = formatear(resultado, ia);
 
             // Un solo comentario por PR: se actualiza en cada push.
             const comentarios = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });

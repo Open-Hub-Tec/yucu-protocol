@@ -5,6 +5,8 @@
 // Este módulo no llama a GitHub: recibe los datos ya leídos y devuelve el resultado.
 // Así se puede probar con `node --test .github/scripts/validar-entregas.test.mjs`.
 
+import { reglasPropuesta, reglasPlan, reglasCarta, formatearReglas, formatearIA } from './rubrica.mjs';
+
 export const MARCA = '<!-- validar-entregas-sprint4 -->';
 
 const EXT_PROHIBIDAS = /\.(pdf|jpe?g|png|gif|webp|heic|svg|bmp|tiff?|mp3|m4a|ogg|opus|wav|aac|mp4|mov|webm|avi|3gp|docx?|xlsx?|pptx?|odt|zip|rar|7z)$/i;
@@ -142,11 +144,13 @@ export function validar(d) {
 
   // 5. Estructura de cada entrega que viene en el PR.
   const entregas = [];
+  const reglas = [];
   const existe = (r) => d.archivosDelEquipo.includes(carpeta + r);
 
   const propuesta = d.contenidos[carpeta + 'propuesta.md'];
   if (propuesta !== undefined) {
     entregas.push('Propuesta Final');
+    reglas.push({ entrega: 'Propuesta Final', items: reglasPropuesta(propuesta) });
     const t = titulos(propuesta);
     let desde = 0;
     const faltan = [];
@@ -163,6 +167,7 @@ export function validar(d) {
   const plan = d.contenidos[carpeta + 'plan-de-informe.md'];
   if (plan !== undefined) {
     entregas.push('Plan de informe');
+    reglas.push({ entrega: 'Plan de informe', items: reglasPlan(plan, { plantilla: d.contenidos[carpeta + 'minutas/plantilla.md'], informe: d.contenidos[carpeta + 'informe-semana-1.md'] }) });
     const t = titulos(plan);
     const faltan = PARTES_PLAN.filter(([, re]) => !t.some((x) => re.test(x))).map(([n]) => n);
     ok(faltan.length === 0, faltan.length
@@ -175,6 +180,7 @@ export function validar(d) {
   const carta = d.contenidos[carpeta + 'carta.md'];
   if (carta !== undefined) {
     entregas.push('Carta de entendimiento');
+    reglas.push({ entrega: 'Carta de entendimiento', items: reglasCarta(carta) });
     const estado = estadoDeCarta(carta);
     ok(estado && estado.tipo !== 'invalido', estado && estado.tipo !== 'invalido'
       ? `La carta dice su estado (${estado.tipo === 'firmada' ? 'firmada el ' + estado.fecha : estado.tipo}).`
@@ -197,10 +203,11 @@ export function validar(d) {
   const aprobaron = [...new Set(d.revisiones.filter((r) => r.state === 'APPROVED' && r.login !== d.autor).map((r) => r.login))];
   if (!aprobaron.length) avisos.push('Todavía nadie más aprobó el PR. La rúbrica pide la revisión de otro integrante con comentarios reales.');
 
-  return { equipo, issue, minimos, avisos, entregas, conteo, aprobaron };
+  return { equipo, issue, minimos, avisos, entregas, reglas, conteo, aprobaron, carpeta };
 }
 
-export function formatear(r) {
+/** @param {{entrega:string, criterios?:object[], total?:number, error?:string}[]} [ia] */
+export function formatear(r, ia = []) {
   const cumple = r.minimos.every((m) => m.cumple);
   const l = [MARCA, '## Revisión automática · Sprint 4', ''];
   if (r.equipo) l.push(`**Equipo ${r.equipo}**${r.entregas.length ? ' · ' + r.entregas.join(', ') : ''}`, '');
@@ -208,11 +215,13 @@ export function formatear(r) {
     ? '✅ **Cumple los requisitos mínimos.** La entrega pasa a revisión cruzada y a calificación con la rúbrica.'
     : '❌ **No cumple los requisitos mínimos.** Corríjanlo en esta misma rama; la revisión se repite sola con cada push.');
   l.push('', '### Requisitos mínimos', ...r.minimos.map((m) => `- ${m.cumple ? '✅' : '❌'} ${m.texto}`));
+  for (const g of r.reglas || []) l.push(...formatearReglas(g.entrega, g.items));
+  for (const x of ia) l.push(...formatearIA(x.entrega, x));
   if (r.conteo) {
     l.push('', '### Trabajo en equipo', ...Object.entries(r.conteo).map(([u, n]) => `- \`${u}\`: ${n} commit(s)`));
     if (r.aprobaron?.length) l.push(`- Aprobado por: ${r.aprobaron.map((u) => '`' + u + '`').join(', ')}`);
   }
   if (r.avisos.length) l.push('', '### Avisos (no bloquean)', ...r.avisos.map((a) => `- ⚠️ ${a}`));
-  l.push('', '---', '*Esta revisión solo comprueba reglas fijas. No califica: la calidad la evalúan la revisión cruzada y el docente con la rúbrica.*');
+  l.push('', '---', '*✅/❌ = requisitos mínimos (bloquean). ✅/⬜ = forma que pide la rúbrica (orientan, no bloquean). La sugerencia de IA solo orienta: la calificación la ponen el docente y la revisión cruzada con la rúbrica.*');
   return { cumple, texto: l.join('\n') };
 }
