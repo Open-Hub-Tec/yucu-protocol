@@ -211,3 +211,75 @@ export interface EscrowPort {
   /** Estado de cada hito, en el mismo orden en que se crearon. */
   getStatus(escrowId: string): Promise<{ milestones: MilestoneState[]; source: ChainSource }>;
 }
+
+// ─────────────────────────────── Salida a pesos (PayoutPort) ───────────────────────────────
+
+export type PayoutStatus = 'pending' | 'ready' | 'collected' | 'expired' | 'refunded';
+
+export interface PayoutQuote {
+  amountUsdc: number;
+  /** Tipo de cambio estimado en pesos mexicanos por 1 USDC. */
+  exchangeRateMxn: number;
+  /** Comisión de retiro en pesos (ADR-004, D9 y D11: la plataforma no cobra comisión de socio). */
+  feeMxn: number;
+  /** Monto neto en pesos mexicanos que recibe la artesana en mano. */
+  netAmountMxn: number;
+  source: ChainSource;
+}
+
+/**
+ * Solicitud de retiro en efectivo en tienda (ADR-004, D9).
+ * Sale de la cuenta de la artesana (`producerAddress`) hacia una tienda elegida (`storeId`).
+ * Nunca lleva su nombre ni su llave secreta.
+ */
+export interface CashoutRequest {
+  /** Dirección pública de la cuenta de la artesana (G...), nunca su nombre. */
+  producerAddress: string;
+  /** Monto a retirar en USDC (debe ser mayor que 0). */
+  amountUsdc: number;
+  /** Identificador de la tienda elegida donde se cobrará el efectivo. */
+  storeId: string;
+  /**
+   * Tipo de billetera con la que firma la artesana (#117, Corrección 2).
+   * Con `'card'`, solo se aceptan retiros presenciales cuyo código venza en 15 minutos o menos.
+   */
+  walletKind: WalletKind;
+  /**
+   * Vigencia del código de cobro en minutos (por defecto 15 minutos, como el QR de MicoPay).
+   * Con `walletKind: 'card'`, un código que dure más de 15 minutos (p. ej. 24 a 72 h) se rechaza.
+   */
+  expiresInMinutes?: number;
+}
+
+/** Comprobante del retiro enviado: incluye el código o QR de cobro y su vencimiento. */
+export interface CashoutReceipt extends ChainReceipt {
+  payoutId: string;
+  /** Código o contenido del QR de cobro para mostrar en la tienda. */
+  cashoutCode: string;
+  /** Monto neto en pesos que recibe la artesana. */
+  netAmountMxn: number;
+  /** Momento (ms) en que vence el código; si no se cobra antes, el dinero regresa a su cuenta. */
+  expiresAt: number;
+}
+
+export interface PayoutState {
+  payoutId: string;
+  status: PayoutStatus;
+  netAmountMxn: number;
+  expiresAt: number;
+  source: ChainSource;
+}
+
+export interface PayoutPort {
+  /** Cuántos pesos recibiría la artesana (neto, con comisiones) por `amountUsdc`. */
+  quote(amountUsdc: number): Promise<PayoutQuote>;
+  /**
+   * Prepara el retiro desde la cuenta de la artesana hacia una tienda elegida (nunca lleva su nombre).
+   * Ella lo firma con su PIN. Devuelve un `UnsignedTransaction`.
+   */
+  prepareCashout(req: CashoutRequest): Promise<UnsignedTransaction>;
+  /** Envía el retiro firmado y devuelve el comprobante con el código o QR de cobro y su vencimiento. */
+  submit(signedXdr: string): Promise<CashoutReceipt>;
+  /** Estado del retiro (`pending` / `ready` / `collected` / `expired` / `refunded`) con `source`. */
+  getStatus(id: string): Promise<PayoutState>;
+}

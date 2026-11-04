@@ -8,9 +8,10 @@ import {
   SimulatedEscrow,
   SimulatedExternalWallet,
   SimulatedLotRegistry,
+  SimulatedPayout,
   SimulatedWallet,
 } from './SimulatedChain';
-import type { CardWalletPort, DeviceWalletPort, EscrowPort, ExternalWalletPort, LotRegistryPort } from './ports';
+import type { CardWalletPort, DeviceWalletPort, EscrowPort, ExternalWalletPort, LotRegistryPort, PayoutPort } from './ports';
 
 export * from './ports';
 
@@ -25,7 +26,8 @@ export interface Chain {
   };
   lots: LotRegistryPort;
   escrow: EscrowPort;
-  // La salida a pesos (`payout: PayoutPort`) la agrega #112.
+  /** Salida a pesos desde la cuenta de la artesana (#112, ADR-004 D9). */
+  payout: PayoutPort;
 }
 
 export const chain: Chain = {
@@ -36,4 +38,5 @@ export const chain: Chain = {
   },
   lots: new SimulatedLotRegistry(),
   escrow: new SimulatedEscrow(),
+  payout: new SimulatedPayout(),
 };

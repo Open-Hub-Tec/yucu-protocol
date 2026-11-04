@@ -7,6 +7,8 @@
  */
 import type {
   CardWalletPort,
+  CashoutReceipt,
+  CashoutRequest,
   ChainReceipt,
   CreateEscrowRequest,
   DeviceWalletPort,
@@ -17,6 +19,10 @@ import type {
   MilestoneState,
   MilestoneStatus,
   LotRegistryPort,
+  PayoutPort,
+  PayoutQuote,
+  PayoutState,
+  PayoutStatus,
   RegisterLotRequest,
   UnsignedTransaction,
 } from './ports';
@@ -201,5 +207,122 @@ export class SimulatedEscrow implements EscrowPort {
   }
   async getStatus(escrowId: string) {
     return { milestones: (this.escrows.get(escrowId) ?? []).map((m) => ({ ...m })), source: 'simulated' as const };
+  }
+}
+
+const DEMO_EXCHANGE_RATE_MXN = 18.5;
+const MAX_CARD_CASHOUT_MINUTES = 15;
+
+export class SimulatedPayout implements PayoutPort {
+  private readonly payouts = new Map<string, Omit<PayoutState, 'source'>>();
+  private seq = 0;
+
+  async quote(amountUsdc: number): Promise<PayoutQuote> {
+    if (!Number.isFinite(amountUsdc) || amountUsdc <= 0) {
+      throw new Error('El monto a retirar debe ser mayor que cero.');
+    }
+    const netAmountMxn = Math.round(amountUsdc * DEMO_EXCHANGE_RATE_MXN * 100) / 100;
+    return {
+      amountUsdc,
+      exchangeRateMxn: DEMO_EXCHANGE_RATE_MXN,
+      feeMxn: 0,
+      netAmountMxn,
+      source: 'simulated',
+    };
+  }
+
+  async prepareCashout(req: CashoutRequest): Promise<UnsignedTransaction> {
+    if (!Number.isFinite(req.amountUsdc) || req.amountUsdc <= 0) {
+      throw new Error('El monto a retirar debe ser mayor que cero.');
+    }
+    if (!req.producerAddress || !req.producerAddress.startsWith('G')) {
+      throw new Error('La cuenta de origen debe ser una dirección pública válida (G...).');
+    }
+    if (!req.storeId || !req.storeId.trim()) {
+      throw new Error('Elige una tienda para retirar tu efectivo.');
+    }
+    const expiresInMinutes = req.expiresInMinutes ?? MAX_CARD_CASHOUT_MINUTES;
+    if (!Number.isFinite(expiresInMinutes) || expiresInMinutes <= 0) {
+      throw new Error('El tiempo de vigencia del código debe ser mayor que cero.');
+    }
+    if (req.walletKind === 'card' && expiresInMinutes > MAX_CARD_CASHOUT_MINUTES) {
+      throw new Error(
+        `Con tarjeta QR solo se aceptan retiros presenciales que vencen en ${MAX_CARD_CASHOUT_MINUTES} minutos o menos.`
+      );
+    }
+    const { netAmountMxn } = await this.quote(req.amountUsdc);
+    const summary = `Retirar $${netAmountMxn.toFixed(2)} pesos en efectivo en la tienda ${req.storeId}. El código vence en ${expiresInMinutes} minutos.`;
+    return demoTx(summary, {
+      op: 'cashout',
+      producerAddress: req.producerAddress,
+      amountUsdc: req.amountUsdc,
+      storeId: req.storeId,
+      walletKind: req.walletKind,
+      expiresInMinutes,
+      netAmountMxn,
+    });
+  }
+
+  async submit(signedXdr: string): Promise<CashoutReceipt> {
+    const payload = JSON.parse(decodeURIComponent(escape(atob(signedXdr)))) as {
+      op: string;
+      expiresInMinutes: number;
+      netAmountMxn: number;
+    };
+    if (payload.op !== 'cashout') {
+      throw new Error('La transacción firmada no corresponde a un retiro en pesos.');
+    }
+    const payoutId = `PAY-${++this.seq}`;
+    const cashoutCode = `YUCU-COBRO-${randomHex(4).toUpperCase()}`;
+    const expiresAt = Date.now() + payload.expiresInMinutes * 60_000;
+    this.payouts.set(payoutId, {
+      payoutId,
+      status: 'ready',
+      netAmountMxn: payload.netAmountMxn,
+      expiresAt,
+    });
+    return {
+      ...demoReceipt(),
+      payoutId,
+      cashoutCode,
+      netAmountMxn: payload.netAmountMxn,
+      expiresAt,
+    };
+  }
+
+  async getStatus(id: string): Promise<PayoutState> {
+    const record = this.payouts.get(id);
+    if (!record) {
+      throw new Error(`No existe el retiro ${id}.`);
+    }
+    if ((record.status === 'ready' || record.status === 'pending') && Date.now() >= record.expiresAt) {
+      record.status = 'refunded';
+    }
+    return { ...record, source: 'simulated' };
+  }
+
+  /** Simula que la artesana cobró el efectivo en la tienda. */
+  markCollected(id: string): void {
+    const record = this.payouts.get(id);
+    if (!record) {
+      throw new Error(`No existe el retiro ${id}.`);
+    }
+    if (Date.now() >= record.expiresAt || record.status !== 'ready') {
+      record.status = 'refunded';
+      throw new Error('El código de cobro ya no está vigente; el dinero regresó a la cuenta de la artesana.');
+    }
+    record.status = 'collected';
+  }
+
+  /** Simula el vencimiento del código de cobro sin que se haya cobrado en la tienda. */
+  expire(id: string): void {
+    const record = this.payouts.get(id);
+    if (!record) {
+      throw new Error(`No existe el retiro ${id}.`);
+    }
+    record.expiresAt = Date.now() - 1_000;
+    if (record.status === 'ready' || record.status === 'pending') {
+      record.status = 'refunded';
+    }
   }
 }
