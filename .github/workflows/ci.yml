@@ -59,6 +59,23 @@ jobs:
           fi
           echo "OK: no se agregan archivos de campo."
 
+  sprint4-validator-tests:
+    name: Pruebas del validador de entregas (Sprint 4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Run validator tests
+        run: node --test .github/scripts/
+
   validate-soroban-contracts:
     name: Soroban Smart Contracts (Rust) Check
     runs-on: ubuntu-latest
