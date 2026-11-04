@@ -2,8 +2,8 @@
 //
 // Capa 1 (reglas): comprueba la FORMA que pide cada criterio (cifras, fechas,
 // tablas, riesgos "si… entonces…"). Siempre da el mismo resultado.
-// Capa 2 (IA, GitHub Models): sugiere un nivel por criterio leyendo la rúbrica
-// de la issue. Es solo una sugerencia: la calificación la pone el docente.
+// Capa 2 (IA): arma la petición y lee la respuesta de un modelo que sugiere un nivel por criterio con la rúbrica
+// de la issue. Todavía no la llama el workflow (GitHub Models se retiró el 2026-07-30). Solo sugiere: la nota la pone el docente.
 
 import { normalizar } from './validar-entregas.mjs';
 
@@ -188,6 +188,6 @@ export function formatearIA(entrega, ia) {
   l.push('| Criterio | Nivel sugerido | Puntos | Por qué |', '|---|---|---|---|');
   for (const c of ia.criterios) l.push(`| ${c.numero} | ${c.nivel} | ${c.puntos.toFixed(1)} | ${c.razon.replace(/\|/g, '/').replace(/\n/g, ' ')} |`);
   l.push(`| **Total sugerido** | | **${ia.total.toFixed(1)} / 20** | |`);
-  l.push('', '> ⚠️ **Es una sugerencia de IA (GitHub Models), no la calificación.** Puede equivocarse. La calificación la pone el docente con la rúbrica.');
+  l.push('', '> ⚠️ **Es una sugerencia de IA, no la calificación.** Puede equivocarse. La calificación la pone el docente con la rúbrica.');
   return l;
 }
