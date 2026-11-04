@@ -60,7 +60,7 @@ jobs:
           echo "OK: no se agregan archivos de campo."
 
   sprint4-validator-tests:
-    name: Pruebas del validador de entregas (Sprint 4)
+    name: Pruebas de los validadores (entregas y código)
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -74,7 +74,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Run validator tests
-        run: node --test .github/scripts/validar-entregas.test.mjs .github/scripts/rubrica.test.mjs
+        run: node --test .github/scripts/validar-entregas.test.mjs .github/scripts/rubrica.test.mjs .github/scripts/validar-codigo.test.mjs
 
   validate-soroban-contracts:
     name: Soroban Smart Contracts (Rust) Check
