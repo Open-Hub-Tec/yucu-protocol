@@ -9,6 +9,10 @@ import { reglasPropuesta, reglasPlan, reglasCarta, formatearReglas, formatearIA 
 
 export const MARCA = '<!-- validar-entregas-sprint4 -->';
 
+/** Archivo principal de cada entrega y etiqueta de su sub-issue. */
+export const ARCHIVO_DE_ENTREGA = { 'Propuesta Final': 'propuesta.md', 'Plan de informe': 'plan-de-informe.md', 'Carta de entendimiento': 'carta.md' };
+export const ETIQUETA_DE_ENTREGA = { 'entrega-propuesta': 'Propuesta Final', 'entrega-plan': 'Plan de informe', 'entrega-carta': 'Carta de entendimiento' };
+
 const EXT_PROHIBIDAS = /\.(pdf|jpe?g|png|gif|webp|heic|svg|bmp|tiff?|mp3|m4a|ogg|opus|wav|aac|mp4|mov|webm|avi|3gp|docx?|xlsx?|pptx?|odt|zip|rar|7z)$/i;
 
 // Número de control del TecNM Tlaxiaco: dos dígitos del año + 620 + tres dígitos (con letra opcional).
@@ -39,6 +43,23 @@ const PARTES_PLAN = [
   ['Semáforo y escalamiento', /semaforo/],
   ['Herramientas', /herramienta/],
 ];
+
+/**
+ * Arma { equipo: { padre, 'Propuesta Final': n, … } } con las issues de la etiqueta tecnm-sprint-4.
+ * @param {{number:number, labels:(string|{name:string})[], pull_request?:object}[]} lista
+ */
+export function mapearIssues(lista) {
+  const mapa = {};
+  for (const i of lista) {
+    if (i.pull_request) continue;
+    const etiquetas = i.labels.map((l) => (typeof l === 'string' ? l : l.name));
+    const equipo = etiquetas.map((l) => l.match(/^equipo-(\d+)$/)?.[1]).find(Boolean);
+    if (!equipo) continue;
+    const entrega = etiquetas.map((l) => ETIQUETA_DE_ENTREGA[l]).find(Boolean);
+    (mapa[equipo] ||= {})[entrega || 'padre'] = i.number;
+  }
+  return mapa;
+}
 
 export function normalizar(texto) {
   return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -85,7 +106,7 @@ export function estadoDeCarta(md) {
  * @param {{path:string,status:string}[]} d.archivos  Archivos que cambia el PR.
  * @param {Record<string,string>} d.contenidos  Contenido de los .md del equipo en el PR (ruta → texto).
  * @param {string[]} d.archivosDelEquipo     Rutas que existen en la carpeta del equipo (en la rama del PR).
- * @param {Record<string,number>} d.issuesPorEquipo  Número de issue del Sprint 4 de cada equipo.
+ * @param {Record<string,Record<string,number>>} d.issuesPorEquipo  Por equipo: { padre, 'Propuesta Final', 'Plan de informe', 'Carta de entendimiento' } → número de issue.
  * @param {string} d.autor                   Usuario que abrió el PR.
  * @param {string[]} d.autoresCommits        Usuario de cada commit del PR.
  * @param {{login:string,state:string}[]} d.revisiones
@@ -113,14 +134,25 @@ export function validar(d) {
   const fuera = d.archivos.filter((a) => !a.path.startsWith('docs/gestion/'));
   if (fuera.length) avisos.push(`El PR también cambia archivos fuera de \`docs/gestion/\`: ${fuera.map((a) => '`' + a.path + '`').join(', ')}. Las entregas del Sprint 4 son solo documentos.`);
 
-  // 2. Ligado a la issue del equipo.
-  const issue = d.issuesPorEquipo[equipo];
-  if (!issue) {
-    ok(false, `No encontré la issue del Sprint 4 del equipo ${equipo} (etiquetas \`tecnm-sprint-4\` y \`equipo-${equipo}\`).`);
+  // 2. Ligado a la sub-issue de cada entrega que trae el PR.
+  const issues = d.issuesPorEquipo[equipo] || {};
+  const menciona = (n) => new RegExp(`\\b(refs|resolves|closes|fixes)\\s+#${n}\\b`, 'i').test(d.prBody || '');
+  const entregasDelPR = Object.entries(ARCHIVO_DE_ENTREGA)
+    .filter(([, archivo]) => d.contenidos[carpeta + archivo] !== undefined)
+    .map(([entrega]) => entrega);
+  if (!issues.padre && !Object.keys(issues).length) {
+    ok(false, `No encontré las issues del Sprint 4 del equipo ${equipo} (etiquetas \`tecnm-sprint-4\` y \`equipo-${equipo}\`).`);
+  } else if (entregasDelPR.length) {
+    for (const entrega of entregasDelPR) {
+      const sub = issues[entrega];
+      if (!sub) ok(false, `No encontré la sub-issue de "${entrega}" del equipo ${equipo}.`);
+      else ok(menciona(sub), `La descripción del PR dice \`Resolves #${sub}\` (sub-issue de ${entrega}).`);
+    }
   } else {
-    const re = new RegExp(`\\b(refs|resolves|closes|fixes)\\s+#${issue}\\b`, 'i');
-    ok(re.test(d.prBody || ''), `La descripción del PR dice \`Refs #${issue}\` (o \`Resolves #${issue}\` en el último PR).`);
+    const todas = Object.values(issues);
+    ok(todas.some(menciona), `La descripción del PR dice \`Refs #\` con una issue del equipo ${equipo} (${todas.map((n) => '#' + n).join(', ')}).`);
   }
+  const issue = issues[entregasDelPR[0]] || issues.padre;
 
   // 3. Sin PDF, fotos, audio, video ni documentos de Office.
   const prohibidos = d.archivos.filter((a) => a.status !== 'removed' && a.path.startsWith('docs/gestion/') && EXT_PROHIBIDAS.test(a.path));

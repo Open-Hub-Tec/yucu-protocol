@@ -1,7 +1,7 @@
 // Pruebas de validar-entregas.mjs. Correr con: node --test .github/scripts/validar-entregas.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validar, formatear, estadoDeCarta } from './validar-entregas.mjs';
+import { validar, formatear, estadoDeCarta, mapearIssues } from './validar-entregas.mjs';
 
 const C = 'docs/gestion/equipo-3/';
 const PROPUESTA = [
@@ -12,11 +12,11 @@ const PROPUESTA = [
 
 function base(extra = {}) {
   return {
-    prBody: 'Refs #199',
+    prBody: 'Resolves #301',
     archivos: [{ path: C + 'propuesta.md', status: 'added' }],
     contenidos: { [C + 'propuesta.md']: PROPUESTA },
     archivosDelEquipo: [C + 'propuesta.md'],
-    issuesPorEquipo: { 3: 199 },
+    issuesPorEquipo: { 3: { padre: 199, 'Propuesta Final': 301, 'Plan de informe': 302, 'Carta de entendimiento': 303 } },
     autor: 'alumna1',
     autoresCommits: ['alumna1', 'alumno2'],
     revisiones: [{ login: 'alumno2', state: 'APPROVED' }],
@@ -31,9 +31,26 @@ test('propuesta completa cumple', () => {
   assert.ok(todoBien(r), JSON.stringify(r.minimos));
 });
 
-test('sin referencia a la issue no cumple', () => {
+test('cada entrega debe citar su propia sub-issue', () => {
   assert.ok(!todoBien(validar(base({ prBody: 'Mi propuesta' }))));
-  assert.ok(!todoBien(validar(base({ prBody: 'Refs #198' }))));
+  assert.ok(!todoBien(validar(base({ prBody: 'Refs #199' }))), 'la issue principal no basta');
+  assert.ok(!todoBien(validar(base({ prBody: 'Resolves #302' }))), 'la sub-issue de otra entrega no sirve');
+});
+
+test('un PR sin entrega principal (solo minutas) acepta cualquier issue del equipo', () => {
+  const d = { archivos: [{ path: C + 'minutas/2026-11-20.md', status: 'added' }], contenidos: { [C + 'minutas/2026-11-20.md']: 'Acuerdo' } };
+  assert.ok(todoBien(validar(base({ ...d, prBody: 'Refs #199' }))));
+  assert.ok(!todoBien(validar(base({ ...d, prBody: 'Refs #1' }))));
+});
+
+test('mapea la issue principal y las sub-issues por etiquetas', () => {
+  const m = mapearIssues([
+    { number: 199, labels: [{ name: 'tecnm-sprint-4' }, { name: 'equipo-3' }] },
+    { number: 301, labels: ['tecnm-sprint-4', 'equipo-3', 'entrega-propuesta'] },
+    { number: 303, labels: [{ name: 'equipo-3' }, { name: 'entrega-carta' }] },
+    { number: 400, labels: [{ name: 'equipo-3' }], pull_request: {} },
+  ]);
+  assert.deepEqual(m, { 3: { padre: 199, 'Propuesta Final': 301, 'Carta de entendimiento': 303 } });
 });
 
 test('sección faltante o fuera de orden no cumple', () => {
@@ -70,6 +87,7 @@ test('mezclar dos equipos no cumple', () => {
 test('plan de informe pide sus partes, el informe real y la plantilla de minuta', () => {
   const plan = '## Destinatarios\n## Matriz de comunicación\n## Formato del informe\n## Indicadores\n## Semáforo\n## Herramientas';
   const d = {
+    prBody: 'Resolves #302',
     archivos: [{ path: C + 'plan-de-informe.md', status: 'added' }],
     contenidos: { [C + 'plan-de-informe.md']: plan },
   };
@@ -89,6 +107,7 @@ test('estado de la carta', () => {
 test('carta firmada pide huella y minuta', () => {
   const huella = 'b'.repeat(64);
   const d = (texto, archivos) => base({
+    prBody: 'Refs #303',
     archivos: [{ path: C + 'carta.md', status: 'modified' }],
     contenidos: { [C + 'carta.md']: texto },
     archivosDelEquipo: archivos,
@@ -112,5 +131,6 @@ test('el comentario lleva la marca y el resultado', () => {
   const { cumple, texto } = formatear(validar(base()));
   assert.ok(cumple);
   assert.match(texto, /validar-entregas-sprint4/);
+  assert.match(texto, /Resolves #301/);
   assert.match(texto, /Cumple los requisitos mínimos/);
 });

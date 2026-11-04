@@ -41,7 +41,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { validar, formatear, MARCA } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/validar-entregas.mjs`);
+            const { validar, formatear, mapearIssues, MARCA } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/validar-entregas.mjs`);
             const pr = context.payload.pull_request;
             const { owner, repo } = context.repo;
             const head = { owner: pr.head.repo.owner.login, repo: pr.head.repo.name, ref: pr.head.sha };
@@ -77,14 +77,9 @@ jobs:
               }
             }
 
-            // Issue del Sprint 4 de cada equipo.
-            const issuesPorEquipo = {};
+            // Issue principal y sub-issues (propuesta, plan, carta) de cada equipo.
             const issues = await github.paginate(github.rest.issues.listForRepo, { owner, repo, labels: 'tecnm-sprint-4', state: 'all', per_page: 100 });
-            for (const i of issues) {
-              if (i.pull_request) continue;
-              const n = i.labels.map((l) => (typeof l === 'string' ? l : l.name)).map((l) => l.match(/^equipo-(\d+)$/)?.[1]).find(Boolean);
-              if (n) issuesPorEquipo[n] = i.number;
-            }
+            const issuesPorEquipo = mapearIssues(issues);
 
             const commits = await github.paginate(github.rest.pulls.listCommits, { owner, repo, pull_number: pr.number, per_page: 100 });
             const revisiones = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: pr.number, per_page: 100 });
