@@ -1,11 +1,13 @@
 /**
  * Yucu Core - Índice Público del Núcleo de Dominio
  * Punto de entrada único para React, PWA, Apps Android o Servicios Externos.
+ *
+ * Nota (ADR-003, #105): `StellarLiveClient` NO se reexporta aquí para que
+ * `@stellar/stellar-sdk` nunca llegue al bundle de la interfaz de usuario.
  */
 
 export * from './hooks/useYucuProtocol';
 export * from './agents/YucuAgentSwarm';
-export * from './blockchain/StellarLiveClient';
 export * from './blockchain/StellarRavenBridge';
 export * from './crypto/CryptoEngine';
 export * from './sync/SyncEngine';
@@ -24,7 +26,7 @@ import { SorobanAdapter, DEFAULT_STELLAR_CONFIG } from './blockchain/SorobanAdap
 import { HybridSettlementOrchestrator } from './settlement/HybridSettlementOrchestrator';
 import { RaizAuthEngine } from './auth/RaizAuthEngine';
 import { RaizAIOracles } from './ai/RaizAIOracles';
-import { RaizProtocolSDK, raizProtocol } from './sdk/RaizProtocolSDK';
+import { raizProtocol } from './sdk/RaizProtocolSDK';
 
 export const RaizCore = {
   crypto: CryptoEngine,
@@ -35,7 +37,7 @@ export const RaizCore = {
   auth: RaizAuthEngine,
   ai: RaizAIOracles,
   sdk: raizProtocol,
-  
+
   /**
    * Inicializa los servicios del Core en el ciclo de vida de la app
    */

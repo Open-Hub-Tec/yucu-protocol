@@ -1,24 +1,22 @@
 /**
  * Yucu Core - Cliente Oficial de Stellar & Soroban RPC (@stellar/stellar-sdk)
- * 
- * Implementa conectividad directa con Horizon y Soroban RPC:
- * - Generación de llaves Ed25519 con derivación determinista rural
- * - Construcción y serialización XDR de transacciones
- * - Envoltura Fee-Bump (CAP-0015) para transacciones 100% patrocinadas
+ *
+ * Implementa conectividad del lado del servidor con Horizon y Soroban RPC:
+ * - Consulta de estado de la red y número de ledger
+ * - Envoltura Fee-Bump (CAP-0015) en el servidor leyendo STELLAR_SPONSOR_SECRET desde .env
  * - Conversión de tipos nativos a ScVal de Soroban
- * - Simulación de contratos en Soroban Testnet y Mainnet
+ * - Simulación de contratos en Soroban Testnet
+ *
+ * Regla no custodial (ADR-003): este módulo NUNCA genera ni deriva llaves de usuarios,
+ * ni recibe ni devuelve llaves secretas (S...) por parámetro.
  */
 
-import crypto from 'crypto';
 import {
   Keypair,
   Networks,
   Horizon,
   rpc,
   TransactionBuilder,
-  Account,
-  Operation,
-  Address,
   nativeToScVal,
   scValToNative,
   xdr,
@@ -59,26 +57,39 @@ export class StellarLiveClient {
   }
 
   /**
-   * Consulta el estado en vivo de la red y el último número de ledger
+   * Consulta el estado de la red y el último número de ledger.
+   * Si la red no responde en entornos sin conexión, devuelve un estado de demostración con `source: 'simulated'`.
    */
   public async getLatestLedger(): Promise<{
+    source: 'testnet' | 'simulated';
     network: string;
     latestLedger: number;
     protocolVersion: number;
     status: 'ONLINE' | 'OFFLINE';
   }> {
     try {
-      const sorobanHealth = await this.sorobanServer.getHealth();
-      const latestLedger = sorobanHealth.latestLedger || 52410982;
+      if (process.env.YUCU_LIVE_RPC === '1') {
+        const sorobanHealth = await this.sorobanServer.getHealth();
+        if (sorobanHealth.latestLedger) {
+          return {
+            source: 'testnet',
+            network: this.config.network,
+            latestLedger: sorobanHealth.latestLedger,
+            protocolVersion: 22,
+            status: sorobanHealth.status === 'healthy' ? 'ONLINE' : 'OFFLINE',
+          };
+        }
+      }
       return {
+        source: 'simulated',
         network: this.config.network,
-        latestLedger,
+        latestLedger: 52410982,
         protocolVersion: 22,
-        status: sorobanHealth.status === 'healthy' ? 'ONLINE' : 'ONLINE',
+        status: 'ONLINE',
       };
     } catch {
-      // Fallback robusto en caso de latencia de red
       return {
+        source: 'simulated',
         network: this.config.network,
         latestLedger: 52410982,
         protocolVersion: 22,
@@ -88,62 +99,44 @@ export class StellarLiveClient {
   }
 
   /**
-   * Genera un par de llaves Ed25519 nativo de Stellar (G... / S...)
+   * Convierte un valor de TypeScript a ScVal tipado de Soroban.
    */
-  public generateRandomKeypair(): {
-    publicKey: string;
-    secretKey: string;
-  } {
-    const pair = Keypair.random();
-    return {
-      publicKey: pair.publicKey(),
-      secretKey: pair.secret(),
-    };
+  public toScVal(value: unknown, typeHint?: string): xdr.ScVal {
+    return typeHint ? nativeToScVal(value, { type: typeHint }) : nativeToScVal(value);
   }
 
   /**
-   * Deriva de forma determinista una llave pública Ed25519 para un campesino
-   * a partir de su número telefónico y sal comunitaria (Zero-Seed Phrase)
+   * Convierte un ScVal de Soroban a tipo nativo de JavaScript/TypeScript.
    */
-  public deriveRuralKeypair(seedString: string): {
-    publicKey: string;
-    keypair: Keypair;
-  } {
-    // Genera un buffer de 32 bytes criptográficamente uniforme con SHA-256
-    const hash = crypto.createHash('sha256').update(`yucu-protocol-salt-mixteca-v1-${seedString}`).digest();
-    const keypair = Keypair.fromRawEd25519Seed(hash);
-    return {
-      publicKey: keypair.publicKey(),
-      keypair,
-    };
-  }
-
-  /**
-   * Convierte un valor de TypeScript a ScVal tipado de Soroban
-   */
-  public toScVal(value: any, typeHint?: string): xdr.ScVal {
-    return nativeToScVal(value, { type: typeHint as any });
-  }
-
-  /**
-   * Convierte un ScVal de Soroban a tipo nativo de JavaScript/TypeScript
-   */
-  public fromScVal(scVal: xdr.ScVal): any {
+  public fromScVal(scVal: xdr.ScVal): unknown {
     return scValToNative(scVal);
   }
 
   /**
-   * Construye un envoltorio Fee-Bump (CAP-0015) para patrocinar el gas
-   * de un agricultor o artesano sin que este tenga saldo de XLM
+   * Construye un envoltorio Fee-Bump (CAP-0015) en el servidor para patrocinar la comisión
+   * sin recibir llaves secretas por parámetro ni alterar la transacción interna firmada por el usuario.
+   * La llave de la cuenta patrocinadora de la plataforma se lee exclusivamente de `process.env.STELLAR_SPONSOR_SECRET`.
    */
-  public buildSponsoredFeeBump(innerTxXdr: string, sponsorSecretKey: string): string {
-    const sponsorKeypair = Keypair.fromSecret(sponsorSecretKey);
-    const innerTx = TransactionBuilder.fromXDR(innerTxXdr, this.config.networkPassphrase);
-    
+  public buildSponsoredFeeBump(innerTxXdr: string): string {
+    if (typeof window !== 'undefined') {
+      throw new Error('El patrocinio fee-bump solo se ejecuta en el servidor.');
+    }
+
+    const sponsorSecret = process.env.STELLAR_SPONSOR_SECRET?.trim();
+    if (!sponsorSecret) {
+      throw new Error('Falta configurar STELLAR_SPONSOR_SECRET en el entorno del servidor.');
+    }
+
+    const sponsorKeypair = Keypair.fromSecret(sponsorSecret);
+    const parsedTx = TransactionBuilder.fromXDR(innerTxXdr, this.config.networkPassphrase);
+    if ('innerTransaction' in parsedTx) {
+      throw new Error('La transacción recibida ya es un FeeBumpTransaction.');
+    }
+
     const feeBumpTx = TransactionBuilder.buildFeeBumpTransaction(
       sponsorKeypair,
-      '200000', // Stroops máximos (~0.02 XLM para cubrir operaciones)
-      innerTx as any,
+      '200000',
+      parsedTx,
       this.config.networkPassphrase
     );
 
@@ -152,7 +145,7 @@ export class StellarLiveClient {
   }
 
   /**
-   * Simula la invocación de una función de contrato inteligente en Soroban
+   * Simula la invocación de una función de contrato inteligente en Soroban.
    */
   public async simulateContractInvocation(params: {
     contractId: string;
@@ -160,15 +153,15 @@ export class StellarLiveClient {
     args: xdr.ScVal[];
     callerPublicKey?: string;
   }): Promise<{
+    source: 'simulated';
     simulated: boolean;
     contractId: string;
     functionName: string;
     gasFeeXLM: string;
     resultPreview: string;
   }> {
-    const dummyCaller = params.callerPublicKey || 'GPRODUCER_DON_EUTIQUIO_YUCUHITI_5541';
-    
     return {
+      source: 'simulated',
       simulated: true,
       contractId: params.contractId,
       functionName: params.functionName,
