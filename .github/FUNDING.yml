@@ -1,5 +1,4 @@
-# GitHub Funding Configuration for Yucu Protocol & Open Hub TecNM
-custom:
-  - 'https://drips.network/app/drip?receiver=Open-Hub-Tec'
-  - 'https://stellar.org/community'
+# Funding links shown in the "Sponsor" button of the repository.
 github: [josealfredo79]
+custom:
+  - 'https://www.drips.network/app/projects/github/Open-Hub-Tec/yucu-protocol'
