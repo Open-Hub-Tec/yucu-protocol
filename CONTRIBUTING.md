@@ -70,8 +70,8 @@ cargo test --locked
 1. Open a PR against `main` and write **`Resolves #<issue number>`** in the description.
 2. Explain how you tested it.
 3. Two bots comment on your PR within a minute:
-   * **Validar código** checks the fixed rules of `AGENTS.md`: tests included, screens only talk to the ports, no new `any` or `@ts-ignore`, no secrets or personal data.
-   * **Validar entregas** checks course deliverables in `docs/gestion/`.
+   * **Code rules check** verifies the fixed rules of `AGENTS.md`: tests included, screens only talk to the ports, no new `any` or `@ts-ignore`, no secrets or personal data.
+   * **Validar entregas** checks course deliverables in `docs/gestion/` (in Spanish, for TecNM students).
 
    If a bot shows ❌, fix it on the same branch: it checks again on every push.
 4. A maintainer reviews it. **Be ready to explain your code**: a PR you cannot explain is not merged, even if it works. AI-generated code is welcome only when it is tested and you understand it.
