@@ -87,15 +87,15 @@ test('porcentajes a mano y hashes inventados solo avisan', () => {
 });
 
 test('avisa si no está asignado, si la issue no es W* o si agrega dependencias', () => {
-  assert.ok(validarCodigo(base({ autor: 'otra' })).avisos.some((a) => a.includes('no está asignado')));
-  assert.ok(validarCodigo(base({ issues: [{ number: 5, title: 'Arreglo', state: 'open', assignees: [] }], prBody: 'Resolves #5' })).avisos.some((a) => a.includes('no es una W')));
+  assert.ok(validarCodigo(base({ autor: 'otra' })).avisos.some((a) => a.includes('is not assigned')));
+  assert.ok(validarCodigo(base({ issues: [{ number: 5, title: 'Arreglo', state: 'open', assignees: [] }], prBody: 'Resolves #5' })).avisos.some((a) => a.includes('not a W*')));
   const dep = validarCodigo(base({ archivos: [...base().archivos, { path: 'package.json', status: 'modified', patch: parche('    "left-pad": "^1.3.0",') }] }));
-  assert.ok(dep.avisos.some((a) => a.includes('dependencias')));
+  assert.ok(dep.avisos.some((a) => a.includes('dependencies')));
 });
 
 test('el comentario lleva la marca y el resultado', () => {
   const { cumple, texto } = formatearCodigo(validarCodigo(base()));
   assert.ok(cumple);
   assert.match(texto, /validar-codigo/);
-  assert.match(texto, /Cumple las reglas fijas/);
+  assert.match(texto, /Passes the fixed rules/);
 });

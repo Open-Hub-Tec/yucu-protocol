@@ -13,16 +13,16 @@ const ES_PRUEBA = /^src\/tests\/.+\.test\.(ts|tsx)$/;
 const ES_UI = /^src\/(components\/|hooks\/|App\.tsx$|main\.tsx$)/;
 const IMPORTS_PROHIBIDOS_UI = [
   [/['"]@stellar\/stellar-sdk['"]/, '`@stellar/stellar-sdk`'],
-  [/['"]@google\/genai['"]/, 'el proveedor de IA (`@google/genai`)'],
-  [/SimulatedChain['"]/, '`SimulatedChain` (usen `chain` de `src/core/chain`)'],
-  [/trustless/i, 'Trustless Work directamente'],
+  [/['"]@google\/genai['"]/, 'the AI provider (`@google/genai`)'],
+  [/SimulatedChain['"]/, '`SimulatedChain` (use `chain` from `src/core/chain`)'],
+  [/trustless/i, 'Trustless Work directly'],
 ];
 const RE_ANY = /(:\s*any\b|\bas\s+any\b|<any>|\bany\[\])/;
 const RE_TS_IGNORE = /@ts-(ignore|nocheck)/;
 const SECRETOS = [
-  [/\bS[A-Z2-7]{55}\b/, 'una llave secreta de Stellar (`S…`)'],
-  [/AIza[0-9A-Za-z_-]{35}/, 'una llave de Google/Gemini'],
-  [/GEMINI_API_KEY\s*[:=]\s*['"][^'"\s]{8,}/, 'un valor de `GEMINI_API_KEY`'],
+  [/\bS[A-Z2-7]{55}\b/, 'a Stellar secret key (`S…`)'],
+  [/AIza[0-9A-Za-z_-]{35}/, 'a Google/Gemini API key'],
+  [/GEMINI_API_KEY\s*[:=]\s*['"][^'"\s]{8,}/, 'a `GEMINI_API_KEY` value'],
 ];
 const RE_CONTROL = /(?<![\w])[A-Za-z]?\d{2}620\d{3}(?![\w])/;
 const RE_CURP = /\b[A-Z][AEIOUX][A-Z]{2}\d{6}[HM][A-Z]{5}[A-Z0-9]\d\b/;
@@ -59,13 +59,13 @@ export function validarCodigo(d) {
   // 1. Ligado a una issue.
   const citadas = issuesCitadas(d.prBody);
   ok(citadas.length > 0, citadas.length
-    ? `El PR dice resolver ${citadas.map((n) => '#' + n).join(', ')}.`
-    : 'La descripción del PR debe decir `Resolves #<número>` con la issue que resuelve.');
+    ? `The PR resolves ${citadas.map((n) => '#' + n).join(', ')}.`
+    : 'The PR description must say `Resolves #<number>` with the issue it resolves.');
   const w = d.issues.filter((i) => /^\[W\d+\]/.test(i.title));
-  if (citadas.length && !w.length) avisos.push('La issue citada no es una W*. Si es trabajo de clase de la Unidad 5, citen su issue W*.');
+  if (citadas.length && !w.length) avisos.push('The cited issue is not a W* issue. If this is course work, cite your W* issue.');
   for (const i of w) {
-    if (i.state !== 'open') avisos.push(`La issue #${i.number} ya está cerrada.`);
-    if (!i.assignees.includes(d.autor)) avisos.push(`\`${d.autor}\` no está asignado a #${i.number}. Pidan al docente que los asigne antes de programar.`);
+    if (i.state !== 'open') avisos.push(`Issue #${i.number} is already closed.`);
+    if (!i.assignees.includes(d.autor)) avisos.push(`\`${d.autor}\` is not assigned to #${i.number}. Ask a maintainer to assign you before you start coding.`);
   }
 
   // 2. Pruebas.
@@ -73,8 +73,8 @@ export function validarCodigo(d) {
   const pruebas = vivos.filter((a) => ES_PRUEBA.test(a.path));
   if (codigo.length) {
     ok(pruebas.length > 0, pruebas.length
-      ? `Trae pruebas: ${pruebas.map((a) => '`' + a.path + '`').join(', ')}.`
-      : 'El PR cambia código en `src/` pero no agrega ni cambia pruebas en `src/tests/`. AGENTS.md pide una prueba positiva y una negativa por cada regla nueva.');
+      ? `Includes tests: ${pruebas.map((a) => '`' + a.path + '`').join(', ')}.`
+      : 'The PR changes code in `src/` but adds or changes no tests in `src/tests/`. AGENTS.md asks for a positive and a negative test for every new rule.');
   }
   const nuevas = pruebas.filter((a) => a.status === 'added');
   if (nuevas.length) {
@@ -82,22 +82,22 @@ export function validarCodigo(d) {
     try { script = JSON.parse(d.packageJson || '{}')?.scripts?.test || ''; } catch { script = ''; }
     const faltan = nuevas.filter((a) => !script.includes(a.path));
     ok(faltan.length === 0, faltan.length
-      ? `Estas pruebas nuevas no están en el script \`test\` de \`package.json\`, así que no se ejecutarían: ${faltan.map((a) => '`' + a.path + '`').join(', ')}.`
-      : 'Las pruebas nuevas están en el script `test` de `package.json`.');
+      ? `These new tests are not in the \`test\` script of \`package.json\`, so they would never run: ${faltan.map((a) => '`' + a.path + '`').join(', ')}.`
+      : 'The new tests are in the `test` script of `package.json`.');
   }
 
   // 3. Reglas sobre las líneas agregadas.
   const hallazgos = { ui: [], any: [], ignore: [], secreto: [], privacidad: [], porcentaje: [], hash: [] };
   for (const a of vivos) {
     if (a.patch === undefined && ES_CODIGO.test(a.path)) {
-      avisos.push(`GitHub no mostró los cambios de \`${a.path}\` (archivo muy grande); no lo revisé.`);
+      avisos.push(`GitHub did not show the changes of \`${a.path}\` (file too large); it was not checked.`);
       continue;
     }
     const lineas = lineasAgregadas(a.patch);
     const esPrueba = a.path.startsWith('src/tests/');
     for (const l of lineas) {
       if (ES_UI.test(a.path) && /\b(import|require)\b/.test(l)) {
-        for (const [re, nombre] of IMPORTS_PROHIBIDOS_UI) if (re.test(l)) hallazgos.ui.push(`\`${a.path}\` importa ${nombre}`);
+        for (const [re, nombre] of IMPORTS_PROHIBIDOS_UI) if (re.test(l)) hallazgos.ui.push(`\`${a.path}\` imports ${nombre}`);
       }
       if (/\.(ts|tsx)$/.test(a.path)) {
         if (RE_ANY.test(l.replace(/\/\/.*$/, ''))) hallazgos.any.push(a.path);
@@ -111,46 +111,46 @@ export function validarCodigo(d) {
   }
   const unicos = (xs) => [...new Set(xs)];
   ok(!hallazgos.ui.length, hallazgos.ui.length
-    ? `Las pantallas solo hablan con los puertos (AGENTS.md, regla 4): ${unicos(hallazgos.ui).join('; ')}.`
-    : 'Ninguna pantalla importa Stellar, Trustless Work, la IA ni `SimulatedChain` directamente.');
+    ? `Screens only talk to the ports (AGENTS.md, rule 4): ${unicos(hallazgos.ui).join('; ')}.`
+    : 'No screen imports Stellar, Trustless Work, the AI provider or `SimulatedChain` directly.');
   ok(!hallazgos.any.length && !hallazgos.ignore.length, hallazgos.any.length || hallazgos.ignore.length
-    ? `TypeScript estricto: hay ${hallazgos.any.length ? '`any` nuevos en ' + unicos(hallazgos.any).map((p) => '`' + p + '`').join(', ') : ''}${hallazgos.any.length && hallazgos.ignore.length ? ' y ' : ''}${hallazgos.ignore.length ? '`@ts-ignore` en ' + unicos(hallazgos.ignore).map((p) => '`' + p + '`').join(', ') : ''}.`
-    : 'Sin `any` nuevos ni `@ts-ignore`.');
+    ? `Strict TypeScript: there are ${hallazgos.any.length ? 'new `any` in ' + unicos(hallazgos.any).map((p) => '`' + p + '`').join(', ') : ''}${hallazgos.any.length && hallazgos.ignore.length ? ' and ' : ''}${hallazgos.ignore.length ? '`@ts-ignore` in ' + unicos(hallazgos.ignore).map((p) => '`' + p + '`').join(', ') : ''}.`
+    : 'No new `any` and no `@ts-ignore`.');
   ok(!hallazgos.secreto.length, hallazgos.secreto.length
-    ? `Hay posibles secretos en el código: ${unicos(hallazgos.secreto).join('; ')}. Van en \`.env\`, nunca en el repo. Si ya se subió una llave real, hay que cambiarla.`
-    : 'Sin llaves ni secretos.');
+    ? `Possible secrets in the code: ${unicos(hallazgos.secreto).join('; ')}. They belong in \`.env\`, never in the repo. If a real key was pushed, it must be rotated.`
+    : 'No keys or secrets.');
   ok(!hallazgos.privacidad.length, hallazgos.privacidad.length
-    ? `Posibles números de control o CURP en: ${unicos(hallazgos.privacidad).map((p) => '`' + p + '`').join(', ')}.`
-    : 'Sin números de control ni CURP.');
-  if (hallazgos.porcentaje.length) avisos.push(`Parece haber comisiones o porcentajes escritos a mano en ${unicos(hallazgos.porcentaje).map((p) => '`' + p + '`').join(', ')}. Deben salir de \`src/config/protocolFees.ts\` (AGENTS.md, regla 7).`);
-  if (hallazgos.hash.length) avisos.push(`Hay hashes de 64 caracteres escritos a mano en ${unicos(hallazgos.hash).map((p) => '`' + p + '`').join(', ')}. Solo \`SimulatedChain.ts\` puede inventar resultados, y con \`source: 'simulated'\` (regla 3).`);
+    ? `Possible student control numbers or CURP in: ${unicos(hallazgos.privacidad).map((p) => '`' + p + '`').join(', ')}.`
+    : 'No student control numbers or CURP.');
+  if (hallazgos.porcentaje.length) avisos.push(`Fees or percentages seem to be hard-coded in ${unicos(hallazgos.porcentaje).map((p) => '`' + p + '`').join(', ')}. They must come from \`src/config/protocolFees.ts\` (AGENTS.md, rule 7).`);
+  if (hallazgos.hash.length) avisos.push(`Hard-coded 64-character hashes in ${unicos(hallazgos.hash).map((p) => '`' + p + '`').join(', ')}. Only \`SimulatedChain.ts\` may invent results, and with \`source: 'simulated'\` (rule 3).`);
 
   // 4. Otros avisos.
   if (vivos.some((a) => a.path === 'package.json' && /^\+\s*"[^"]+":\s*"[\^~]?\d/m.test(a.patch || ''))) {
-    avisos.push('El PR parece agregar o cambiar dependencias en `package.json`. Expliquen en el PR por qué hacen falta.');
+    avisos.push('The PR seems to add or change dependencies in `package.json`. Explain in the PR why they are needed.');
   }
   if (vivos.some((a) => a.path.startsWith('contracts/'))) {
-    avisos.push('Toca `contracts/`: corran `cargo fmt --all`, `cargo clippy --locked --all-targets -- -D warnings` y `cargo test --locked`.');
+    avisos.push('It touches `contracts/`: run `cargo fmt --all`, `cargo clippy --locked --all-targets -- -D warnings` and `cargo test --locked`.');
   }
 
   const conteo = {};
-  for (const a of d.autoresCommits) conteo[a || '(sin cuenta de GitHub)'] = (conteo[a || '(sin cuenta de GitHub)'] || 0) + 1;
+  for (const a of d.autoresCommits) conteo[a || '(no GitHub account)'] = (conteo[a || '(no GitHub account)'] || 0) + 1;
   const aprobaron = [...new Set(d.revisiones.filter((r) => r.state === 'APPROVED' && r.login !== d.autor).map((r) => r.login))];
-  if (!aprobaron.length) avisos.push('Todavía nadie más aprobó el PR. Pidan revisión a otro integrante o al equipo pareja.');
+  if (!aprobaron.length) avisos.push('Nobody else has approved the PR yet. Ask a teammate or another contributor for a review.');
 
   return { minimos, avisos, conteo, aprobaron, citadas };
 }
 
 export function formatearCodigo(r) {
   const cumple = r.minimos.every((m) => m.cumple);
-  const l = [MARCA_CODIGO, '## Revisión automática · reglas de AGENTS.md', ''];
+  const l = [MARCA_CODIGO, '## Automated check · AGENTS.md rules', ''];
   l.push(cumple
-    ? '✅ **Cumple las reglas fijas.** Falta que el CI (lint, pruebas y build) salga en verde y la revisión del docente.'
-    : '❌ **No cumple las reglas fijas.** Corríjanlo en esta misma rama; la revisión se repite sola con cada push.');
-  l.push('', '### Reglas', ...r.minimos.map((m) => `- ${m.cumple ? '✅' : '❌'} ${m.texto}`));
-  l.push('', '### Trabajo en equipo', ...Object.entries(r.conteo).map(([u, n]) => `- \`${u}\`: ${n} commit(s)`));
-  if (r.aprobaron.length) l.push(`- Aprobado por: ${r.aprobaron.map((u) => '`' + u + '`').join(', ')}`);
-  if (r.avisos.length) l.push('', '### Avisos (no bloquean)', ...r.avisos.map((a) => `- ⚠️ ${a}`));
-  l.push('', '---', '*Esta revisión solo comprueba reglas fijas de [AGENTS.md](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/AGENTS.md). Antes de pedir revisión, corran `npm run lint`, `npm test` y `npm run build`. En la revisión tendrán que explicar su código.*');
+    ? '✅ **Passes the fixed rules.** CI (lint, tests and build) must also be green, and a maintainer will review it.'
+    : '❌ **Does not pass the fixed rules.** Fix it on this same branch; the check runs again on every push.');
+  l.push('', '### Rules', ...r.minimos.map((m) => `- ${m.cumple ? '✅' : '❌'} ${m.texto}`));
+  l.push('', '### Contributors', ...Object.entries(r.conteo).map(([u, n]) => `- \`${u}\`: ${n} commit(s)`));
+  if (r.aprobaron.length) l.push(`- Approved by: ${r.aprobaron.map((u) => '`' + u + '`').join(', ')}`);
+  if (r.avisos.length) l.push('', '### Warnings (not blocking)', ...r.avisos.map((a) => `- ⚠️ ${a}`));
+  l.push('', '---', '*This check only covers fixed rules from [AGENTS.md](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/AGENTS.md). Before asking for review, run `npm run lint`, `npm test` and `npm run build`. In the review you will have to explain your code.*');
   return { cumple, texto: l.join('\n') };
 }
