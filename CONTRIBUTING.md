@@ -1,157 +1,105 @@
-# 🎓 Developer & Contributor Guide: Yucu Protocol
-### *TecNM Campus Tlaxiaco • Stellar Community Fund • Drips Network*
+# Contributing to Yucu Protocol
 
-Welcome to the engineering team of **Yucu Protocol**! 🌿
+Yucu is an open-source prototype on Stellar testnet, built by students of the Instituto Tecnológico de Tlaxiaco (TecNM) and open to contributors from anywhere. Thank you for helping.
 
-This project is engineered by computer systems engineering student-researchers and faculty at **Instituto Tecnológico de Tlaxiaco (Oaxaca, Mexico)** in collaboration with the global open-source Web3 ecosystem.
-
-Contributions here deliver real-world impact: validating smallholder harvests, protecting indigenous artisans in the Mixteca Highlands, and contributing to public goods infrastructure funded by **Drips Network** and the **Stellar Community Fund (SCF)**.
+Before you write code, read [`AGENTS.md`](./AGENTS.md). Its rules apply to people and AI assistants alike, and the CI checks several of them automatically. By taking part you agree to the [Code of conduct](./CODE_OF_CONDUCT.md).
 
 ---
 
-## 🚀 1. Local Development Setup (In 3 Steps)
+## 1. Pick an issue
 
-### Prerequisites:
-- **Node.js 22** (the exact version is in `.nvmrc`; with nvm run `nvm use`).
-- **Rust 1.94** with `rustup target add wasm32v1-none` (only if you work on `contracts/`).
-- **Git**.
+There are two kinds of issues:
 
-### Step 1: Clone the repository
+| Kind | How to recognize it | Who can take it |
+|---|---|---|
+| **Open issues** | Not assigned to anyone. Look for [`good first issue`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/good%20first%20issue) or [`help wanted`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/help%20wanted) if you are new | **Anyone** |
+| **Course issues** | Label [`tecnm-sprint-4`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/tecnm-sprint-4), or an issue already assigned to a TecNM student team | Only the assigned team |
+
+1. Comment on the issue asking to be assigned. **Wait for the assignment before you start**: one person or team per issue.
+2. Read the issue's acceptance criteria and the ADRs it links to.
+
+Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository takes part in an active Wave. There is no guaranteed reward.
+
+---
+
+## 2. Set up
+
+Requires **Node 22** ([`.nvmrc`](./.nvmrc)) and Git. Rust 1.94 with `rustup target add wasm32v1-none` is only needed for [`contracts/`](./contracts/).
+
 ```bash
-git clone https://github.com/Open-Hub-Tec/yucu-protocol.git
+git clone https://github.com/Open-Hub-Tec/yucu-protocol.git   # or your fork
 cd yucu-protocol
+nvm use
+npm ci          # exact versions from package-lock.json, same as CI
+npm run dev     # http://localhost:3000
 ```
 
-### Step 2: Install dependencies
-```bash
-npm ci
-```
-`npm ci` installs exactly the versions in `package-lock.json`, the same ones CI uses. Only use `npm install <package>` when you intentionally add a dependency, and commit the updated `package-lock.json`.
-
-### Step 3: Start the local development server
-```bash
-npm run dev
-```
-
-Open your browser at `http://localhost:3000`. You now have Yucu Protocol running locally!
+Use `npm install <package>` only when you intentionally add a dependency, and explain why in the PR.
 
 ---
 
-## 🧭 2. Finding & Claiming Tasks on GitHub
+## 3. Work on a branch
 
-1. Visit our **GitHub Project Board**:  
-   👉 **[https://github.com/orgs/Open-Hub-Tec/projects/1](https://github.com/orgs/Open-Hub-Tec/projects/1)**
-2. Explore the **`Todo`** column for the current sprint.
-3. Select an issue aligned with your interest (e.g., `#18`, `#19`, `#20`, `#22`, etc.).
-4. Comment on the issue: *"Hi! I'm claiming this task for the TecNM research team"* and request assignment from `@josealfredo79`.
-
----
-
-## 🛠️ 3. Codebase Structure & Areas of Interest
-
-The repository is organized modularly by domain:
-
-| Domain / Specialization | Directory Path | What You Will Work On |
-| :--- | :--- | :--- |
-| **🎨 Frontend & Mobile UI** | `src/components/` | PWA user interface, tactile buttons, "Modo Abuelo" elder mode, public passport display, and modals. |
-| **🗣️ Mixteco Language & Audio** | `src/utils/audioRecorder.ts`<br>`src/core/ai/RaizAIOracles.ts` | 24kbps Opus recording, acoustic normalization, *Tu'un Savi* voice parsing. |
-| **🧠 AI Oracles & Verification** | `src/core/ai/RaizAIOracles.ts` | SCAA coffee cupping analysis, Sentinel-2 EUDR satellite anti-deforestation proofs, Gemini multimodal prompts. |
-| **🔐 Cryptography & Identity** | `src/core/crypto/`<br>`src/core/auth/` | Canonical SHA-256 Community Digest, Ed25519 signatures, zero-seed physical QR card authentication. |
-| **💳 Payments & Escrow** | `src/core/blockchain/TrustlessWorkEscrowAdapter.ts`<br>`src/core/settlement/` | Trustless Work Soroban escrow integration, Etherfuse SPEI off-ramps (Banco del Bienestar) and rural cash rails. |
-| **🦀 Smart Contracts in Rust (Soroban)** | `contracts/` | Soroban smart contracts: `lot_passport/`, `perpetual_royalties/`, and the attestation index and rules on top of Attest Protocol (ADR-005). `attestation_registry/` and `fair_escrow/` are practice material only. |
-
----
-
-## 🌿 4. Git Workflow Guidelines
-
-### 1. Synchronize your local main branch
 ```bash
-git checkout main
-git pull origin main
+git checkout main && git pull origin main
+git checkout -b feat/issue-112-payout-port     # or fix/issue-<n>-<topic>
 ```
 
-### 2. Create a feature branch
-Use clear, semantic branch naming including the issue number:
-```bash
-git checkout -b feature/issue-22-offline-qr-sync
-```
+* Keep changes small and focused on the issue. Do not reformat unrelated files.
+* Add a **positive and a negative test** for every new rule. A new file in `src/tests/` must also be added to the `test` script in `package.json`, or it will not run.
+* Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org/) style, for example `feat(chain): add PayoutPort with simulated version`.
 
-### 3. Implement and test your changes
-Verify changes as you code:
-```bash
-npm run test
-```
-
-### 4. Commit using Conventional Commits
-Write concise, descriptive commit messages in English:
-- `feat: add offline sync retry policy in SyncEngine`
-- `fix: correct touch target size for microphone in elder mode`
-- `docs: update Trustless Work escrow integration guide`
+Before opening the PR, all of these must pass:
 
 ```bash
-git add .
-git commit -m "feat: implement offline QR sync handler for issue #22"
-```
+npm run lint     # TypeScript, no errors
+npm test         # tests
+npm run build    # production build
 
-### 5. Push to GitHub
-```bash
-git push origin feature/issue-22-offline-qr-sync
-```
-
----
-
-## 🎁 5. Submitting Pull Requests & Drips Recognition
-
-1. Open [https://github.com/Open-Hub-Tec/yucu/pulls](https://github.com/Open-Hub-Tec/yucu/pulls) and click **"New Pull Request"**.
-2. **Important:** Link the relevant issue in your PR description:
-   ```markdown
-   Closes #22
-   ```
-   *(or `Resolves #18`, substituting your actual issue number).*
-3. Linking issues enables:
-   - Automated CI testing to ensure zero breaking regressions.
-   - Project maintainer review and eligibility attribution for Drips funding splits.
-4. Maintainers (`@josealfredo79`) will review your code, provide constructive feedback, and merge into `main`.
-
----
-
-## ✅ 6. Pre-Submission Checklist
-
-Before submitting your PR, execute the full test and lint suite:
-```bash
-npm run lint && npm run test
-```
-Ensure all tests pass cleanly with zero errors.
-
-If you touched `contracts/`, also run:
-```bash
+# Only if you changed contracts/
 cd contracts
-cargo fmt --all && cargo clippy --locked --all-targets -- -D warnings && cargo test --locked
+cargo fmt --all
+cargo clippy --locked --all-targets -- -D warnings
+cargo test --locked
 ```
 
-**Simulated results:** if your screen shows a result that does not come from a real source (payments, escrow, certifications, rule-based AI, test login, fixed metrics), add `<DemoBadge />` from `src/components/DemoBadge.tsx` next to its title and update the "real vs. simulated" table in the README.
+---
 
-**Privacy (mandatory for research and UX work):** never commit names of interviewees, student control numbers, audio, video, photos of people or signed PDFs. Publish by role and community (e.g. *"rebozo artisan, Amoltepec"*) and keep evidence in `.investigacion_privada/`. Read [`docs/research/PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md). The CI rejects PRs that add media files to `docs/research/`, `docs/ux-testing/` or `public/videos/`.
+## 4. Open the pull request
 
-`main` is protected: every change goes through a PR with green CI and one approving review from a code owner (see [`.github/CODEOWNERS`](./.github/CODEOWNERS)).
+1. Open a PR against `main` and write **`Resolves #<issue number>`** in the description.
+2. Explain how you tested it.
+3. Two bots comment on your PR within a minute:
+   * **Validar código** checks the fixed rules of `AGENTS.md`: tests included, screens only talk to the ports, no new `any` or `@ts-ignore`, no secrets or personal data.
+   * **Validar entregas** checks course deliverables in `docs/gestion/`.
+
+   If a bot shows ❌, fix it on the same branch: it checks again on every push.
+4. A maintainer reviews it. **Be ready to explain your code**: a PR you cannot explain is not merged, even if it works. AI-generated code is welcome only when it is tested and you understand it.
+
+`main` is protected: every change needs green CI and an approving review from a code owner ([`CODEOWNERS`](./.github/CODEOWNERS)).
 
 ---
 
-## 📚 7. Technical Documentation References
+## 5. Rules you must not break
 
-- [MVP Specification — draft (Tlaxiaco)](./docs/MVP_SPECIFICATION.md)
-- [System Architecture & Sequence Diagram](./docs/ARCHITECTURE.md)
-- [Protocol Specification (Stellar & Soroban)](./docs/PROTOCOL_SPECIFICATION.md)
-- [ADR-001: Trustless Work Escrow Adoption](./docs/adr/ADR-001-TRUSTLESS-WORK-ESCROW.md)
-- [ADR-002: Offline-First PWA & Zero-Seed Rural Identity Standards](./docs/adr/ADR-002-OFFLINE-FIRST-PWA-AND-RURAL-IDENTITY.md)
-- [Documentation Index](./docs/README.md)
+These are summarized from [`AGENTS.md`](./AGENTS.md):
+
+* **Non-custodial.** The server never generates, receives or stores private keys, and never holds funds. Pattern: prepare → sign on the phone → submit.
+* **Nothing fake.** Simulated results only come from `SimulatedChain.ts`, carry `source: 'simulated'` and show `<DemoBadge />`.
+* **Screens only use the ports** in `src/core/chain/`. No component imports `@stellar/stellar-sdk` or calls Trustless Work, Attest Protocol or an AI provider directly.
+* **Privacy.** Never commit names of interviewees, student control numbers, phone numbers, audio, video, photos of people or signed PDFs ([`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md)). CI rejects media files in `docs/research/`, `docs/ux-testing/`, `public/videos/` and `docs/gestion/`.
+* **No secrets** (`S…` keys, `GEMINI_API_KEY`) in code, tests or logs. They go in `.env`.
+* **Percentages** come only from [`src/config/protocolFees.ts`](./src/config/protocolFees.ts).
+* **Do not overclaim.** No "in production", "audited" or "official certification".
+
+Security problems are reported privately: see [`SECURITY.md`](./SECURITY.md).
 
 ---
 
-## 💬 8. Community & Support
+## 6. Where to read more
 
-- **On Campus:** Computer Systems Laboratory at TecNM Campus Tlaxiaco.
-- **On GitHub:** Open an issue or start a thread in *GitHub Discussions*.
-- **On Discord:** Stellar Development Community & Open Hub TecNM channels.
-
-*Building community-driven decentralized technology from the Mixteca Highlands to the world!* 🚀
+* [`README.md`](./README.md): what Yucu is, its status and roadmap.
+* [`docs/arquitectura/`](./docs/arquitectura/README.md): diagrams, front-end, server and database guides.
+* [`docs/adr/`](./docs/adr/): architecture decisions. Read the ones your issue mentions.
+* [`skills/`](./skills/): guides for contracts, attestations, offline PWA and Git.
+* Questions: comment on the issue you are working on.
