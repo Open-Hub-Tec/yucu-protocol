@@ -4,7 +4,22 @@
 
 **Issue:** <https://github.com/Open-Hub-Tec/yucu-protocol/issues/112>
 **Estado:** propuesta para revisión. Este documento no implementa el puerto.
-**Rama:** `docs/issue-112-payout-port-propuesta`
+**Rama de la propuesta:** `docs/issue-112-payout-port-propuesta`
+**Rama de implementación sugerida:** `feat/issue-112-payout-port`
+
+---
+
+## 0. Skills de Yucu consultadas
+
+| Skill | Uso en esta propuesta |
+|---|---|
+| [`skills/stellar-soroban-rwa/SKILL.md`](../../skills/stellar-soroban-rwa/SKILL.md) | Capa de puertos, `PayoutPort`, MicoPay/Etherfuse, fee-bump CAP-15, USDC SEP-41 y regla de no ser ancla |
+| [`skills/student-git-collaboration/SKILL.md`](../../skills/student-git-collaboration/SKILL.md) | Rama `feat/issue-112-...`, prefijos de commit, `npm run verify` y `Resolves #112` |
+| [`skills/student-rwa-attestations/SKILL.md`](../../skills/student-rwa-attestations/SKILL.md) | No aplica: esta issue no emite atestaciones |
+| [`skills/student-soroban-contracts/SKILL.md`](../../skills/student-soroban-contracts/SKILL.md) | No aplica: esta issue no toca contratos Rust |
+| [`skills/student-offline-pwa/SKILL.md`](../../skills/student-offline-pwa/SKILL.md) | Se usará después, cuando la pantalla de retiro se conecte al puerto; el retiro en sí requiere conexión |
+
+Las reglas de [`AGENTS.md`](../../AGENTS.md) siguen mandando sobre las skills.
 
 ---
 
@@ -69,6 +84,22 @@ UI                    PayoutPort                 Billetera de la artesana
 El puerto **nunca firma, nunca recibe llaves privadas y nunca recibe el nombre de la persona**.
 La firma la hace `chain.wallets.device.sign(...)` o `chain.wallets.card.sign(...)`, según el
 `walletKind`.
+
+### 3.1.1. Reglas de `stellar-soroban-rwa` que aplican
+
+- `PayoutPort` es la capa de salida a pesos. Los proveedores quedan detrás: **MicoPay para
+  efectivo** (HTLC) y **Etherfuse para SPEI** (ADR-004, D9).
+- **Yucu no es un ancla SEP-24/38.** No custodia pesos ni recibe fondos de personas; solo
+  prepara, hace firmar y envía. La conversión y la entrega de efectivo las hace el proveedor.
+- El activo que se retira es **USDC SEP-41**. El adaptador real debe revisar trustline y saldo
+  antes de preparar la transacción; si falta algo, se avisa antes de firmar, no después.
+- La comisión de red se cubre con **fee-bump CAP-15**: la llave del patrocinador vive solo en
+  el `.env` del servidor y solo paga comisiones. Antes de envolver, el servidor valida la
+  transacción contra la lista blanca de #94 para que nadie pueda vaciar al patrocinador.
+- El servidor **prepara transacciones sin firmar**; nunca recibe la llave de la artesana ni
+  retiene su dinero.
+- El estado del retiro se guarda en **PostgreSQL**, no en memoria: en Vercel cada petición puede
+  caer en otra instancia (`BASE_DE_DATOS.md`).
 
 ### 3.2. Semántica de `expired` y `refunded`
 
@@ -393,6 +424,29 @@ export const chain: Chain = {
 };
 ```
 
+### 5.1. Notas para el adaptador real (fuera del alcance de #112)
+
+La simulación no toca la red. El adaptador real de #114, #145 y #146 debe seguir estas reglas de
+la skill `stellar-soroban-rwa`:
+
+1. **Efectivo (MicoPay):** preparar el retiro con el HTLC de MicoPay desde la cuenta de la
+   artesana. El código o QR lo emite el proveedor; Yucu no lo inventa.
+2. **SPEI (Etherfuse):** solo si la artesana lo elige y tiene RFC y cuenta bancaria a su nombre.
+   El alta y el KYC van en un flujo aparte (ADR-004, D9).
+3. **USDC SEP-41:** revisar trustline y saldo antes de preparar. Si no hay trustline, avisar en
+   español claro antes de pedir el PIN.
+4. **Fee-bump CAP-15:** el servidor envuelve la transacción ya firmada y paga la comisión de red.
+   La llave del patrocinador vive solo en `.env`, nunca en el teléfono ni en el repositorio, y la
+   transacción se valida contra la lista blanca de #94 antes de envolverla.
+5. **Persistencia:** guardar `payoutId`, estado y vencimiento en PostgreSQL. No usar memoria
+   (Vercel cambia de instancia) y no guardar el código de cobro en claro ni en logs.
+6. **Idempotencia:** usar una clave por intento para que un reintento no cree dos retiros.
+7. **Estado:** consultar al proveedor por webhook o polling y mapear la respuesta a
+   `pending`, `ready`, `collected`, `expired` o `refunded`.
+8. **Rutas:** si hace falta un endpoint propio, va en `src/server/routes/`, un archivo por área,
+   siguiendo `SERVIDOR.md`.
+9. **Nunca ser ancla:** Yucu no implementa SEP-24/38 ni guarda pesos. Eso lo hace el proveedor.
+
 ---
 
 ## 6. Validaciones que debe cubrir
@@ -466,12 +520,16 @@ const payout = new SimulatedPayout(() => now);
 ### Pasos
 
 1. Pedir asignación de #112 antes de escribir código.
-2. Crear rama `feat/issue-112-payout-port`.
+2. Crear rama `feat/issue-112-payout-port`, sin nombres de personas en el nombre de la rama.
 3. Implementar tipos, simulación y exposición.
 4. Escribir las pruebas.
-5. Ejecutar `npm ci`, `npm run lint`, `npm test` y `npm run build`.
-6. Abrir PR con `Resolves #112` y explicar el flujo no custodial.
+5. Ejecutar `npm ci` y `npm run verify` (lint + test + build).
+6. Abrir PR con `Resolves #112`, explicar el flujo no custodial y cómo se probó.
 7. No tocar `contracts/` ni `package.json`.
+
+Los commits deben llevar prefijo (`feat:`, `fix:`, `docs:` o `test:`) según la skill
+`student-git-collaboration`. Esta propuesta vive en una rama `docs/`; la implementación va en la
+rama `feat/` para no mezclar documentación con código.
 
 ---
 
@@ -530,3 +588,16 @@ La propuesta de este documento corrige esos puntos y mantiene el alcance pequeñ
 3. ¿Se agrega `provider: 'micopay'` al comprobante desde este issue, o se deja para el adaptador
    real de #114?
 4. ¿La pantalla de pagos se conecta en un issue aparte para no mezclar UI con puertos?
+
+---
+
+## 13. Referencias
+
+- [`AGENTS.md`](../../AGENTS.md)
+- [`skills/stellar-soroban-rwa/SKILL.md`](../../skills/stellar-soroban-rwa/SKILL.md)
+- [`skills/student-git-collaboration/SKILL.md`](../../skills/student-git-collaboration/SKILL.md)
+- [ADR-003: no custodial y Trustless Work](../../docs/adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md)
+- [ADR-004: pagos en pesos sin billetera](../../docs/adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md)
+- [`docs/arquitectura/SERVIDOR.md`](../../docs/arquitectura/SERVIDOR.md)
+- [`docs/arquitectura/BASE_DE_DATOS.md`](../../docs/arquitectura/BASE_DE_DATOS.md)
+- [`src/config/protocolFees.ts`](../../src/config/protocolFees.ts)
