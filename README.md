@@ -24,7 +24,7 @@
 | Documented decisions | 8 architecture decision records ([`docs/adr/`](./docs/adr/)) and 100+ open issues with acceptance criteria |
 | Grounded in the field | Interviews with artisans, a honey producers' union and 14 buyers in the Mixteca ([`docs/research/`](./docs/research/)) |
 | Education | Used as the real project of TecNM Tlaxiaco's software project management course; student teams work from issues, branches and reviewed PRs |
-| Open to you | Unassigned issues are open to anyone: start with [`good first issue`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/good%20first%20issue) ([how to contribute](#contributing)) |
+| Course work | Issues are grouped by module so each student team becomes expert in one part of the code; code contributions are reserved for TecNM Tlaxiaco students ([how to contribute](#contributing)) |
 
 ---
 
@@ -263,10 +263,10 @@ cargo test --locked
 
 ## Contributing
 
-Yucu is built by TecNM Tlaxiaco students and is **open to contributors from anywhere**:
+Yucu is built by TecNM Tlaxiaco students as part of their courses. **Code contributions are reserved for those students:** pull requests from outside the course are closed without merging. Bug reports, questions and field feedback from anyone are welcome as issues.
 
-* **Unassigned issues are open to anyone.** New here? Start with [`good first issue`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/good%20first%20issue) or [`help wanted`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/help%20wanted).
-* **Course issues** (label `tecnm-sprint-4`, or already assigned to a student team) are reserved for that team.
+* **Module issues** (`[W…]`, with a `modulo: …` label) are taken by student teams, one module per team; see [#152](https://github.com/Open-Hub-Tec/yucu-protocol/issues/152).
+* **Course deliverables** (label `tecnm-sprint-4`) are reserved for the assigned team.
 * Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository is part of an active Wave. There is no guaranteed reward.
 
 1. Read [`AGENTS.md`](./AGENTS.md) (it applies to people and AI assistants alike), [`CONTRIBUTING.md`](./CONTRIBUTING.md) and the ADRs the issue mentions.

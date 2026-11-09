@@ -1,6 +1,6 @@
 # Code of conduct
 
-Yucu is built by students of the Instituto Tecnológico de Tlaxiaco together with contributors from anywhere, for artisans and producers of the Mixteca. Everyone who takes part (in issues, pull requests, reviews, field work or chats) agrees to this code. It is based on the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+Yucu is built by students of the Instituto Tecnológico de Tlaxiaco, for artisans and producers of the Mixteca. Everyone who takes part (in issues, pull requests, reviews, field work or chats) agrees to this code. It is based on the [Contributor Covenant 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
 
 ## Our commitment
 
