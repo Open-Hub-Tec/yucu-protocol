@@ -7,6 +7,8 @@
  */
 import type {
   CardWalletPort,
+  CashoutReceipt,
+  CashoutRequest,
   ChainReceipt,
   CreateEscrowRequest,
   DeviceWalletPort,
@@ -17,6 +19,9 @@ import type {
   MilestoneState,
   MilestoneStatus,
   LotRegistryPort,
+  PayoutPort,
+  PayoutQuote,
+  PayoutState,
   RegisterLotRequest,
   UnsignedTransaction,
 } from './ports';
@@ -201,5 +206,94 @@ export class SimulatedEscrow implements EscrowPort {
   }
   async getStatus(escrowId: string) {
     return { milestones: (this.escrows.get(escrowId) ?? []).map((m) => ({ ...m })), source: 'simulated' as const };
+  }
+}
+
+interface SimulatedCashout {
+  expiresAt: number;
+  collectedAt: number | null;
+  refundedAt: number | null;
+}
+
+/**
+ * Salida a pesos de demostración (#112). No toca la red ni mueve dinero.
+ * La tasa de cambio es inventada, como todo lo demás de esta clase, y lleva source: 'simulated'.
+ */
+export class SimulatedPayout implements PayoutPort {
+  /** Tasa de demostración: solo sirve para construir la UI antes de los proveedores reales. */
+  private static readonly DEMO_PESOS_PER_USDC = 17.5;
+  /** La devolución simulada tarda unos minutos en completarse después de vencer el código. */
+  private static readonly DEMO_REFUND_DELAY_MS = 5 * 60_000;
+
+  private readonly cashouts = new Map<string, SimulatedCashout>();
+  private readonly now: () => number;
+
+  constructor(options: { now?: () => number } = {}) {
+    this.now = options.now ?? (() => Date.now());
+  }
+
+  private validate(req: CashoutRequest) {
+    if (!Number.isFinite(req.amountUsdc) || req.amountUsdc <= 0) {
+      throw new Error('El monto del retiro debe ser mayor que cero.');
+    }
+    if (!Number.isFinite(req.expiresInMinutes) || req.expiresInMinutes <= 0) {
+      throw new Error('El código de cobro debe durar más de cero minutos.');
+    }
+    if (req.walletKind === 'card' && req.expiresInMinutes > 15) {
+      throw new Error('Con la tarjeta QR, el código de cobro debe durar 15 minutos o menos.');
+    }
+  }
+
+  async quote(amountUsdc: number): Promise<PayoutQuote> {
+    if (!Number.isFinite(amountUsdc) || amountUsdc <= 0) {
+      throw new Error('El monto del retiro debe ser mayor que cero.');
+    }
+    const amountPesos = Math.round(amountUsdc * SimulatedPayout.DEMO_PESOS_PER_USDC * 100) / 100;
+    return { amountPesos, source: 'simulated' };
+  }
+
+  async prepareCashout(req: CashoutRequest) {
+    this.validate(req);
+    return demoTx(
+      `Retirar ${req.amountUsdc} USDC en pesos en la tienda ${req.agentCode}.`,
+      { req },
+    );
+  }
+
+  async submit(signedXdr: string): Promise<CashoutReceipt> {
+    const { req } = JSON.parse(decodeURIComponent(escape(atob(signedXdr)))) as { req: CashoutRequest };
+    this.validate(req);
+    const cashoutId = `RETIRO-${randomHex(6)}`;
+    const code = randomHex(8).toUpperCase();
+    const expiresAt = this.now() + req.expiresInMinutes * 60_000;
+    this.cashouts.set(cashoutId, { expiresAt, collectedAt: null, refundedAt: null });
+    return { ...demoReceipt(), cashoutId, code, expiresAt };
+  }
+
+  async getStatus(cashoutId: string): Promise<PayoutState> {
+    const cashout = this.cashouts.get(cashoutId);
+    if (!cashout) throw new Error('No encontramos ese retiro.');
+    const now = this.now();
+    if (cashout.collectedAt !== null) {
+      return { status: 'collected', expiresAt: cashout.expiresAt, source: 'simulated' };
+    }
+    if (now >= cashout.expiresAt) {
+      if (cashout.refundedAt === null) {
+        cashout.refundedAt = cashout.expiresAt + SimulatedPayout.DEMO_REFUND_DELAY_MS;
+      }
+      const status = now >= cashout.refundedAt ? 'refunded' : 'expired';
+      return { status, expiresAt: cashout.expiresAt, source: 'simulated' };
+    }
+    return { status: 'ready', expiresAt: cashout.expiresAt, source: 'simulated' };
+  }
+
+  /** Solo para la demostración: la tienda confirma que pagó el efectivo. */
+  markCollected(cashoutId: string, at: number = this.now()) {
+    const cashout = this.cashouts.get(cashoutId);
+    if (!cashout) throw new Error('No encontramos ese retiro.');
+    if (at > cashout.expiresAt) {
+      throw new Error('El código ya venció; el dinero regresó a la cuenta de la artesana.');
+    }
+    cashout.collectedAt = at;
   }
 }

@@ -211,3 +211,65 @@ export interface EscrowPort {
   /** Estado de cada hito, en el mismo orden en que se crearon. */
   getStatus(escrowId: string): Promise<{ milestones: MilestoneState[]; source: ChainSource }>;
 }
+
+// ─────────────────────────────── Salida a pesos (ADR-004, D9) ───────────────────────────────
+
+export type PayoutStatus = 'pending' | 'ready' | 'collected' | 'expired' | 'refunded';
+
+/**
+ * Pesos que la artesana recibiría por su retiro. La simulación no cobra comisión porque todavía
+ * no se conoce la del proveedor (ADR-004 D9).
+ */
+export interface PayoutQuote {
+  amountPesos: number;
+  source: ChainSource;
+}
+
+/**
+ * Retiro en efectivo o por SPEI. Sale de la cuenta de la artesana y lo firma ella (#112).
+ * `walletKind: 'card'` exige un código de cobro de 15 minutos o menos, como el QR de MicoPay:
+ * si nadie lo cobra, el dinero regresa a su cuenta.
+ */
+export interface CashoutRequest {
+  /** Dirección pública de la artesana (G...), nunca su nombre. */
+  producerAddress: string;
+  /** Monto en USDC que sale de su propia cuenta. */
+  amountUsdc: number;
+  /** Cómo firma: teléfono, tarjeta QR o billetera externa (el mismo `kind` de WalletPort). */
+  walletKind: WalletKind;
+  /** Código del agente o tienda donde cobra. No lleva el nombre de ninguna persona. */
+  agentCode: string;
+  /** Minutos que vale el código de cobro. Con 'card' no puede pasar de 15. */
+  expiresInMinutes: number;
+}
+
+/** Comprobante del retiro: el código/QR que se muestra en la tienda y cuándo vence. */
+export interface CashoutReceipt extends ChainReceipt {
+  cashoutId: string;
+  code: string;
+  /** Momento (ms) en que vence el código de cobro. */
+  expiresAt: number;
+}
+
+export interface PayoutState {
+  status: PayoutStatus;
+  /** Momento (ms) en que vence el código de cobro. */
+  expiresAt: number;
+  source: ChainSource;
+}
+
+/**
+ * Salida a pesos desde la cuenta de la artesana, detrás de un proveedor (MicoPay para efectivo,
+ * Etherfuse para SPEI; ADR-004 D9). Mismo patrón: preparar -> firmar en el teléfono -> enviar.
+ * Ningún método recibe ni devuelve llaves secretas ni nombres de personas.
+ */
+export interface PayoutPort {
+  /** Pesos netos que recibiría la artesana por `amountUsdc`. */
+  quote(amountUsdc: number): Promise<PayoutQuote>;
+  /** Prepara el retiro desde la cuenta de la artesana hacia la tienda elegida. */
+  prepareCashout(req: CashoutRequest): Promise<UnsignedTransaction>;
+  /** Envía el retiro firmado y devuelve el código/QR y su vencimiento. */
+  submit(signedXdr: string): Promise<CashoutReceipt>;
+  /** Estado del retiro: pendiente, listo, cobrado, vencido o devuelto. */
+  getStatus(cashoutId: string): Promise<PayoutState>;
+}
