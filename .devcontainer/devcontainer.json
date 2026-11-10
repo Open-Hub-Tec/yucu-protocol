@@ -1,0 +1,14 @@
+{
+  // Entorno de Yucu para pantallas, núcleo y servidor (Node 22, como .nvmrc y el CI).
+  // Se abre en GitHub Codespaces o en VS Code con "Dev Containers". Ver AGENTS.md, sección "Comandos".
+  "name": "Yucu (app y servidor)",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "postCreateCommand": "npm ci",
+  "forwardPorts": [3000],
+  "portsAttributes": { "3000": { "label": "Yucu (npm run dev)" } },
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"]
+    }
+  }
+}

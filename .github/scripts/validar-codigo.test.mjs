@@ -1,7 +1,7 @@
 // Pruebas de validar-codigo.mjs. Correr con: node --test .github/scripts/validar-codigo.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validarCodigo, formatearCodigo, lineasAgregadas, issuesCitadas } from './validar-codigo.mjs';
+import { validarCodigo, formatearCodigo, lineasAgregadas, issuesCitadas, globARegex } from './validar-codigo.mjs';
 
 const parche = (...lineas) => ['@@ -1,1 +1,3 @@', ' contexto', ...lineas.map((l) => '+' + l)].join('\n');
 const PKG = JSON.stringify({ scripts: { test: 'tsx src/tests/chain_ports.test.ts && tsx src/tests/payout.test.ts' } });
@@ -47,6 +47,20 @@ test('código sin pruebas no cumple; solo pruebas sí', () => {
 test('prueba nueva que no está en package.json no cumple', () => {
   const pkg = JSON.stringify({ scripts: { test: 'tsx src/tests/chain_ports.test.ts' } });
   assert.ok(!todoBien(validarCodigo(base({ packageJson: pkg }))));
+});
+
+test('con un patrón en el script test, la prueba nueva ya cuenta', () => {
+  const pkg = JSON.stringify({ scripts: { test: 'tsx --test "src/tests/**/*.test.ts"' } });
+  assert.ok(todoBien(validarCodigo(base({ packageJson: pkg }))));
+  const otroPatron = JSON.stringify({ scripts: { test: 'tsx --test "src/otra/*.test.ts"' } });
+  assert.ok(!todoBien(validarCodigo(base({ packageJson: otroPatron }))), 'un patrón que no la cubre no cuenta');
+});
+
+test('globARegex: ** cruza carpetas y * no', () => {
+  assert.ok(globARegex('src/tests/**/*.test.ts').test('src/tests/chain_ports.test.ts'));
+  assert.ok(globARegex('src/tests/**/*.test.ts').test('src/tests/payout/ok.test.ts'));
+  assert.ok(!globARegex('src/tests/*.test.ts').test('src/tests/payout/ok.test.ts'));
+  assert.ok(!globARegex('src/tests/**/*.test.ts').test('src/tests/chain_ports.test.tsx'));
 });
 
 test('una pantalla no puede importar Stellar, la IA ni SimulatedChain', () => {

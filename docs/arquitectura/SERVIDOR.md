@@ -150,7 +150,7 @@ Todas van en `.env` (ignorado por git) y aparecen en `.env.example` **sin valore
 * **El CI no llama a servicios externos** (Google, Stellar, Trustless Work, Etherfuse). Usa la versión simulada del proveedor o del almacén.
 * Cada regla nueva tiene una prueba positiva y una negativa. En el servidor, la negativa casi siempre es un código de la sección 4 (403, 409, 429…).
 * Prueba que no se registran datos personales ni secretos: cambia el logger por uno falso que guarde lo que recibe y revisa que no aparezcan.
-* Si agregas un archivo en `src/tests/`, agrégalo al script `test` de `package.json`.
+* Las pruebas van en archivos `src/tests/**/*.test.ts`; `npm test` las encuentra solas.
 
 ## 8. En qué orden
 

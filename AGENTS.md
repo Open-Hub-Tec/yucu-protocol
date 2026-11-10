@@ -40,8 +40,8 @@ Arquitectura v2 (ADR-005 a ADR-007, aceptadas el 29 de octubre de 2026): la pers
 
 ```bash
 npm ci                 # instala exactamente lo de package-lock.json (Node 22, ver .nvmrc)
-npm run lint           # TypeScript sin errores
-npm test               # pruebas de TypeScript
+npm run lint           # TypeScript sin errores y ESLint (reglas fijas de este archivo)
+npm test               # todas las pruebas de src/tests/ (se encuentran solas)
 npm run build          # build de producción
 
 # Solo si tocaste contracts/
@@ -51,7 +51,11 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
 ```
 
-Si agregas un archivo de prueba en `src/tests/`, agrégalo también al script `test` de `package.json`, o no se ejecutará.
+Las pruebas se encuentran solas: cualquier archivo `src/tests/**/*.test.ts` corre con `npm test`. No edites el script `test` de `package.json`.
+
+ESLint marca en tu editor, mientras escribes, un `any` nuevo, un `@ts-ignore` y los imports que la regla 4 prohíbe en las pantallas. Los casos que ya existían están en `eslint-suppressions.json`: no agregues casos nuevos ahí; cuando quites uno, corre `npx eslint . --prune-suppressions`.
+
+**Entorno listo sin instalar nada:** abre el repositorio en GitHub Codespaces (botón **Code → Codespaces**) o en VS Code con *Dev Containers*. La configuración de `.devcontainer/` trae Node 22; para `contracts/`, elige la configuración "Yucu (contratos Soroban)", que agrega Rust 1.94 y `wasm32v1-none`.
 
 ## Cómo trabajar una issue
 
