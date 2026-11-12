@@ -57,6 +57,8 @@ ESLint marca en tu editor, mientras escribes, un `any` nuevo, un `@ts-ignore` y 
 
 **Entorno listo sin instalar nada:** abre el repositorio en GitHub Codespaces (botón **Code → Codespaces**) o en VS Code con *Dev Containers*. La configuración de `.devcontainer/` trae Node 22; para `contracts/`, elige la configuración "Yucu (contratos Soroban)", que agrega Rust 1.94 y `wasm32v1-none`.
 
+**En tu propia computadora** necesitas Node 22 (`nvm install 22 && nvm use 22`). Si `npm test` dice *Could not find 'src/tests/**/*.test.ts'*, tienes una versión vieja de Node.
+
 ## Cómo trabajar una issue
 
 1. Lee la issue completa, sus criterios de aceptación y los ADR que mencione.
