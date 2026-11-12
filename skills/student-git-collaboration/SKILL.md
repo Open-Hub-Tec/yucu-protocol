@@ -32,7 +32,7 @@ npm run verify
 
 Este comando ejecuta en secuencia:
 1. `npm run lint` (verificación de tipos de TypeScript sin errores).
-2. `npm run test` (todas las pruebas que lista el script `test` de `package.json`; si agregas un archivo de prueba, agrégalo ahí).
+2. `npm run test` (todas las pruebas `src/tests/**/*.test.ts`; se encuentran solas).
 3. `npm run build` (compilación exitosa del bundle de producción y servidor).
 
 Si tocaste `contracts/`, corre también `cargo fmt --all`, `cargo clippy --locked --all-targets -- -D warnings` y `cargo test --locked` dentro de `contracts/`.

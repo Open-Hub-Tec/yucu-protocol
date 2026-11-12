@@ -21,7 +21,7 @@ Resolves #
 
 ### ✅ Lista de verificación
 - [ ] `npm run lint`, `npm test` y `npm run build` pasan (y `cargo fmt`, `clippy`, `cargo test` si toqué `contracts/`).
-- [ ] Agregué una prueba positiva y una negativa por cada regla nueva, y los archivos nuevos de `src/tests/` están en el script `test` de `package.json`.
+- [ ] Agregué una prueba positiva y una negativa por cada regla nueva, en archivos `src/tests/**/*.test.ts` (corren solos con `npm test`).
 - [ ] Nada simulado sin `source: 'simulated'` y `<DemoBadge />`; la IA solo sugiere, nunca firma ni certifica.
 - [ ] Sin nombres de personas entrevistadas, teléfonos, llaves ni secretos en código, pruebas o logs.
 - [ ] Si cambié pantallas, las probé en un celular y en Modo Abuelo.
