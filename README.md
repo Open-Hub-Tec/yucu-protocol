@@ -15,6 +15,17 @@
 
 > **Prototype.** Yucu runs on Stellar **testnet** only. The contracts have not been audited, no fees are charged, and several modules are still simulated. The [status table](#implementation-status) says exactly what is real.
 
+**At a glance (November 2026)**
+
+| | |
+|---|---|
+| Built on Stellar | 4 Soroban contracts on testnet, with tests; attestations on [Attest Protocol](https://github.com/daccred/attestprotocol), escrow on [Trustless Work](https://trustlesswork.com) |
+| Open development | 74 merged pull requests from 26 contributors; every pull request runs CI and an automated check of the project rules |
+| Documented decisions | 8 architecture decision records ([`docs/adr/`](./docs/adr/)) and 100+ open issues with acceptance criteria |
+| Grounded in the field | Interviews with artisans, a honey producers' union and 14 buyers in the Mixteca ([`docs/research/`](./docs/research/)) |
+| Education | Used as the real project of TecNM Tlaxiaco's software project management course; student teams work from issues, branches and reviewed PRs |
+| Course work | Issues are grouped by module so each student team becomes expert in one part of the code; code contributions are reserved for TecNM Tlaxiaco students ([how to contribute](#contributing)) |
+
 ---
 
 ## What Yucu is
@@ -187,7 +198,14 @@ This is a working prototype. Every PR that changes a module's status must update
 
 ## Roadmap
 
-Work is organized as GitHub issues. Implementation order for the non-custodial core:
+Work is organized as GitHub issues. In plain words, the next steps are:
+
+1. **Register a real lot on testnet**, signed on the artisan's phone, with fees sponsored so she never pays.
+2. **Protected purchase and cash-out in pesos**: Trustless Work escrow for buyers abroad and a single payout port for local cash or SPEI.
+3. **Attestations by voice**: the person speaks, AI drafts, she signs, and anyone can verify the result on Attest Protocol.
+4. **A live demo** with a preview for every pull request, and a usability retest with real artisans and buyers.
+
+Implementation order for the non-custodial core:
 
 ```
 #110 contracts ─▶ #92 prepare ─┐
@@ -247,15 +265,19 @@ cargo test --locked
 
 ## Contributing
 
-Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributions may be recognized through [Drips Wave](https://www.drips.network/wave) when the issue is part of an active Wave.
+Yucu is built by TecNM Tlaxiaco students as part of their courses. **Code contributions are reserved for those students:** pull requests from outside the course are closed without merging. Bug reports, questions and field feedback from anyone are welcome as issues.
+
+* **Module issues** (`[W…]`, with a `modulo: …` label) are taken by student teams, one module per team; see [#152](https://github.com/Open-Hub-Tec/yucu-protocol/issues/152).
+* **Course deliverables** (label `tecnm-sprint-4`) are reserved for the assigned team.
+* Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository is part of an active Wave. There is no guaranteed reward.
 
 1. Read [`AGENTS.md`](./AGENTS.md) (it applies to people and AI assistants alike), [`CONTRIBUTING.md`](./CONTRIBUTING.md) and the ADRs the issue mentions.
-2. Ask to be assigned **before** you start; one team per issue.
+2. Ask to be assigned **before** you start; one person or team per issue.
 3. Work on a branch `feat/issue-<n>-<topic>` or `fix/issue-<n>-<topic>`; `main` is protected.
 4. Add a positive and a negative test for every new rule.
-5. Open the PR with `Resolves #<n>`, and be ready to explain your code: a PR you cannot explain is not merged, even if it works.
+5. Open the PR with `Resolves #<n>`, and be ready to explain your code: a PR you cannot explain is not merged, even if it works. A bot checks the fixed rules of `AGENTS.md` on every PR and tells you what to fix.
 
-**Privacy and security.** Never commit names of interviewed people, phone numbers, addresses, keys (`S…`) or API keys. Audio, video, photos of people and PDFs do not go into `docs/research/`, `docs/ux-testing/` or `public/videos/` (CI rejects them). See [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md).
+**Privacy and security.** Never commit names of interviewed people, phone numbers, addresses, keys (`S…`) or API keys. Audio, video, photos of people and PDFs do not go into `docs/research/`, `docs/ux-testing/` or `public/videos/` (CI rejects them). See [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md). Report vulnerabilities privately as described in [`SECURITY.md`](./SECURITY.md). Everyone follows the [Code of conduct](./CODE_OF_CONDUCT.md).
 
 **AI assistants.** The repository is configured for the [Stellar Raven](https://raven.stellar.buzz/mcp) MCP server ([`mcp.json`](./mcp.json)). AI-generated code is welcome only when it is tested and the contributor understands it.
 
@@ -279,7 +301,7 @@ Yucu is built by TecNM Tlaxiaco students working from GitHub issues. Contributio
 | Field research and privacy rules | [`docs/research/`](./docs/research/), [`PRIVACIDAD.md`](./docs/research/PRIVACIDAD.md) |
 | Usability testing and field guides | [`docs/ux-testing/`](./docs/ux-testing/) |
 | Student guides | [`docs/guides/`](./docs/guides/), [`docs/estudiantes/`](./docs/estudiantes/) |
-| Earlier attestation drafts (**obsolete**, superseded by ADR-005) | [`docs/standards/`](./docs/standards/) |
+| Attestation specification: the new one ([#140](https://github.com/Open-Hub-Tec/yucu-protocol/issues/140)) will be `ATTESTATION_SPEC.md`; the other files there are **obsolete** drafts superseded by ADR-005 | [`docs/standards/`](./docs/standards/) |
 
 ---
 
