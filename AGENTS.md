@@ -57,7 +57,23 @@ ESLint marca en tu editor, mientras escribes, un `any` nuevo, un `@ts-ignore` y 
 
 **Entorno listo sin instalar nada:** abre el repositorio en GitHub Codespaces (botón **Code → Codespaces**) o en VS Code con *Dev Containers*. La configuración de `.devcontainer/` trae Node 22; para `contracts/`, elige la configuración "Yucu (contratos Soroban)", que agrega Rust 1.94 y `wasm32v1-none`.
 
-**En tu propia computadora** necesitas Node 22 (`nvm install 22 && nvm use 22`). Si `npm test` dice *Could not find 'src/tests/**/*.test.ts'*, tienes una versión vieja de Node.
+**En tu computadora con Ubuntu (o WSL en Windows):** el `nodejs` de `apt` es viejo; instala Node 22 con nvm. En WSL, clona dentro de Linux (`~/…`), no en `/mnt/c/…`.
+
+```bash
+sudo apt update && sudo apt install -y git curl build-essential
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install 22 && nvm alias default 22
+git clone https://github.com/Open-Hub-Tec/yucu-protocol.git && cd yucu-protocol
+npm ci
+
+# Solo para contracts/
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.94.0
+source ~/.cargo/env
+rustup target add wasm32v1-none && rustup component add rustfmt clippy
+```
+
+Si `npm test` dice *Could not find 'src/tests/\*\*/\*.test.ts'*, tienes una versión vieja de Node: corre `nvm use 22`.
 
 ## Cómo trabajar una issue
 
