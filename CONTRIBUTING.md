@@ -125,7 +125,7 @@ git push origin feature/issue-22-offline-qr-sync
 
 ## 🎁 5. Submitting Pull Requests & Drips Recognition
 
-1. Open [https://github.com/Open-Hub-Tec/yucu/pulls](https://github.com/Open-Hub-Tec/yucu/pulls) and click **"New Pull Request"**.
+1. Open [https://github.com/Open-Hub-Tec/yucu-protocol/pulls](https://github.com/Open-Hub-Tec/yucu-protocol/pulls) and click **"New Pull Request"**.
 2. **Important:** Link the relevant issue in your PR description:
    ```markdown
    Closes #22
@@ -133,7 +133,7 @@ git push origin feature/issue-22-offline-qr-sync
    *(or `Resolves #18`, substituting your actual issue number).*
 3. Linking issues enables:
    - Automated CI testing to ensure zero breaking regressions.
-   - Project maintainer review and eligibility attribution for Drips funding splits.
+   - Project maintainer review. If the issue is part of a Drips Wave, Drips pays the reward directly to you; nobody else takes a share (see [`docs/drips/FUNDING_POLICY.md`](docs/drips/FUNDING_POLICY.md)).
 4. Maintainers (`@josealfredo79`) will review your code, provide constructive feedback, and merge into `main`.
 
 ---

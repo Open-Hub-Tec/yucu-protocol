@@ -151,5 +151,5 @@
 ---
 
 ### Diapositiva 11: Propuesta Estratégica para Drips y Stellar
-* **Fondos de Investigación y Residencia Estudiantil:** Los fondos de Drips Wave y Stellar Community Fund (SCF) se dispersan directamente a los estudiantes investigadores mediante el sistema de splits de `drips.config.json`.
+* **Aportes de estudiantes:** En Drips Wave, Drips le paga directamente a cada estudiante por la issue que resolvió; nadie más se queda con una parte. Cualquier fondo para el proyecto se presupuesta en público antes de aceptarlo (ver `docs/drips/FUNDING_POLICY.md`).
 * **Impacto Comprobado:** Construcción de infraestructura de software libre con identidad comunitaria desde la Mixteca Oaxaqueña para el mundo.

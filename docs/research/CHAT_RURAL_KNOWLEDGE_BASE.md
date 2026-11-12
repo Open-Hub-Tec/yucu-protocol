@@ -16,7 +16,7 @@
 5. **Transformación del Coyote: Agente Logístico y Cajero Comunitario**
 6. **Mecanismo de Regalías Perpetuas On-Chain (Mercado Secundario)**
 7. **Protocolo MicoPay: Liquidación de Última Milla (Efectivo & SPEI)**
-8. **Infraestructura Drips + GitHub: Modelo de Becas para Estudiantes**
+8. **Infraestructura Drips + GitHub: Cómo se paga a los estudiantes**
 9. **Análisis Regulatorio y Despliegue en El Salvador (San Salvador)**
 10. **Estrategia para Tech Rebel (`techrebel.world/es`) y Convocatorias de Grants**
 11. **Ruta Crítica de Implementación Técnica y de Campo (Paso a Paso)**
@@ -178,36 +178,13 @@ MicoPay es el protocolo financiero que convierte los dólares digitales (USDC en
 
 ---
 
-## 8. INFRAESTRUCTURA DRIPS + GITHUB: MODELO DE BECAS PARA ESTUDIANTES
+## 8. INFRAESTRUCTURA DRIPS + GITHUB: CÓMO SE PAGA A LOS ESTUDIANTES
 
-### El Modelo "Learn, Build and Earn" Comunitario:
-Para que la plataforma sea un **Bien Público Sostenible**, el desarrollo técnico no se delega a consultoras externas; se ejecuta en el **Tecnológico Nacional de México - Campus Tlaxiaco**.
+> **Corregido el 2026-11-12.** La versión anterior de esta sección describía un "smart contract de Drips" con una bolsa de USDC, montos fijos por issue y becas. Eso no existe. La política vigente está en [`docs/drips/FUNDING_POLICY.md`](../drips/FUNDING_POLICY.md).
 
-```
-[FONDO DEL GRANT (SCF / COMMONS)]
-              │
-              ▼
-[SMART CONTRACT DRIPS EN SOROBAN] (Bolsa de fondos en USDC)
-              │
-              ▼
-┌───────────────────────── REPOSITORIO GITHUB ─────────────────────────┐
-│ El Coordinador/Profesor crea los Issues técnicos con recompensa:     │
-│ • Issue #15: "Agregar audio en dialecto Tu'un Savi de Peñasco" [50$] │
-│ • Issue #22: "Optimizar compresión de fotos offline" [75$]           │
-│ • Issue #31: "Contrato Soroban de cálculo de regalías 10%" [120$]    │
-└──────────────────────────────────┬───────────────────────────────────┘
-                                   │
-                                   ▼
-[ESTUDIANTE PROGRAMADOR ENVÍA PULL REQUEST (PR)]
-                                   │
-                                   ▼
-[REVISIÓN DE CÓDIGO Y MERGE POR EL DOCENTE TUTOR]
-                                   │
-                                   ▼
-[DRIPS TRANSMITE AUTOMÁTICAMENTE EL PAGO EN USDC A LA WALLET DEL ALUMNO]
-```
-
-* **Impacto Educativo:** Cada estudiante que resuelve un Issue acredita horas oficiales de **Servicio Social o Residencia Profesional**, y recibe ingresos reales directos a su cuenta para solventar sus estudios universitarios.
+* El desarrollo lo hacen estudiantes del **Tecnológico Nacional de México - Campus Tlaxiaco**; el docente redacta las issues, revisa y fusiona.
+* En Drips Wave, **Drips le paga directamente a quien resolvió la issue**, según sus propias reglas. Nadie más se queda con una parte.
+* Participar en Drips es voluntario y la calificación no depende de cobrar. No prometemos becas, montos ni fechas.
 
 ---
 
