@@ -22,8 +22,9 @@ Welcome to the technical documentation hub for **Yucu Protocol**. To maintain a 
 
 ## 💧 3. Drips Network Funding & Governance
 
-* [**`drips/APELACION_DRIPS_STELLAR.md`**](./drips/APELACION_DRIPS_STELLAR.md): Technical appeal and research rationale for Drips Wave and Stellar Community Fund.
-* [**`drips/BACKLOG_DRIPS_STELLAR.md`**](./drips/BACKLOG_DRIPS_STELLAR.md): Task backlog and issues eligible for student-researcher funding splits.
+* [**`drips/FUNDING_POLICY.md`**](./drips/FUNDING_POLICY.md): Who receives money for work on Yucu: Drips pays each contributor directly, nobody takes a share, and how project grants would be handled.
+* [**`drips/APELACION_DRIPS_STELLAR.md`**](./drips/APELACION_DRIPS_STELLAR.md): Historical record of the October 2026 appeal; superseded by the ADRs.
+* [**`drips/BACKLOG_DRIPS_STELLAR.md`**](./drips/BACKLOG_DRIPS_STELLAR.md): Task backlog and issues for Drips Wave.
 * [**`drips/DRIPS_ISSUES_ROADMAP.md`**](./drips/DRIPS_ISSUES_ROADMAP.md): Deliverables roadmap and technical milestone schedule.
 
 ---

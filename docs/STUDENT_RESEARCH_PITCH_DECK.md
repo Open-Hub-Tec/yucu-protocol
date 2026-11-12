@@ -151,5 +151,5 @@
 ---
 
 ### Slide 11: Strategic Proposal for Drips Network & SCF
-* **Student-Researcher Funding Pipeline:** Drips Wave and Stellar Community Fund grants disburse directly to student-researchers via `drips.config.json` automated splits.
+* **Student Contributions:** In Drips Wave, Drips pays each student directly for the issue they solved; nobody else takes a share. Any grant to the project is budgeted publicly first (see `docs/drips/FUNDING_POLICY.md`).
 * **Open Source Public Good:** Training a permanent cohort of Mexican Rust and Stellar engineers building decentralized technology from the Mixteca Highlands for the world.

@@ -1,0 +1,16 @@
+{
+  // Entorno para el módulo de contratos (Rust 1.94 y wasm32v1-none, como el CI), con Node 22.
+  // En Codespaces, elige esta configuración al crear el codespace ("Configure and create").
+  "name": "Yucu (contratos Soroban)",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/rust:1": { "version": "1.94.0" }
+  },
+  "postCreateCommand": "rustup target add wasm32v1-none && rustup component add rustfmt clippy && npm ci",
+  "forwardPorts": [3000],
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "rust-lang.rust-analyzer", "tamasfe.even-better-toml"]
+    }
+  }
+}

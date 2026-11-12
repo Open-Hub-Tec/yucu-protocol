@@ -20,13 +20,15 @@ There are two kinds of issues, both for TecNM Campus Tlaxiaco students:
 1. Comment on the issue asking to be assigned. **Wait for the assignment before you start**: one person or team per issue.
 2. Read the issue's acceptance criteria and the ADRs it links to.
 
-Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository takes part in an active Wave. There is no guaranteed reward.
+Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository takes part in an active Wave. There is no guaranteed reward. If there is one, Drips pays it directly to you and nobody else takes a share: see the [funding policy](./docs/drips/FUNDING_POLICY.md).
 
 ---
 
 ## 2. Set up
 
-Requires **Node 22** ([`.nvmrc`](./.nvmrc)) and Git. Rust 1.94 with `rustup target add wasm32v1-none` is only needed for [`contracts/`](./contracts/).
+**Nothing to install (GitHub Codespaces).** On the repo page, click **Code → Codespaces → Create codespace on main**: you get VS Code in the browser with Node 22 and `npm ci` already done. For `contracts/`, use **⋯ → New with options** and choose "Yucu (contratos Soroban)", which adds Rust 1.94 and `wasm32v1-none`. The same configuration works in local VS Code with the *Dev Containers* extension.
+
+**On your own computer**, you need **Node 22** ([`.nvmrc`](./.nvmrc)) and Git. Rust 1.94 with `rustup target add wasm32v1-none` is only needed for [`contracts/`](./contracts/). On Ubuntu or WSL, the `nodejs` package from `apt` is too old: install Node 22 with nvm (step-by-step commands in [`AGENTS.md`](./AGENTS.md#comandos-deben-pasar-antes-de-abrir-un-pr)). On WSL, clone inside Linux (`~/…`), not under `/mnt/c/…`. If `npm test` says *Could not find 'src/tests/\*\*/\*.test.ts'*, you are on an old Node: run `nvm use 22`.
 
 ```bash
 git clone https://github.com/Open-Hub-Tec/yucu-protocol.git   # or your fork
@@ -48,13 +50,14 @@ git checkout -b feat/issue-112-payout-port     # or fix/issue-<n>-<topic>
 ```
 
 * Keep changes small and focused on the issue. Do not reformat unrelated files.
-* Add a **positive and a negative test** for every new rule. A new file in `src/tests/` must also be added to the `test` script in `package.json`, or it will not run.
+* Add a **positive and a negative test** for every new rule. Any `src/tests/**/*.test.ts` file runs automatically; do not edit the `test` script in `package.json`.
+* ESLint flags a new `any`, `@ts-ignore` or a forbidden import in a screen while you type. Do not add new entries to `eslint-suppressions.json`.
 * Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org/) style, for example `feat(chain): add PayoutPort with simulated version`.
 
 Before opening the PR, all of these must pass:
 
 ```bash
-npm run lint     # TypeScript, no errors
+npm run lint     # TypeScript and ESLint, no errors
 npm test         # tests
 npm run build    # production build
 

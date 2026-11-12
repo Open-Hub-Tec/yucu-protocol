@@ -35,6 +35,21 @@ export function lineasAgregadas(patch) {
   return patch.split('\n').filter((l) => l.startsWith('+') && !l.startsWith('+++')).map((l) => l.slice(1));
 }
 
+/** Convierte un patrón como "src/tests/**\/*.test.ts" en una expresión regular. */
+export function globARegex(glob) {
+  let re = '';
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*' && glob[i + 1] === '*') {
+      i++;
+      if (glob[i + 1] === '/') { i++; re += '(?:.*/)?'; } else re += '.*';
+    } else if (c === '*') re += '[^/]*';
+    else if (c === '?') re += '[^/]';
+    else re += c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  }
+  return new RegExp(`^${re}$`);
+}
+
 /** Números de issue que el PR dice resolver. */
 export function issuesCitadas(body) {
   return [...(body || '').matchAll(/\b(resolves|closes|fixes)\s+#(\d+)/gi)].map((m) => Number(m[2]));
@@ -80,7 +95,9 @@ export function validarCodigo(d) {
   if (nuevas.length) {
     let script = '';
     try { script = JSON.parse(d.packageJson || '{}')?.scripts?.test || ''; } catch { script = ''; }
-    const faltan = nuevas.filter((a) => !script.includes(a.path));
+    // El script puede listar archivos o usar un patrón como "src/tests/**/*.test.ts".
+    const patrones = (script.match(/[^\s"']*\*[^\s"']*/g) || []).map(globARegex);
+    const faltan = nuevas.filter((a) => !script.includes(a.path) && !patrones.some((re) => re.test(a.path)));
     ok(faltan.length === 0, faltan.length
       ? `Estas pruebas nuevas no están en el script \`test\` de \`package.json\`, así que no se ejecutarían: ${faltan.map((a) => '`' + a.path + '`').join(', ')}.`
       : 'Las pruebas nuevas están en el script `test` de `package.json`.');

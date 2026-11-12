@@ -20,7 +20,7 @@
 | | |
 |---|---|
 | Built on Stellar | 4 Soroban contracts on testnet, with tests; attestations on [Attest Protocol](https://github.com/daccred/attestprotocol), escrow on [Trustless Work](https://trustlesswork.com) |
-| Open development | 70 merged pull requests from 26 contributors; every change goes through CI, automated rule checks and code-owner review |
+| Open development | 74 merged pull requests from 26 contributors; every pull request runs CI and an automated check of the project rules |
 | Documented decisions | 8 architecture decision records ([`docs/adr/`](./docs/adr/)) and 100+ open issues with acceptance criteria |
 | Grounded in the field | Interviews with artisans, a honey producers' union and 14 buyers in the Mixteca ([`docs/research/`](./docs/research/)) |
 | Education | Used as the real project of TecNM Tlaxiaco's software project management course; student teams work from issues, branches and reviewed PRs |
@@ -234,7 +234,9 @@ Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verificatio
 
 ## Quickstart
 
-Requires Node 22 ([`.nvmrc`](./.nvmrc)). Rust and the Stellar CLI are only needed for the contracts.
+**Fastest:** open the repo in GitHub Codespaces (**Code → Codespaces → Create**) or in VS Code with *Dev Containers*. Node 22 and the dependencies come installed; for `contracts/`, pick the "Yucu (contratos Soroban)" configuration, which adds Rust.
+
+**On your own computer:** Node 22 ([`.nvmrc`](./.nvmrc)). Rust and the Stellar CLI are only needed for the contracts. Step-by-step for Ubuntu or WSL in [`CONTRIBUTING.md`](./CONTRIBUTING.md#-1-local-development-setup).
 
 ```bash
 git clone https://github.com/Open-Hub-Tec/yucu-protocol.git
@@ -248,8 +250,8 @@ npm run dev             # http://localhost:3000
 Checks that must pass before opening a PR:
 
 ```bash
-npm run lint     # TypeScript, no errors
-npm test         # TypeScript tests
+npm run lint     # TypeScript and ESLint (fixed rules of AGENTS.md)
+npm test         # every src/tests/**/*.test.ts file, found automatically
 npm run build    # production build
 
 # Only if you changed contracts/

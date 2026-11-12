@@ -28,7 +28,7 @@ Si usas Claude Code, las skills se cargan solas. Si usas otro asistente de IA, p
 
 ## 3. Prepara tu rama
 
-Usa **Node 22** (la versión exacta está en `.nvmrc`):
+Usa **Node 22** (la versión exacta está en `.nvmrc`). Si no quieres instalar nada, abre el repositorio en GitHub Codespaces (**Code → Codespaces → Create**): ya trae Node 22 y las dependencias. Para instalarlo en Ubuntu o WSL, sigue los pasos de [`AGENTS.md`](../../AGENTS.md), sección "Comandos".
 
 ```bash
 git checkout main
@@ -43,12 +43,12 @@ git checkout -b feat/issue-<número>-<tema>
 ## 4. Programa y prueba
 
 * Cambios **pequeños y enfocados** en tu issue. No reformatees archivos que no tienen que ver.
-* **Una prueba positiva y una negativa por cada regla nueva.** Si agregas un archivo en `src/tests/`, agrégalo al script `test` de `package.json`.
+* **Una prueba positiva y una negativa por cada regla nueva.** Ponlas en archivos `src/tests/**/*.test.ts`: `npm test` las encuentra solas. No edites el script `test` de `package.json`.
 * Corre lo mismo que corre el CI:
 
 ```bash
-npm run lint   # TypeScript sin errores
-npm test       # pruebas
+npm run lint   # TypeScript y ESLint sin errores
+npm test       # todas las pruebas de src/tests/
 npm run build  # build de producción
 
 # Solo si tocaste contracts/
