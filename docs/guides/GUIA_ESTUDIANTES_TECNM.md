@@ -64,7 +64,7 @@ git merge main
 npm run test
 ```
 
-### ¿Cómo verificar que no tengo errores de TypeScript?
+### ¿Cómo verificar que no tengo errores de TypeScript ni de ESLint?
 ```bash
 npm run lint
 ```
