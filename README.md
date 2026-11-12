@@ -216,7 +216,9 @@ Independent: #120 real SHA-256 · #121 buyer privacy · #106 no fake verificatio
 
 ## Quickstart
 
-Requires Node 22 ([`.nvmrc`](./.nvmrc)). Rust and the Stellar CLI are only needed for the contracts.
+**Fastest:** open the repo in GitHub Codespaces (**Code → Codespaces → Create**) or in VS Code with *Dev Containers*. Node 22 and the dependencies come installed; for `contracts/`, pick the "Yucu (contratos Soroban)" configuration, which adds Rust.
+
+**On your own computer:** Node 22 ([`.nvmrc`](./.nvmrc)). Rust and the Stellar CLI are only needed for the contracts. Step-by-step for Ubuntu or WSL in [`CONTRIBUTING.md`](./CONTRIBUTING.md#-1-local-development-setup).
 
 ```bash
 git clone https://github.com/Open-Hub-Tec/yucu-protocol.git
@@ -230,8 +232,8 @@ npm run dev             # http://localhost:3000
 Checks that must pass before opening a PR:
 
 ```bash
-npm run lint     # TypeScript, no errors
-npm test         # TypeScript tests
+npm run lint     # TypeScript and ESLint (fixed rules of AGENTS.md)
+npm test         # every src/tests/**/*.test.ts file, found automatically
 npm run build    # production build
 
 # Only if you changed contracts/

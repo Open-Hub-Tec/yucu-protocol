@@ -9,12 +9,33 @@ Contributions here deliver real-world impact: validating smallholder harvests, p
 
 ---
 
-## 🚀 1. Local Development Setup (In 3 Steps)
+## 🚀 1. Local Development Setup
 
-### Prerequisites:
-- **Node.js 22** (the exact version is in `.nvmrc`; with nvm run `nvm use`).
+### Option A: nothing to install (GitHub Codespaces)
+On the repo page, click **Code → Codespaces → Create codespace on main**. In a few minutes you get VS Code in the browser with Node 22 and `npm ci` already done. To work on `contracts/`, use **Code → Codespaces → ⋯ → New with options** and choose the "Yucu (contratos Soroban)" configuration, which adds Rust 1.94 and `wasm32v1-none`. The same configuration works in local VS Code with the *Dev Containers* extension. Then jump to Step 3.
+
+### Option B: your own computer
+
+#### Prerequisites:
+- **Node.js 22** (the exact version is in `.nvmrc`). Older versions fail: `npm test` says *Could not find 'src/tests/\*\*/\*.test.ts'*.
 - **Rust 1.94** with `rustup target add wasm32v1-none` (only if you work on `contracts/`).
 - **Git**.
+
+#### On Ubuntu or WSL (Windows)
+The `nodejs` package from `apt` is too old; install Node 22 with nvm:
+```bash
+sudo apt update && sudo apt install -y git curl build-essential
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install 22 && nvm alias default 22
+```
+Only if you work on `contracts/`:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.94.0
+source ~/.cargo/env
+rustup target add wasm32v1-none && rustup component add rustfmt clippy
+```
+On WSL, clone inside Linux (`~/…`), not under `/mnt/c/…`: it is much faster and symlinks work. On Windows without WSL, run `git config --global core.symlinks true` (with Developer Mode on) before cloning.
 
 ### Step 1: Clone the repository
 ```bash
@@ -77,9 +98,11 @@ git checkout -b feature/issue-22-offline-qr-sync
 ```
 
 ### 3. Implement and test your changes
-Verify changes as you code:
+Verify changes as you code. Tests are any `src/tests/**/*.test.ts` file and run automatically; do not edit the `test` script in `package.json`. ESLint flags new `any`, `@ts-ignore` and forbidden imports in your editor.
 ```bash
-npm run test
+npm run lint    # TypeScript and ESLint
+npm test        # all tests
+npm run build   # production build
 ```
 
 ### 4. Commit using Conventional Commits
