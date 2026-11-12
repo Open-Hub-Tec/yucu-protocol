@@ -10,6 +10,10 @@ This file says who receives money for work on Yucu Protocol, and who does not. I
 - **Taking part in Drips is voluntary.** A student's course grade never depends on applying to a Wave, passing the identity check or receiving a reward. A student who cannot or does not want to take part does the same course work and keeps the authorship of their commits.
 - We do not promise scholarships, fixed amounts or payment dates.
 
+## Conflict of interest
+
+The maintainer of this repository also maintains [MicoPay](https://github.com/Micopay/micopay-protocol), another project in Drips Wave, and teaches the students who work on Yucu. Because the same person writes the issues, assigns them and grades the students, we state it here instead of leaving it for others to find. The rules above are how we limit it: the maintainer takes no share of any reward, and no grade depends on Drips. Yucu and MicoPay are separate projects, with separate organizations and issues.
+
 ## Grants to the project
 
 A grant to the project as a whole (for example, from the Stellar Community Fund) is a separate matter from Wave rewards. Before accepting one:
@@ -35,4 +39,5 @@ On 2026-11-12 we removed two files that did not describe how Drips works and tha
 - Solo programan los estudiantes del TecNM Campus Tlaxiaco. El docente redacta issues, revisa y fusiona.
 - Participar en Drips es voluntario: la calificación no depende de postularse, pasar la verificación de identidad ni cobrar.
 - No prometemos becas, montos ni fechas.
+- El docente también mantiene MicoPay, otro proyecto en Drips Wave, y califica a los estudiantes que trabajan en Yucu. Lo decimos aquí para que nadie tenga que descubrirlo; las reglas de arriba son cómo lo limitamos.
 - Si algún día llega un fondo para el proyecto (por ejemplo, del SCF), su presupuesto se publica aquí y se acuerda por escrito con el TecNM antes de aceptarlo.
