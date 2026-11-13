@@ -2,7 +2,7 @@
 
 Yucu is an open-source prototype on Stellar testnet, built by students of the Instituto Tecnológico de Tlaxiaco (TecNM) as part of their courses.
 
-> **Code contributions are reserved for TecNM Campus Tlaxiaco students.** Every issue, including `good first issue` and `drips-eligible`, is course work. Pull requests from outside the course are closed without merging, whatever their quality. Bug reports, questions and field feedback from anyone are welcome as issues.
+> **Who can write code.** Issues labeled [`open-to-all`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/open-to-all) are open to anyone, including contributors who come through Drips Wave. All other issues are course work for TecNM Campus Tlaxiaco students. A pull request from outside the course for an issue without `open-to-all` is closed without merging. Bug reports, questions and field feedback from anyone are welcome as issues.
 
 Before you write code, read [`AGENTS.md`](./AGENTS.md). Its rules apply to people and AI assistants alike, and the CI checks several of them automatically. By taking part you agree to the [Code of conduct](./CODE_OF_CONDUCT.md).
 
@@ -10,12 +10,13 @@ Before you write code, read [`AGENTS.md`](./AGENTS.md). Its rules apply to peopl
 
 ## 1. Pick an issue
 
-There are two kinds of issues, both for TecNM Campus Tlaxiaco students:
+There are three kinds of issues:
 
 | Kind | How to recognize it | Who can take it |
 |---|---|---|
 | **Module issues** | `[W…]` issues with a `modulo: …` label. Stay in one module to become its expert; see [#152](https://github.com/Open-Hub-Tec/yucu-protocol/issues/152) for the order. New here? Start with a [`good first issue`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/good%20first%20issue) | Students, after the instructor assigns them |
 | **Course deliverables** | Label [`tecnm-sprint-4`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/tecnm-sprint-4) | Only the assigned team |
+| **Open issues** | Label [`open-to-all`](https://github.com/Open-Hub-Tec/yucu-protocol/labels/open-to-all) | Anyone, students or not, after the maintainer assigns them |
 
 1. Comment on the issue asking to be assigned. **Wait for the assignment before you start**: one person or team per issue.
 2. Read the issue's acceptance criteria and the ADRs it links to.

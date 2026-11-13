@@ -6,13 +6,13 @@ This file says who receives money for work on Yucu Protocol, and who does not. I
 
 - Rewards for a Wave issue are paid **by Drips directly to the contributor** who solved it, under the [Drips Wave terms](https://docs.drips.network/wave/terms-and-rules) (age 18 or older, identity check). Yucu has no say in the amount: Drips sets it from the issue's complexity and its own rules.
 - **Nobody else takes a share.** The maintainer, Open Hub TecNM and the repository do not receive, hold, pool or redistribute any part of a contributor's reward. There is no "splits" contract and no reserve fund.
-- **Code is written by TecNM Campus Tlaxiaco students only** (see [CONTRIBUTING](../../CONTRIBUTING.md)). The maintainer writes issues, reviews and merges pull requests, and does not solve Wave issues.
+- **Who writes code:** TecNM Campus Tlaxiaco students, and any contributor on issues labeled `open-to-all` (see [CONTRIBUTING](../../CONTRIBUTING.md)). The maintainer writes issues, reviews and merges pull requests, and does not solve Wave issues.
 - **Taking part in Drips is voluntary.** A student's course grade never depends on applying to a Wave, passing the identity check or receiving a reward. A student who cannot or does not want to take part does the same course work and keeps the authorship of their commits.
 - We do not promise scholarships, fixed amounts or payment dates.
 
 ## Conflict of interest
 
-The maintainer of this repository also maintains [MicoPay](https://github.com/Micopay/micopay-protocol), another project in Drips Wave, and teaches the students who work on Yucu. Because the same person writes the issues, assigns them and grades the students, we state it here instead of leaving it for others to find. The rules above are how we limit it: the maintainer takes no share of any reward, and no grade depends on Drips. Yucu and MicoPay are separate projects, with separate organizations and issues.
+The maintainer of this repository also maintains [MicoPay](https://github.com/Micopay/micopay-protocol), another project in Drips Wave, and teaches the students who work on Yucu. Because the same person writes the issues, assigns them and grades the students, we state it here instead of leaving it for others to find. The rules above are how we limit it: the maintainer takes no share of any reward, no grade depends on Drips, and issues labeled `open-to-all` can be taken by contributors who are not the maintainer's students. Yucu and MicoPay are separate projects, with separate organizations and issues.
 
 ## Grants to the project
 
