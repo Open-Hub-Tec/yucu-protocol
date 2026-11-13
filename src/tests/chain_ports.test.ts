@@ -7,6 +7,7 @@ import {
   SimulatedEscrow,
   SimulatedExternalWallet,
   SimulatedLotRegistry,
+  SimulatedPayout,
   SimulatedWallet,
 } from '../core/chain/SimulatedChain';
 
@@ -118,6 +119,39 @@ async function run() {
   check((await escrow.getStatus('ORD-5')).milestones[0].status === 'resolved', 'Resolver la disputa cierra el hito');
   const badPercent = await escrow.prepareResolveDispute('ORD-5', 0, 'GTERCERO', 120).then(() => false, () => true);
   check(badPercent, 'Se rechaza resolver una disputa con un porcentaje fuera de 0 a 100');
+
+  // Salida a pesos desde la cuenta de la artesana (#112)
+  let fakeNow = 1_000_000;
+  const payout = new SimulatedPayout({ now: () => fakeNow });
+  const quote = await payout.quote(10);
+  check(quote.source === 'simulated' && quote.amountPesos > 0, 'La cotización dice cuántos pesos recibe la artesana');
+  check(await payout.quote(0).then(() => false, () => true), 'Se rechaza un retiro de cero');
+  check(await payout.quote(-5).then(() => false, () => true), 'Se rechaza un retiro con monto negativo');
+
+  const cashoutRequest = {
+    producerAddress: address, amountUsdc: 50, walletKind: 'device' as const,
+    agentCode: 'TIENDA-01', expiresInMinutes: 15,
+  };
+  const cashoutTx = await payout.prepareCashout(cashoutRequest);
+  check(cashoutTx.summary.includes('TIENDA-01'), 'La transacción preparada explica dónde se cobra');
+  const cashout = await payout.submit(await wallet.sign(cashoutTx, '1234'));
+  check(cashout.source === 'simulated' && cashout.code.length > 0 && cashout.expiresAt > fakeNow, 'El retiro devuelve su código y vencimiento');
+  check((await payout.getStatus(cashout.cashoutId)).status === 'ready', 'El retiro queda listo para cobrar');
+  payout.markCollected(cashout.cashoutId);
+  check((await payout.getStatus(cashout.cashoutId)).status === 'collected', 'El retiro pasa de listo a cobrado');
+
+  const expiringTx = await payout.prepareCashout({ ...cashoutRequest, agentCode: 'TIENDA-02' });
+  const expiring = await payout.submit(await wallet.sign(expiringTx, '1234'));
+  fakeNow = expiring.expiresAt + 1;
+  check((await payout.getStatus(expiring.cashoutId)).status === 'expired', 'Un retiro vencido deja de estar listo');
+  fakeNow = expiring.expiresAt + 6 * 60_000;
+  check((await payout.getStatus(expiring.cashoutId)).status === 'refunded', 'El retiro vencido se devuelve a la cuenta de la artesana');
+  check((await payout.getStatus(expiring.cashoutId)).source === 'simulated', 'El estado del retiro se marca como simulado');
+
+  const cardCashout = await payout.prepareCashout({ ...cashoutRequest, walletKind: 'card', expiresInMinutes: 15 });
+  check(cardCashout.summary.includes('TIENDA-01'), 'Con la tarjeta QR se acepta un código de 15 minutos');
+  const longCard = await payout.prepareCashout({ ...cashoutRequest, walletKind: 'card', expiresInMinutes: 24 * 60 }).then(() => false, () => true);
+  check(longCard, 'Con la tarjeta QR se rechaza un código de 24 horas');
 
   if (failures > 0) {
     console.error(`\n${failures} prueba(s) fallaron`);
