@@ -5,7 +5,8 @@ This file says who receives money for work on Yucu Protocol, and who does not. I
 ## Drips Wave rewards
 
 - Rewards for a Wave issue are paid **by Drips directly to the contributor** who solved it, under the [Drips Wave terms](https://docs.drips.network/wave/terms-and-rules) (age 18 or older, identity check). Yucu has no say in the amount: Drips sets it from the issue's complexity and its own rules.
-- **Nobody else takes a share.** The maintainer, Open Hub TecNM and the repository do not receive, hold, pool or redistribute any part of a contributor's reward. There is no "splits" contract and no reserve fund.
+- **Nobody outside the team takes a share.** The maintainer, Open Hub TecNM and the repository do not receive, hold, pool or redistribute any part of a contributor's reward. There is no "splits" contract and no reserve fund.
+- **Teams.** When a team works on an issue, one person applies in Drips on behalf of the team, and Drips pays that person. How the team shares it is their own voluntary decision; Yucu does not take part in it and does not check it.
 - **Who writes code:** TecNM Campus Tlaxiaco students, and any contributor on issues labeled `open-to-all` (see [CONTRIBUTING](../../CONTRIBUTING.md)). The maintainer writes issues, reviews and merges pull requests, and does not solve Wave issues.
 - **Taking part in Drips is voluntary.** A student's course grade never depends on applying to a Wave, passing the identity check or receiving a reward. A student who cannot or does not want to take part does the same course work and keeps the authorship of their commits.
 - We do not promise scholarships, fixed amounts or payment dates.
@@ -36,7 +37,8 @@ On 2026-11-12 we removed two files that did not describe how Drips works and tha
 ## Resumen en español
 
 - En Drips Wave, **Drips le paga directamente a quien resolvió la issue**. Ni el docente ni Open Hub ni el repositorio reciben, guardan o reparten parte de ese pago.
-- Solo programan los estudiantes del TecNM Campus Tlaxiaco. El docente redacta issues, revisa y fusiona.
+- Si trabaja un equipo, una persona aplica en Drips a nombre del equipo y Drips le paga a ella. Cómo lo reparten lo decide el equipo, de forma voluntaria; Yucu no interviene.
+- Programan los estudiantes del TecNM Campus Tlaxiaco y, en las issues con la etiqueta `open-to-all`, cualquier persona. El docente redacta issues, revisa y fusiona.
 - Participar en Drips es voluntario: la calificación no depende de postularse, pasar la verificación de identidad ni cobrar.
 - No prometemos becas, montos ni fechas.
 - El docente también mantiene MicoPay, otro proyecto en Drips Wave, y califica a los estudiantes que trabajan en Yucu. Lo decimos aquí para que nadie tenga que descubrirlo; las reglas de arriba son cómo lo limitamos.

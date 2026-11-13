@@ -21,7 +21,22 @@ There are three kinds of issues:
 1. Comment on the issue asking to be assigned. **Wait for the assignment before you start**: one person or team per issue.
 2. Read the issue's acceptance criteria and the ADRs it links to.
 
-Issues labeled `drips-eligible` may be recognized through [Drips Wave](https://www.drips.network/wave) when the repository takes part in an active Wave. There is no guaranteed reward. If there is one, Drips pays it directly to you and nobody else takes a share: see the [funding policy](./docs/drips/FUNDING_POLICY.md).
+### Applying through Drips Wave
+
+Yucu is part of the [Stellar Wave](https://www.drips.network/wave/stellar). Issues the maintainer adds to a Wave can earn points, and Drips pays the reward directly to the contributor.
+
+1. Sign in at [drips.network/wave](https://www.drips.network/wave) with your GitHub account.
+2. When a Wave is active, find the Yucu issue in the Drips app and **apply there**. A comment on GitHub alone is not an application.
+3. Wait for the maintainer to assign you. Only start after you are assigned.
+4. Open your PR with `Resolves #<number>`, as usual. Each Wave lasts one week, so pick an issue you can finish in that time.
+
+Rules to keep in mind:
+
+* To receive a reward, Drips requires you to be **18 or older** and to pass its **identity check (KYC)**. See the [Drips Wave terms](https://docs.drips.network/wave/terms-and-rules).
+* **Teams:** one person applies on behalf of the team, and Drips pays that person. How the team shares it is the team's own decision.
+* **Students:** taking part in Drips is voluntary. Your course grade never depends on applying, passing the identity check or receiving a reward.
+* Drips does not accept low-quality, untested or AI-generated work that you do not understand. In the review you will have to explain your code.
+* There is no guaranteed reward, amount or date. See the [funding policy](./docs/drips/FUNDING_POLICY.md).
 
 ---
 
