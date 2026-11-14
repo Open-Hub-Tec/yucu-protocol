@@ -1,5 +1,10 @@
 # ADR-003: Arquitectura no custodial con Trustless Work
 
+> **English summary.**
+> **Context:** An internal technical audit in October 2026 showed that Stellar integration in the prototype was simulated in memory. Connecting to the real network raised a core architectural and legal question: who controls private keys and funds? Holding third-party keys or funds would trigger financial custody regulations in Mexico (Ley Fintech / CNBV) that an academic project cannot assume.
+> **Decision:** Yucu adopts a strictly non-custodial architecture (`D1`): the platform never generates, stores, receives, or recovers user private keys and never holds user funds. Conditional-payment purchases use the Trustless Work escrow API, while `contracts/fair_escrow` remains educational material (`D2`). Every operation follows a single prepare → sign → submit flow (`D3`), where the server may prepare unsigned transactions and sponsor reserves or fees via fee-bump, but each participant signs on their own device. Development targets Stellar testnet first (`D4`), with producer keys encrypted by a PIN in IndexedDB and backed up on a physical recovery card (`D5`), while the platform certifier node co-signs only the `certifier` authorization entry in `lot_passport` (`D6`). All UI screens interact exclusively through the chain ports (`WalletPort`, `DeviceWalletPort`, `CardWalletPort`, `ExternalWalletPort`, `LotRegistryPort`, and `EscrowPort`), tagging simulated results with `source: 'simulated'` and `<DemoBadge />`.
+> **Consequences:** Eliminates custody risk and unifies transaction signing across the codebase, at the cost of user responsibility for PIN and recovery card safekeeping, external reliance on Trustless Work behind `EscrowPort`, and per-account limits on sponsored XLM reserves and fees.
+
 * **Estado:** Aceptada
 * **Fecha:** 26 de octubre de 2026
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)
