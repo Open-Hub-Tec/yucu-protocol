@@ -1,4 +1,4 @@
-name: Validar código (reglas de AGENTS.md)
+name: Code rules check (AGENTS.md)
 
 # Revisa las reglas fijas de AGENTS.md en las líneas que agrega cada PR de código
 # (issue citada, pruebas, pantallas que solo hablan con los puertos, TypeScript
@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   validar:
-    name: Reglas fijas de AGENTS.md
+    name: AGENTS.md fixed rules
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
