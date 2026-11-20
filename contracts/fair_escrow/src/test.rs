@@ -244,3 +244,90 @@ fn el_arbitro_puede_reembolsar_antes_de_la_fecha() {
     s.client.refund(&order, &s.admin);
     assert_eq!(TokenClient::new(&s.env, &s.token).balance(&s.buyer), 10_000);
 }
+
+#[test]
+fn rechaza_ordenes_con_monto_invalido_duplicadas_o_al_mismo_productor() {
+    let s = setup();
+    let res_min = s.client.try_set_min_price(&s.producer, &s.token, &-100);
+    assert_eq!(res_min, Err(Ok(EscrowError::InvalidAmount)));
+
+    let res_cero = s.client.try_create_and_fund_order(
+        &uid(&s.env, 10),
+        &s.buyer,
+        &s.producer,
+        &s.token,
+        &0,
+        &1_000,
+        &PayoutRail::EtherfuseSpeiBanxico,
+    );
+    assert_eq!(res_cero, Err(Ok(EscrowError::InvalidAmount)));
+
+    let res_mismo = s.client.try_create_and_fund_order(
+        &uid(&s.env, 11),
+        &s.buyer,
+        &s.buyer,
+        &s.token,
+        &1_000,
+        &1_000,
+        &PayoutRail::EtherfuseSpeiBanxico,
+    );
+    assert_eq!(res_mismo, Err(Ok(EscrowError::InvalidAmount)));
+
+    let order = uid(&s.env, 12);
+    s.client.create_and_fund_order(
+        &order,
+        &s.buyer,
+        &s.producer,
+        &s.token,
+        &2_000,
+        &1_000,
+        &PayoutRail::EtherfuseSpeiBanxico,
+    );
+    let res_dup = s.client.try_create_and_fund_order(
+        &order,
+        &s.buyer,
+        &s.producer,
+        &s.token,
+        &2_000,
+        &1_000,
+        &PayoutRail::EtherfuseSpeiBanxico,
+    );
+    assert_eq!(res_dup, Err(Ok(EscrowError::OrderAlreadyExists)));
+}
+
+#[test]
+fn operaciones_sobre_orden_inexistente_o_ya_liquidada_devuelven_error() {
+    let s = setup();
+    let inexistente = uid(&s.env, 44);
+    assert_eq!(
+        s.client.try_get_order(&inexistente),
+        Err(Ok(EscrowError::OrderNotFound))
+    );
+    assert_eq!(
+        s.client.try_refund(&inexistente, &s.admin),
+        Err(Ok(EscrowError::OrderNotFound))
+    );
+    assert_eq!(
+        s.client
+            .try_release_with_attestation(&inexistente, &uid(&s.env, 9), &s.buyer),
+        Err(Ok(EscrowError::OrderNotFound))
+    );
+
+    let order = uid(&s.env, 45);
+    s.client.create_and_fund_order(
+        &order,
+        &s.buyer,
+        &s.producer,
+        &s.token,
+        &3_000,
+        &1_000,
+        &PayoutRail::EtherfuseSpeiBanxico,
+    );
+    let delivery = uid(&s.env, 9);
+    s.registry.set_valid(&delivery, &true);
+    s.client
+        .release_with_attestation(&order, &delivery, &s.buyer);
+
+    let res_refund = s.client.try_refund(&order, &s.admin);
+    assert_eq!(res_refund, Err(Ok(EscrowError::InvalidOrderStatus)));
+}
