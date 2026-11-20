@@ -46,7 +46,7 @@ export class RaizProtocolSDK {
    */
   public get ai() {
     return {
-      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): VoiceParsingResult => {
+      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): Promise<VoiceParsingResult> => {
         return RaizAIOracles.parseAcousticVoiceInput(transcriptOrVoice, language);
       },
 
@@ -54,11 +54,11 @@ export class RaizProtocolSDK {
         productType: 'coffee' | 'textile' | 'honey' | 'chocolate' | 'artesania';
         imageUrlOrBase64?: string;
         sampleMetrics?: { moistureInput?: number; defectRatio?: number; isHandWoven?: boolean };
-      }): QualityAttestation => {
+      }): Promise<QualityAttestation> => {
         return RaizAIOracles.evaluateLotQuality(params);
       },
 
-      verifyEUDR: (community: string, lat?: number, lng?: number): EUDRComplianceReport => {
+      verifyEUDR: (community: string, lat?: number, lng?: number): Promise<EUDRComplianceReport> => {
         return RaizAIOracles.verifyEUDRCompliance({ community, latitude: lat, longitude: lng });
       },
 
@@ -188,7 +188,7 @@ export class RaizProtocolSDK {
         return CryptoEngine.computeCommunityDigest(params);
       },
       sha256: (input: string) => {
-        return CryptoEngine.sha256Hex(input);
+        return CryptoEngine.sha256(input);
       },
     };
   }

@@ -1,6 +1,7 @@
 import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 import { ProcessStage, DynamicSpec, DigitalPassportLot } from '../types';
 import { CryptoEngine } from '../core/crypto/CryptoEngine';
+import { RegisterLotRequest } from '../core/chain/ports';
 
 let passed = 0;
 let failed = 0;
@@ -84,45 +85,44 @@ assert(chocolateStages.length === 4, 'Lista dinámica de chocolate tradicional e
 console.log('\n--- 2. Criptografía y Sellado Inmutable en Stellar ---');
 
 async function testCrypto() {
-  // Serialización de la lista dinámica para el cálculo del Community Digest
-  const stagesSummaryTextile = textileStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
-  const stagesSummaryHoney = honeyStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
+  const photoTextileHash = await CryptoEngine.sha256('photo_telar_cintura_coyuchi_sample');
+  const photoHoneyHash = await CryptoEngine.sha256('photo_colmenas_campanilla_sample');
 
-  const digestTextile = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_tuun_savi_sample',
-    photoBase64: 'photo_telar_cintura_coyuchi_sample',
-    processStagesSummary: stagesSummaryTextile
-  });
+  const lotTextile: RegisterLotRequest = {
+    code: 'MX-2024-CUQ-001',
+    producerAddress: 'GARTISAN1TEXTILE7777777777777777777777777777777777777777777',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textile',
+    variety: 'Telar de cintura con tinte de grana cochinilla',
+    volumeRange: 1,
+    photoHashHex: photoTextileHash,
+  };
 
-  const digestHoney = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
-    processStagesSummary: stagesSummaryHoney
-  });
+  const lotHoney: RegisterLotRequest = {
+    code: 'MX-2024-HON-002',
+    producerAddress: 'GPRODUCER2HONEY8888888888888888888888888888888888888888888',
+    location: 'Magdalena Peñasco',
+    category: 'honey',
+    variety: 'Miel virgen de campanilla',
+    volumeRange: 2,
+    photoHashHex: photoHoneyHash,
+  };
+
+  const digestTextile = await CryptoEngine.generateLotDigest(lotTextile);
+  const digestHoney = await CryptoEngine.generateLotDigest(lotHoney);
 
   assert(digestTextile.length === 64, `Digest SHA-256 Textile válido de 64 caracteres: ${digestTextile.slice(0, 16)}...`);
   assert(digestHoney.length === 64, `Digest SHA-256 Miel válido de 64 caracteres: ${digestHoney.slice(0, 16)}...`);
-  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de las etapas del proceso');
+  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de los datos del lote');
 
   // Prueba de Detección de Fraude (Tamper Evidence)
-  // Si un intermediario altera "17.8% humedad" por "22.0% humedad" o cambia el tinte:
-  const tamperedStagesSummary = stagesSummaryHoney.replace('17.8%', '22.0%');
-  const tamperedDigest = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
-    processStagesSummary: tamperedStagesSummary
-  });
+  const tamperedLot: RegisterLotRequest = {
+    ...lotHoney,
+    variety: 'Miel adulterada con jarabe de maíz',
+  };
+  const tamperedDigest = await CryptoEngine.generateLotDigest(tamperedLot);
 
-  assert(digestHoney !== tamperedDigest, 'Detección antifraude: Modificar una etapa invalida inmediatamente el hash de Stellar');
+  assert(digestHoney !== tamperedDigest, 'Detección antifraude: Modificar un campo invalida inmediatamente el hash de Stellar');
 }
 
 // -------------------------------------------------------------

@@ -62,11 +62,6 @@
       "count": 4
     }
   },
-  "src/core/crypto/CryptoEngine.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
   "src/core/hooks/useYucuProtocol.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 3

@@ -68,18 +68,18 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
 
   if (!isOpen) return null;
 
-  const handleRunVoiceOracle = () => {
-    const res = RaizAIOracles.parseAcousticVoiceInput(voiceInput);
+  const handleRunVoiceOracle = async () => {
+    const res = await RaizAIOracles.parseAcousticVoiceInput(voiceInput);
     setVoiceResult(res);
   };
 
-  const handleRunQualityOracle = () => {
-    const res = RaizAIOracles.evaluateLotQuality({ productType: qualityDomain });
+  const handleRunQualityOracle = async () => {
+    const res = await RaizAIOracles.evaluateLotQuality({ productType: qualityDomain });
     setQualityResult(res);
   };
 
-  const handleRunEudrOracle = () => {
-    const res = RaizAIOracles.verifyEUDRCompliance({ community: eudrCommunity });
+  const handleRunEudrOracle = async () => {
+    const res = await RaizAIOracles.verifyEUDRCompliance({ community: eudrCommunity });
     setEudrResult(res);
   };
 
