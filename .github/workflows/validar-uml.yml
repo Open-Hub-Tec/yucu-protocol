@@ -1,0 +1,109 @@
+name: Validar diagramas UML
+
+# Revisa los PR de docs/uml/: diagramas dibujados en Modelio o Enterprise Architect
+# (PNG + tabla de elementos + fuentes) y documentos de requisitos, historias,
+# glosario y trazabilidad. Comprueba archivos, nombres y reglas fijas de AGENTS.md
+# y deja un comentario en el PR. No mira el dibujo ni aprueba: eso lo hace un mantenedor.
+#
+# Seguridad: usa pull_request_target para poder comentar en PR de forks. NUNCA hace
+# checkout del código del PR ni lo ejecuta: lee sus archivos como datos por la API.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - 'docs/uml/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: validar-uml-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Validar diagramas UML
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Traer el script de validación (de main, no del PR)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Revisar el PR y comentar
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { validarUml, formatearUml, issuesCitadas, MARCA_UML } = await import(`${process.env.GITHUB_WORKSPACE}/.github/scripts/validar-uml.mjs`);
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const head = { owner: pr.head.repo.owner.login, repo: pr.head.repo.name };
+
+            // Archivos del PR (con su sha para leer el contenido por la API de git).
+            const lista = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
+            const archivos = lista.map((f) => ({ path: f.filename, status: f.status }));
+
+            // Issues citadas.
+            const issues = [];
+            for (const n of issuesCitadas(pr.body)) {
+              try {
+                const { data: i } = await github.rest.issues.get({ owner, repo, issue_number: n });
+                if (!i.pull_request) issues.push({ number: i.number, title: i.title, state: i.state, body: i.body || '', assignees: (i.assignees || []).map((a) => a.login) });
+              } catch { /* la issue no existe */ }
+            }
+
+            // Contenido de los archivos del PR, como datos.
+            const textos = {};
+            const binarios = {};
+            for (const f of lista) {
+              if (f.status === 'removed' || !f.filename.startsWith('docs/uml/')) continue;
+              let blob;
+              try { ({ data: blob } = await github.rest.git.getBlob({ ...head, file_sha: f.sha })); } catch { continue; }
+              const buf = Buffer.from(blob.content || '', blob.encoding === 'base64' ? 'base64' : 'utf8');
+              if (f.filename.endsWith('.md')) textos[f.filename] = buf.subarray(0, 300_000).toString('utf8');
+              else binarios[f.filename] = { size: blob.size, cabecera: [...buf.subarray(0, 24)], inicio: buf.subarray(0, 4000).toString('utf8') };
+            }
+
+            // Fuentes que cita la issue, leídas de main (más AGENTS.md).
+            const rutas = new Set(['AGENTS.md']);
+            for (const i of issues) {
+              for (const m of (i.body || '').matchAll(/github\.com\/Open-Hub-Tec\/yucu-protocol\/(?:blob|tree)\/main\/([^)\s#]+)/g)) rutas.add(m[1].replace(/\/$/, ''));
+            }
+            const partes = [];
+            const leer = async (path, nivel = 0) => {
+              try {
+                const { data } = await github.rest.repos.getContent({ owner, repo, path, ref: pr.base.sha });
+                if (Array.isArray(data)) {
+                  if (nivel > 0) return;
+                  for (const x of data.filter((x) => x.type === 'file' && /\.(ts|tsx|md|rs)$/.test(x.name)).slice(0, 25)) await leer(x.path, nivel + 1);
+                } else if (data.content && /\.(ts|tsx|md|rs|json)$/.test(path)) {
+                  partes.push(Buffer.from(data.content, 'base64').toString('utf8'));
+                }
+              } catch { /* la ruta no existe en main */ }
+            };
+            for (const r of rutas) await leer(r);
+            const fuentes = partes.join('\n');
+
+            // Qué tan atrasada va la rama respecto a main.
+            let atraso = null;
+            try {
+              const { data } = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `${pr.base.ref}...${head.owner}:${pr.head.ref}` });
+              atraso = data.behind_by;
+            } catch { atraso = null; }
+
+            const resultado = validarUml({ prBody: pr.body || '', autor: pr.user.login, archivos, issues, textos, binarios, fuentes, atraso });
+            const { cumple, texto } = formatearUml(resultado);
+
+            const comentarios = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: pr.number, per_page: 100 });
+            const previo = comentarios.find((c) => c.user?.type === 'Bot' && c.body?.includes(MARCA_UML));
+            if (previo) await github.rest.issues.updateComment({ owner, repo, comment_id: previo.id, body: texto });
+            else await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: texto });
+
+            await core.summary.addRaw(texto).write();
+            if (!cumple) core.setFailed('El PR de docs/uml/ no cumple los requisitos mínimos. Revisa el comentario en el PR.');
