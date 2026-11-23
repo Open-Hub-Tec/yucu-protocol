@@ -1,0 +1,69 @@
+## Resumen ejecutivo
+
+Esta propuesta presenta el diseño y plan de entrega del módulo de repositorio digital y gestión financiera para productores locales de ollas de barro y canastas tejidas artesanalmente en Heroica Ciudad de Tlaxiaco, Oaxaca (Equipo 7, módulo #116). El problema central consiste en la dificultad de registrar de forma ordenada la producción, los costos de insumos y las ventas artesanales sin herramientas complejas ni dependencia de conectividad constante. La solución propone un módulo web/móvil ligero con registro básico de piezas y movimientos financieros, soporte de interfaz simplificada y referencias verificables en el repositorio. Los beneficiarios directos son los productores y talleres artesanales locales de ollas de barro y canastas tejidas a mano en Tlaxiaco. El costo total estimado del proyecto es de 12000 MXN (incluyendo horas de desarrollo, aseguramiento de calidad y costo de calidad del Sprint 2) y la fecha objetivo de cierre de propuesta es el 16 de noviembre de 2026.
+
+## Problema y contexto
+
+Los productores locales de ollas de barro y canastas tejidas artesanalmente en Heroica Ciudad de Tlaxiaco, Oaxaca, realizan gran parte de su actividad en talleres familiares y espacios de venta local como el mercado sabatino. En el trabajo de campo se identificó que el control de insumos (barro, leña, fibras/materiales de tejido, traslados) y el registro de ventas suelen hacerse en libretas sueltas o de memoria.
+
+Evidencia y observaciones de campo (anónimas):
+- Observación 1: En puestos y talleres locales se observó que los precios de venta se ajustan por pieza o lote sin llevar un registro constante de costos unitarios de materiales y traslado.
+- Observación 2: Varios productores utilizan teléfonos móviles de gama básica o comparten dispositivo y prefieren pantallas directas, con textos claros y pocos pasos.
+- Cita anónima 1: "A veces vendemos varias piezas el mismo día y luego cuesta trabajo saber cuánto quedó libre después de pagar el material."
+- Cita anónima 2: "Si la pantalla tiene muchas opciones o pide muchos datos, nadie la usa cuando está ocupado atendiendo."
+- Cifra de referencia del levantamiento: En el muestreo de campo realizado en Tlaxiaco se registraron observaciones en 12 puestos/productores artesanales y se documentaron 6 historias de usuario base para el flujo inicial.
+
+## Objetivo SMART y alcance
+
+Objetivo SMART:
+- Específico (Specific): Implementar y documentar el módulo base de registro de piezas artesanales (ollas de barro y canastas tejidas) y control básico de ingresos/egresos para productores en Tlaxiaco.
+- Medible (Measurable): Completar al menos 100 % de las historias de usuario priorizadas del módulo, ejecutar pruebas automatizadas y de usabilidad en al menos 8 escenarios de registro/consulta, y alcanzar un tiempo promedio menor a 45 segundos por registro básico.
+- Alcanzable (Assignable / Achievable): Ejecutable por el equipo del proyecto dentro de las horas asignadas en la unidad académica utilizando el stack del repositorio y plantillas existentes.
+- Relevante (Relevant): Atiende directamente las necesidades de organización de información y seguimiento financiero identificadas en el diagnóstico de campo en Tlaxiaco.
+- con tiempo definido (Time-bound): Entregable de propuesta consolidado el 16 de noviembre de 2026, con cierre de iteración del módulo alineado al calendario del Sprint 4.
+
+Alcance del módulo:
+- Qué incluye:
+  - Catálogo/registro básico de productos artesanales (ollas de barro y canastas tejidas a mano) con categoría, cantidad y precio de referencia.
+  - Registro sencillo de ingresos y gastos operativos/insumos con cálculo de balance básico.
+  - Interfaz adaptable a pantalla móvil y vista simplificada (Modo Abuelo).
+  - Documentación técnica y de gestión en el repositorio.
+- Qué no incluye:
+  - Pasarela de pagos reales, liquidación bancaria automática ni promesa de ventas o ingresos garantizados.
+  - Certificación oficial de denominación de origen, auditoría externa de seguridad o despliegue garantizado como servicio comercial en producción.
+  - Gestión contable fiscal completa ni facturación electrónica automática.
+
+## Solución y uso de Stellar
+
+Se está construyendo un módulo dentro del ecosistema del repositorio para apoyar el registro estructurado de la actividad artesanal (ollas de barro y canastas tejidas en Tlaxiaco) y el seguimiento transparente de aportaciones, hitos o registros asociados al proyecto.
+
+Por qué ayuda Stellar:
+- Permite estructurar registros verificables, trazabilidad de eventos/aportaciones y pruebas de conceptos o flujos de valor programables con bajas comisiones y confirmaciones rápidas, sin depender de intermediarios financieros tradicionales complejos para prototipos académicos.
+
+Distinción entre real, demostración y pendiente:
+- Real: Estructura del repositorio, documentación en `docs/gestion/equipo-7/propuesta.md`, historias de usuario y planes de calidad/riesgos elaborados por el equipo.
+- Demostración / simulado: Datos de ejemplo, flujos simulados en interfaz o pruebas de demostración identificadas explícitamente con `source: 'simulated'` y `<DemoBadge />` (la asistencia de IA solo sugiere y nunca firma ni certifica).
+- Pendiente: Integraciones avanzadas, pruebas de carga extendidas y validaciones adicionales posteriores al cierre de esta propuesta.
+- Referencia de transparencia en repositorio: Consultar la tabla "Qué es real y qué es simulado" ("What is real and what is simulated") en `README.md` (ruta: `README.md`).
+
+## Plan de trabajo y cronograma
+
+Fecha de referencia del plan y cierre de propuesta: 16 de noviembre de 2026.
+
+| Entregable | Qué se entrega | Cómo se verifica | Fecha | Responsable |
+| :--- | :--- | :--- | :--- | :--- |
+| E1. Diagnóstico y evidencias | Síntesis de campo anónima y contexto de Tlaxiaco | Revisión de formato y ausencia de datos personales en PR | 2026-11-10 | @EdgarExa |
+| E2. Especificación y alcance | Objetivo SMART, alcance incluido/excluido y solución | Cotejo contra rúbrica de Sprint 4 y enlace a `README.md` | 2026-11-12 | @EdgarExa |
+| E3. Presupuesto y riesgos | Tablas de horas, costos, CoQ del Sprint 2 y matriz de riesgos | Cuadre matemático de horas y totales entre secciones | 2026-11-14 | @EdgarExa |
+| E4. Propuesta final integrada | Archivo `docs/gestion/equipo-7/propuesta.md` completo y revisado | Validación automática en PR con `Resolves #224` y revisión cruzada | 2026-11-16 | @EdgarExa |
+
+```mermaid
+gantt
+    title Cronograma Propuesta Final — Equipo 7
+    dateFormat  YYYY-MM-DD
+    section Planeacion y Campo
+    E1 Diagnostico y evidencias       :done, e1, 2026-11-04, 2026-11-10
+    E2 Especificacion y alcance      :done, e2, 2026-11-10, 2026-11-12
+    section Costos y Cierre
+    E3 Presupuesto y riesgos          :active, e3, 2026-11-12, 2026-11-14
+    E4 Propuesta final integrada      :e4, 2026-11-14, 2026-11-16
