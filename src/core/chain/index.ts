@@ -3,6 +3,8 @@
  * Hoy todo es de demostración. Cuando exista una implementación real, se elige aquí según la
  * configuración (#118), y ningún componente de la UI tiene que cambiar.
  */
+import { readNetworkConfig } from '../../config/network';
+import type { NetworkConfig } from '../../config/network';
 import {
   SimulatedCardWallet,
   SimulatedEscrow,
@@ -30,13 +32,44 @@ export interface Chain {
   payout: PayoutPort;
 }
 
-export const chain: Chain = {
-  wallets: {
-    device: new SimulatedWallet(),
-    card: new SimulatedCardWallet(),
-    external: new SimulatedExternalWallet(),
-  },
-  lots: new SimulatedLotRegistry(),
-  escrow: new SimulatedEscrow(),
-  payout: new SimulatedPayout(),
+type Ports = {
+  device: DeviceWalletPort;
+  card: CardWalletPort;
+  external: ExternalWalletPort;
+  lots: LotRegistryPort;
+  escrow: EscrowPort;
+  payout: PayoutPort;
 };
+
+type PortFactories = { [K in keyof Ports]: () => Ports[K] };
+
+const simulatedPortFactories: PortFactories = {
+  device: () => new SimulatedWallet(),
+  card: () => new SimulatedCardWallet(),
+  external: () => new SimulatedExternalWallet(),
+  lots: () => new SimulatedLotRegistry(),
+  escrow: () => new SimulatedEscrow(),
+  payout: () => new SimulatedPayout(),
+};
+
+const testnetPortFactories: Partial<PortFactories> = {};
+
+export function createChain(config: NetworkConfig): Chain {
+  const port = <K extends keyof Ports>(name: K): Ports[K] => {
+    const factory = config.mode === 'testnet' ? testnetPortFactories[name] : undefined;
+    return (factory ?? simulatedPortFactories[name])();
+  };
+
+  return {
+    wallets: {
+      device: port('device'),
+      card: port('card'),
+      external: port('external'),
+    },
+    lots: port('lots'),
+    escrow: port('escrow'),
+    payout: port('payout'),
+  };
+}
+
+export const chain: Chain = createChain(readNetworkConfig());
