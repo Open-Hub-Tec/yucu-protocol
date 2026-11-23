@@ -4,6 +4,8 @@ import { ScreenView, BotCardData, BotCardType, DigitalPassportLot, OrderReceipt 
 import { BotCardView } from './BotCardView';
 import { KnowledgeBaseModal } from './KnowledgeBaseModal';
 import { startAudioRecording, LiveRecorderSession } from '../utils/audioRecorder';
+import { DemoBadge } from './DemoBadge';
+import { assistant, type AISource, type ChatMessage as AssistantMessage } from '../core/ai';
 
 interface ChatScreenProps {
   onNavigateScreen: (screen: ScreenView, productType?: string) => void;
@@ -34,6 +36,8 @@ interface MessageItem {
   card?: BotCardData;
   options?: { id: number; title: string; subtitle: string; icon?: string; action?: string }[];
   isCheck?: boolean;
+  /** De dónde viene la respuesta de IA; si es 'simulated', se muestra <DemoBadge />. */
+  source?: AISource;
 }
 
 export const ChatScreen: React.FC<ChatScreenProps> = ({
@@ -435,6 +439,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     }, delayMs);
   };
 
+  // Asistente único con flujos reales (ADR-006, D4). Habla solo a través del puerto de IA (#154).
+  const ASSISTANT_TAG = '🌱 Asistente Yucu';
+  const BASIC_OPTIONS: NonNullable<MessageItem['options']> = [
+    { id: 1, title: '📦 Registrar un lote', subtitle: 'Paso a paso', icon: 'add_box', action: 'registrar_lote' },
+    { id: 2, title: '📸 Tomar foto al producto', subtitle: 'Con la cámara', icon: 'photo_camera', action: 'evaluar_foto' },
+    { id: 3, title: '💰 Ver mis pagos', subtitle: 'Pantalla de pagos', icon: 'payments', action: 'ver_pagos' },
+  ];
+  const toAssistantHistory = (messages: MessageItem[]): AssistantMessage[] =>
+    messages.slice(-6).map((m) => ({ role: m.sender === 'bot' ? 'assistant' : 'user', text: m.text }));
+
   // Checks if spoken/typed text contains an actionable instruction for the platform
   const processPlatformInstruction = (text: string): boolean => {
     const clean = text
@@ -453,7 +467,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       clean.includes('cobrar')
     ) {
       const reply =
-        '🎤 Instrucción de voz ejecutada: Abriendo Billetera y Saldo Comunitario ($38,250.00 MXN en custodia Soroban)...';
+        '🎤 Abriendo la pantalla de pagos...';
       dispatchSimulatedBotReply('💰 Tesorería y Fondos Comunitarios', reply, { type: 'billetera_pago' }, undefined, 300);
       if (onOpenPaymentsModal) setTimeout(() => onOpenPaymentsModal(), 650);
       return true;
@@ -927,47 +941,31 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     startLiveCamera(nextFacing);
   };
 
-  // Function to call Gemini Multimodal Vision API for real photo analysis
-  const analyzePhotoWithAI = async (photoBase64: string, sourceLabel: string) => {
+  // Revisión de la foto a través del puerto de IA. El resultado es una sugerencia, nunca un dictamen (#154).
+  const analyzePhotoWithAI = async (photoBase64: string) => {
     setIsBotTyping(true);
-    setTypingAgent('🌿 Agente Agrónomo IA (Analizando imagen...)');
+    setTypingAgent(`${ASSISTANT_TAG} (mirando la foto...)`);
 
-    try {
-      const res = await fetch('/api/analyze-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: photoBase64,
-          mimeType: 'image/jpeg',
-          prompt: `Analiza esta fotografía tomada desde la aplicación ("${sourceLabel}"). Evalúa la calidad del grano de café o muestra agrícola, nivel de maduración, humedad visual o sanidad agronómica y emite tu recomendación técnica para el productor de la Mixteca de Tlaxiaco.`
-        })
-      });
+    const result = await assistant.analyzeImage(photoBase64, 'image/jpeg');
+    setIsBotTyping(false);
 
-      const data = await res.json();
-      setIsBotTyping(false);
-
-      const botMsg: MessageItem = {
-        id: `bot-vision-${Date.now()}`,
-        sender: 'bot',
-        agentTag: data.agent || '🌿 Agente Agrónomo IA (Visión Gemini)',
-        text: data.analysis || 'Muestra de campo analizada con éxito.',
-        time: 'Ahora',
-        card: { type: (data.cardType as BotCardType) || 'dictamen_stellar' }
-      };
-      setAssistantMessages((prev) => [...prev, botMsg]);
-    } catch (err) {
-      console.warn('Fallo al llamar /api/analyze-image, usando dictamen de respaldo:', err);
-      setIsBotTyping(false);
-      const fallbackMsg: MessageItem = {
-        id: `bot-vision-fallback-${Date.now()}`,
-        sender: 'bot',
-        agentTag: '🌿 Agente Agrónomo IA',
-        text: '📸 Muestra de campo recibida con éxito:\n\n• Parámetros físicos: Coloración uniforme y consistencia apta para acopio en el Tec.\n• Estado fitosanitario: 0% broca aparente, humedad estimada en rango de 11.4%.\n• Dictamen: Aprobado para emisión de Pasaporte Digital en Stellar.',
-        time: 'Ahora',
-        card: { type: 'dictamen_stellar' }
-      };
-      setAssistantMessages((prev) => [...prev, fallbackMsg]);
-    }
+    const botMsg: MessageItem = result.ok
+      ? {
+          id: `bot-vision-${Date.now()}`,
+          sender: 'bot',
+          agentTag: ASSISTANT_TAG,
+          text: `${result.analysis}\n\n${result.disclaimer}`,
+          time: 'Ahora',
+          source: result.source,
+        }
+      : {
+          id: `bot-vision-error-${Date.now()}`,
+          sender: 'bot',
+          agentTag: ASSISTANT_TAG,
+          text: result.error,
+          time: 'Ahora',
+        };
+    setAssistantMessages((prev) => [...prev, botMsg]);
   };
 
   const handleCaptureRealPhoto = () => {
@@ -999,7 +997,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         setAssistantMessages((prev) => [...prev, userPhotoMsg]);
 
         // Call real Gemini Multimodal Vision endpoint
-        analyzePhotoWithAI(photoDataUrl, 'Cámara en vivo');
+        analyzePhotoWithAI(photoDataUrl);
       }
     } catch (e) {
       console.error('Error al capturar foto:', e);
@@ -1028,7 +1026,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       setAssistantMessages((prev) => [...prev, userPhotoMsg]);
 
       // Call real Gemini Multimodal Vision endpoint
-      analyzePhotoWithAI(photoUrl, file.name);
+      analyzePhotoWithAI(photoUrl);
     };
     reader.readAsDataURL(file);
     // reset input
@@ -1044,64 +1042,37 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     };
   }, []);
 
-  // SIMULATED FLOW: Photo Upload & AI Agronomist Analysis
+  // Fotos de ejemplo: solo muestran cómo se ve el flujo. No se inventa ningún diagnóstico (#154).
   const handleSimulatePhotoUpload = (photoType: 'cereza' | 'pergamino' | 'roya' | 'miel' | 'pulque') => {
     setShowCameraModal(false);
 
-    let photoUrl = 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&auto=format&fit=crop&q=80';
-    let photoTitle = 'Muestra de cerezas de café (Parcela El Mirador)';
-    let analysisAgent = '🌿 Agente Agrónomo IA';
-    let analysisText = '';
-    let cardType: BotCardType = 'dictamen_stellar';
+    const samples: Record<typeof photoType, { url: string; title: string }> = {
+      cereza: { url: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80', title: 'Foto de ejemplo: cerezas de café' },
+      pergamino: { url: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&auto=format&fit=crop&q=80', title: 'Foto de ejemplo: café pergamino' },
+      pulque: { url: 'https://images.unsplash.com/photo-1546853020-ca4909aef454?w=600&auto=format&fit=crop&q=80', title: 'Foto de ejemplo: pulque' },
+      miel: { url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8ZBROS9VsAw7NHM5L1DmOrsjS5_bgY5WUAX2CWi4t5af2aINWReGNta7MhraFl1vMglwJfhe52szbMFK3zJCSVdtzGS8Wxk4FAPcGg0ryh6r5SO--xklxpgEP7fXFnRFHhG28vL6IwUl3qW6cFysfAyubAB0o5lspYGGWJSMCYFqxBvweNm6W2qlz6HlxvvKjRiSwLsfBYXxK7Cv3WSoPy77qwwVCiEOx_s0cTXnQKPYnYNHr48piLg', title: 'Foto de ejemplo: miel' },
+      roya: { url: 'https://images.unsplash.com/photo-1524350876685-274059332603?w=600&auto=format&fit=crop&q=80', title: 'Foto de ejemplo: hojas de cafeto' },
+    };
+    const sample = samples[photoType];
 
-    if (photoType === 'cereza') {
-      photoUrl = 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80';
-      photoTitle = 'Foto de cerezas maduras cosechadas en San Mateo Peñasco';
-      analysisText =
-        '🌿 Análisis de Calidad Espectral IA completado:\n\n• Variedad identificada: Arábica Typica Pluma\n• Índice de maduración: 94.2% (Grado óptimo para especialidad)\n• Defectos visuales: 0% broca, sin picaduras de insecto\n• Recomendación técnica: Proceder al despulpado y fermentación anaeróbica controlada antes de las 18:00 hrs.\n\nHe generado el pre-dictamen normativo listo para sellar en Stellar:';
-      cardType = 'dictamen_stellar';
-    } else if (photoType === 'pergamino') {
-      photoUrl = 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=600&auto=format&fit=crop&q=80';
-      photoTitle = 'Foto de café pergamino lavado en camas de secado solar';
-      analysisText =
-        '☀️ Análisis de Secado y Humedad IA:\n\n• Humedad estimada por reflectancia: 11.4% (Rango ideal Norma Mexicana 10%-12%)\n• Color de pergamino: Uniforme, blanco hueso limpio\n• Olor / Fermento: Limpio, libre de moho\n• Conclusión: Lote listo para embolsar en sacos GrainPro y entregar al Centro de Acopio Tlaxiaco.';
-      cardType = 'lote_registro';
-    } else if (photoType === 'pulque') {
-      photoUrl = 'https://images.unsplash.com/photo-1546853020-ca4909aef454?w=600&auto=format&fit=crop&q=80';
-      photoTitle = 'Muestra de Pulque Tradicional de Maguey en Tinacal Comunitario';
-      analysisAgent = '🏺 Agente Comunitario de Pulque y Tradición';
-      analysisText =
-        '🏺 Diagnóstico Tradicional y Físico IA:\n\n• Producto identificado: Pulque Blanco 100% natural de maguey mixteco (Agave salmiana).\n• Fermentación en tinacal: Grado óptimo, consistencia lechosa natural, libre de azúcar o adulterantes.\n• Aprobación comunal: Calidad avalada para venta directa sin intermediarios a $45/litro.\n• Pasaporte Digital: Generado y listo para registro de lote:';
-      cardType = 'lote_registro';
-    } else if (photoType === 'miel') {
-      photoUrl = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA8ZBROS9VsAw7NHM5L1DmOrsjS5_bgY5WUAX2CWi4t5af2aINWReGNta7MhraFl1vMglwJfhe52szbMFK3zJCSVdtzGS8Wxk4FAPcGg0ryh6r5SO--xklxpgEP7fXFnRFHhG28vL6IwUl3qW6cFysfAyubAB0o5lspYGGWJSMCYFqxBvweNm6W2qlz6HlxvvKjRiSwLsfBYXxK7Cv3WSoPy77qwwVCiEOx_s0cTXnQKPYnYNHr48piLg';
-      photoTitle = 'Muestra de Miel Pura de Abeja de la Mixteca';
-      analysisAgent = '🍯 Agente Apícola y Agroecológico Tec';
-      analysisText =
-        '🍯 Verificación de Producto IA completada:\n\n• ¡Atención paisano! Esta fotografía NO corresponde a café; se identifica con 99% de certeza como Miel de Abeja 100% pura en frasco.\n• Pureza y densidad: Excelente consistencia ámbar, sin adulteración ni separación de fases.\n• Humedad estimada: 18.2% (Cumple norma de referencia mexicana de Miel NMX-F-036).\n• Recomendación: Para café, sube una foto de grano pergamino o cereza. Para comercializar esta miel con precio justo comunal, la vinculamos a la Vitrina Apícola:';
-      cardType = 'producto_vitrina';
-    } else {
-      photoUrl = 'https://images.unsplash.com/photo-1524350876685-274059332603?w=600&auto=format&fit=crop&q=80';
-      photoTitle = 'Muestra foliar para diagnóstico fitosanitario';
-      analysisText =
-        '🔬 Diagnóstico Fitosanitario de Hojas:\n\n• Detección de Roya del cafeto (Hemileia vastatrix): Grado 0 (Sano / Negativo)\n• Signos de minador: Negativo\n• Recomendación de nutrición: Aplicar biofertilizante foliar a base de biol de ceniza y melaza para reforzar floración.';
-      cardType = 'trazabilidad_pasaporte';
-    }
-
-    // 1. Add User Photo message
     const userPhotoMsg: MessageItem = {
       id: `usr-img-${Date.now()}`,
       sender: 'user',
-      text: photoTitle,
+      text: sample.title,
       type: 'image',
-      mediaUrl: photoUrl,
+      mediaUrl: sample.url,
       time: 'Ahora',
       isCheck: true
     };
     setAssistantMessages((prev) => [...prev, userPhotoMsg]);
 
-    // 2. Dispatch Bot Analysis with Card
-    dispatchSimulatedBotReply(analysisAgent, analysisText, { type: cardType }, undefined, 1400);
+    dispatchSimulatedBotReply(
+      ASSISTANT_TAG,
+      'Esta es una foto de ejemplo, así que no la reviso. Para que la IA le diga lo que ve, tome o suba una foto de su producto. Lo que diga será una sugerencia, no un dictamen.',
+      undefined,
+      [{ id: 1, title: '📸 Tomar foto a mi producto', subtitle: 'Con la cámara', icon: 'photo_camera', action: 'evaluar_foto' }],
+      800
+    );
   };
 
   // Real Audio Recording with Web Speech API and Gemini Transcription
@@ -1141,9 +1112,14 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
       const durationSec = result.durationSeconds || Math.max(1, recordingSeconds);
       const formattedDuration = `0:${durationSec < 10 ? '0' : ''}${durationSec}`;
-      const spokenText =
-        (result.transcript || liveVoiceTranscript || '').trim() ||
-        'Consulta de campo y registro de cosecha en la Mixteca.';
+      const spokenText = (result.transcript || liveVoiceTranscript || '').trim();
+
+      // Si no se entendió nada, se dice; nunca se inventa una transcripción (ADR-006, D4).
+      if (!spokenText) {
+        dispatchSimulatedBotReply(ASSISTANT_TAG, result.transcriptError || 'No te escuché bien. ¿Lo intentamos otra vez o lo escribes?', undefined, undefined, 300);
+        setLiveVoiceTranscript('');
+        return;
+      }
 
       // Add user audio message with real recorded audio URL and real transcription
       const userAudioMsg: MessageItem = {
@@ -1165,51 +1141,30 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         return;
       }
 
-      // 2. Otherwise, analyze the voice query with Gemini AI!
+      // 2. Si no, se lo pregunta al asistente a través del puerto de IA.
       setIsBotTyping(true);
-      setTypingAgent('🌱 Compañero Yucu (Escuchando tu voz...)');
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: spokenText,
-            history: assistantMessages.slice(-6).map((m) => ({
-              sender: m.sender,
-              text: m.text,
-            })),
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setIsBotTyping(false);
-          const newBotId = `bot-reply-${Date.now()}`;
-          const botMsg: MessageItem = {
-            id: newBotId,
-            sender: 'bot',
-            agentTag: data.agent || '🌱 Compañero Yucu (TecNM)',
-            text: data.reply || `Entendido, paisano: "${spokenText}". Tu mensaje fue procesado correctamente.`,
-            time: 'Ahora',
-            card: data.cardType ? { type: data.cardType } : undefined,
-          };
-          setAssistantMessages((prev) => [...prev, botMsg]);
-          return;
-        }
-      } catch (chatErr) {
-        console.warn('Fallo chat tras voz:', chatErr);
-      }
-
-      // Intelligent fallback if Gemini response fails
+      setTypingAgent(ASSISTANT_TAG);
+      const reply = await assistant.chat(spokenText, toAssistantHistory(assistantMessages));
       setIsBotTyping(false);
-      dispatchSimulatedBotReply(
-        '🌱 Compañero Yucu (TecNM)',
-        `Recibí tu nota de voz: "${spokenText}". Los compañeros del centro de acopio y apoyo técnico en Tlaxiaco tienen registrada tu consulta.`,
-        undefined,
-        undefined,
-        700
-      );
+      const botMsg: MessageItem = reply.ok
+        ? {
+            id: `bot-reply-${Date.now()}`,
+            sender: 'bot',
+            agentTag: ASSISTANT_TAG,
+            text: reply.reply,
+            time: 'Ahora',
+            options: reply.options.length ? reply.options : undefined,
+            source: reply.source,
+          }
+        : {
+            id: `bot-reply-error-${Date.now()}`,
+            sender: 'bot',
+            agentTag: ASSISTANT_TAG,
+            text: reply.error,
+            time: 'Ahora',
+            options: BASIC_OPTIONS,
+          };
+      setAssistantMessages((prev) => [...prev, botMsg]);
     } catch (e: any) {
       console.error('Error al finalizar grabación:', e);
       setIsRecording(false);
@@ -1243,10 +1198,10 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     setAssistantMessages((prev) => [...prev, userAudioMsg]);
 
     dispatchSimulatedBotReply(
-      '🚚 Agente de Logística y Acopio',
-      '¡Saludos paisano! El Centro de Acopio Comunitario del Tec en Tlaxiaco recibe de lunes a sábado de 08:00 a 16:00 hrs.\n\nContamos con pesaje certificado, prueba de humedad en 2 minutos y liquidación directa en billetera Stellar:',
-      { type: 'lote_registro' },
+      ASSISTANT_TAG,
+      'Esta nota de voz es un ejemplo de demostración. Yucu todavía no tiene centro de acopio, horarios de recepción ni pesaje propio.',
       undefined,
+      BASIC_OPTIONS,
       1000
     );
   };
@@ -1354,286 +1309,35 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         ? registrationMessages
         : supportMessages;
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          history: activeHistory.slice(-6).map((m) => ({
-            sender: m.sender,
-            text: m.text
-          }))
-        })
-      });
+    const result = await assistant.chat(text, toAssistantHistory(activeHistory));
+    setIsBotTyping(false);
 
-      if (res.ok) {
-        const data = await res.json();
-        setIsBotTyping(false);
-
-        const newBotId = `bot-${Date.now()}`;
-        const botMsg: MessageItem = {
-          id: newBotId,
+    // Si la IA no está o falló, se dice con honestidad y se ofrecen los botones básicos (ADR-006, D4).
+    const botMsg: MessageItem = result.ok
+      ? {
+          id: `bot-${Date.now()}`,
           sender: 'bot',
-          agentTag: humanizeAgentTag(data.agent) || defaultAgentLabel,
-          text: data.reply || 'Consulta atendida por el sistema Yucu.',
+          agentTag: ASSISTANT_TAG,
+          text: result.reply,
           time: 'Ahora',
-          card: data.cardType ? { type: data.cardType as BotCardType } : undefined,
-          options: data.options || undefined
+          options: result.options.length ? result.options : undefined,
+          source: result.source,
+        }
+      : {
+          id: `bot-error-${Date.now()}`,
+          sender: 'bot',
+          agentTag: ASSISTANT_TAG,
+          text: result.error,
+          time: 'Ahora',
+          options: BASIC_OPTIONS,
         };
 
-        if (activeChannel === 'asistente') {
-          setAssistantMessages((prev) => [...prev, botMsg]);
-        } else if (activeChannel === 'registro') {
-          setRegistrationMessages((prev) => [...prev, botMsg]);
-        } else {
-          setSupportMessages((prev) => [...prev, botMsg]);
-        }
-        return;
-      }
-    } catch (err) {
-      console.warn('Fallo en /api/chat, recurriendo a agente agroecológico local:', err);
-    }
-
-    // Fallback local domain simulation if API is offline or encountered network error
-    const lower = text.toLowerCase();
-
-    // Check out-of-domain filter locally
-    const isOutOfDomain =
-      lower.includes('futbol') ||
-      lower.includes('fútbol') ||
-      lower.includes('chiste') ||
-      lower.includes('pelicula') ||
-      lower.includes('película') ||
-      lower.includes('videojuego') ||
-      lower.includes('politica') ||
-      lower.includes('política');
-
-    if (isOutOfDomain) {
-      dispatchSimulatedBotReply(
-        defaultAgentLabel,
-        'Disculpe paisano, como asistente de Yucu en la Mixteca, únicamente puedo orientarle sobre temas de la plataforma: registro de cosechas, evaluación con foto, trazabilidad en Stellar, pagos comunitarios y asesoría técnica para la región. ¿En qué podemos apoyarle respecto a su café o producción agrícola?',
-        undefined,
-        [
-          { id: 1, title: '📸 Evaluar Cosecha con Foto', subtitle: 'Revisar café o muestra', icon: 'photo_camera', action: 'evaluar_foto' },
-          { id: 2, title: '💰 Ver Mis Pagos y Saldo', subtitle: 'Consultar $38,250 MXN', icon: 'payments', action: 'ver_pagos' }
-        ],
-        700
-      );
-    } else if (
-      lower.includes('registrar') ||
-      lower.includes('producto') ||
-      lower.includes('cosecha') ||
-      lower.includes('lote') ||
-      lower.includes('dar de alta') ||
-      lower.includes('alta') ||
-      lower.includes('vender mi') ||
-      lower.includes('vender cafe') ||
-      lower.includes('vender') ||
-      lower.includes('subir mi') ||
-      lower.includes('inscribir')
-    ) {
-      dispatchSimulatedBotReply(
-        '☕ Agente Agrónomo IA',
-        '¡Con mucho gusto, paisano! En Yucu registrar su cosecha o producto es muy fácil y rápido, sin papeleos ni intermediarios ("coyotes").\n\nPara que reciba su pago directo a precio justo, el proceso tiene 3 pasos sencillos:\n\n1. 🌾 Seleccione qué producto tiene listo (Café pergamino, Miel, Granos o Artesanías).\n2. ⚖️ Indique cuántos kilos o bultos tiene preparados.\n3. 📸 Tómale una foto a la muestra para avalar calidad y humedad con IA en 3 segundos.\n\nToque abajo la opción que desea para comenzar de inmediato:',
-        { type: 'lote_registro' },
-        [
-          {
-            id: 1,
-            title: '☕ Registrar Café Pergamino',
-            subtitle: 'Indicar kilos, humedad y foto con IA',
-            icon: 'add_box',
-            action: 'registrar_cafe'
-          },
-          {
-            id: 2,
-            title: '🍯 Registrar Miel u Otro Producto',
-            subtitle: 'Catálogo de cosechas comunitarias',
-            icon: 'inventory_2',
-            action: 'registrar_lote'
-          },
-          {
-            id: 3,
-            title: '📸 Tomar Foto a la Muestra',
-            subtitle: 'Evaluación rápida con cámara',
-            icon: 'photo_camera',
-            action: 'evaluar_foto'
-          }
-        ],
-        500
-      );
-    } else if (
-      lower.includes('que mas') ||
-      lower.includes('pued ehacer') ||
-      lower.includes('puede hacer') ||
-      lower.includes('que hace') ||
-      lower.includes('para que sirve') ||
-      lower.includes('para que sirbe') ||
-      lower.includes('como funciona') ||
-      lower.includes('ayuda')
-    ) {
-      dispatchSimulatedBotReply(
-        '🌱 Compañero Yucu (TecNM)',
-        '¡Con mucho gusto, paisano! La plataforma Yucu fue creada junto al Tec de Tlaxiaco para que las familias de la Mixteca reciban un trato y pago justo por su trabajo sin intermediarios ni abusos.\n\nAquí puedes realizar 4 tareas muy sencillas con un solo toque:\n\n1. 📸 Evaluar cosecha o artesanía con foto: Revisión de calidad y humedad en 3 segundos con apoyo técnico del Tec.\n2. 💰 Ver y cobrar tus pagos: El dinero de tus ventas se resguarda en tu billetera y puedes cobrarlo en efectivo en Tlaxiaco.\n3. 🏷️ Pasaporte y Sello Digital: Tu trabajo recibe un sello digital verificado para vender a mejor precio a clientes directos.\n4. 🚚 Transporte seguro: Rutas acordadas con transportistas de la región para mover tu producto desde tu comunidad.',
-        undefined,
-        [
-          { id: 1, title: '📦 Registrar Cosecha o Producto', subtitle: 'Café, miel o artesanías', icon: 'add_box', action: 'registrar_cafe' },
-          { id: 2, title: '📸 Evaluar Cosecha con Foto', subtitle: 'Revisar café o muestra al instante', icon: 'photo_camera', action: 'evaluar_foto' },
-          { id: 3, title: '💰 Ver Mis Pagos y Saldo', subtitle: 'Consultar dinero disponible', icon: 'payments', action: 'ver_pagos' }
-        ],
-        600
-      );
-    } else if (
-      lower.includes('evalua') ||
-      lower.includes('calidad') ||
-      lower.includes('humedad') ||
-      lower.includes('foto') ||
-      lower.includes('camara') ||
-      lower.includes('cámara') ||
-      lower.includes('muestra') ||
-      lower.includes('grano')
-    ) {
-      dispatchSimulatedBotReply(
-        '🌿 Agente Agrónomo IA',
-        'Para evaluar su café o cosecha sin ninguna complicación:\n\n• Toque el botón de abajo "📸 Abrir Cámara y Evaluar".\n• Apunte la cámara a un puñado de granos o a su producto sobre una superficie con buena luz.\n• La inteligencia artificial del TecNM Tlaxiaco detectará la humedad estimada (10%-12%), revisará si hay broca y emitirá su Dictamen Comunitario al momento.',
-        { type: 'dictamen_stellar' },
-        [
-          { id: 1, title: '📸 Abrir Cámara y Evaluar', subtitle: 'Tomar foto de muestra de campo', icon: 'photo_camera', action: 'evaluar_foto' },
-          { id: 2, title: '📜 Consultar Dictamen de Demostración', subtitle: 'Ver parámetros de la norma', icon: 'verified', action: 'ver_dictamen' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('saldo') ||
-      lower.includes('pago') ||
-      lower.includes('retiro') ||
-      lower.includes('dinero') ||
-      lower.includes('billetera') ||
-      lower.includes('cobro') ||
-      lower.includes('cuanto') ||
-      lower.includes('cuánto') ||
-      lower.includes('usdc')
-    ) {
-      dispatchSimulatedBotReply(
-        '💰 Tesorería y Fondos Comunitarios',
-        'Tu saldo acumulado por 450 kg de café pergamino lavado es de $38,250.00 MXN en contrato de custodia (Escrow):\n\nPuedes solicitar el retiro en efectivo en Tlaxiaco o directamente en parcela con el transportista aliado:',
-        { type: 'billetera_pago' },
-        [
-          { id: 1, title: '💰 Ver Mi Billetera', subtitle: 'Consultar saldo y retiros', icon: 'payments', action: 'ver_pagos' },
-          { id: 2, title: '🚚 Pago en Parcela', subtitle: 'Cajero móvil con transportista', icon: 'local_shipping', action: 'logistica_coyote' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('coyote') ||
-      lower.includes('flete') ||
-      lower.includes('transporte') ||
-      lower.includes('camioneta') ||
-      lower.includes('logistica') ||
-      lower.includes('logística') ||
-      lower.includes('envio') ||
-      lower.includes('envío')
-    ) {
-      dispatchSimulatedBotReply(
-        '🤝 Trato Directo (Deslinde Logístico)',
-        'En Yucu, el trato y la entrega se realizan de forma 100% directa entre el comprador y el artesano o productor.\n\n• Yucu NO opera paqueterías, fletes ni camiones de reparto.\n• La entrega física de la pieza o cosecha se acuerda libremente entre las partes (en taller, parcela o punto acordado).\n• Yucu se enfoca estrictamente en la trazabilidad de origen, certificación de calidad y custodia segura de pago (Escrow) en Stellar.',
-        { type: 'logistica_coyote' },
-        [
-          { id: 1, title: '🤝 Ver Política de Trato Directo', subtitle: 'Sin intermediarios ni fletes', icon: 'handshake', action: 'logistica_coyote' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('stellar') ||
-      lower.includes('blockchain') ||
-      lower.includes('dictamen') ||
-      lower.includes('norma') ||
-      lower.includes('hash') ||
-      lower.includes('certificado')
-    ) {
-      dispatchSimulatedBotReply(
-        '⛓️ Agente Notario Stellar',
-        'Consultando la red Stellar Testnet...\n\n✅ Hash verificado en bloque #52,491,802. Datos de humedad (11.4%) y cero broca sellados sin intermediarios:',
-        { type: 'dictamen_stellar' },
-        [
-          { id: 1, title: '📜 Ver Dictamen de Demostración', subtitle: 'Certificado del TecNM', icon: 'verified', action: 'ver_dictamen' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('lote') ||
-      lower.includes('cafe') ||
-      lower.includes('café') ||
-      lower.includes('cosecha') ||
-      lower.includes('registro') ||
-      lower.includes('kilos') ||
-      lower.includes('bultos')
-    ) {
-      dispatchSimulatedBotReply(
-        '☕ Agente Agrónomo IA',
-        'Aquí tienes el resumen de tu cosecha registrada en San Mateo Peñasco con folio de demostración #884:',
-        { type: 'lote_registro' },
-        [
-          { id: 1, title: '📦 Registrar Nueva Cosecha', subtitle: 'Paso a paso guiado', icon: 'add_box', action: 'registrar_lote' },
-          { id: 2, title: '📸 Evaluar Muestra', subtitle: 'Tomar foto con IA', icon: 'photo_camera', action: 'evaluar_foto' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('plaga') ||
-      lower.includes('roya') ||
-      lower.includes('broca') ||
-      lower.includes('secado') ||
-      lower.includes('enfermedad')
-    ) {
-      dispatchSimulatedBotReply(
-        '🌿 Agente Agrónomo IA',
-        'Recomendaciones agroecológicas del TecNM Tlaxiaco para la Mixteca Alta:\n\n• Roya del cafeto: Aplicar caldo bordelés o biofertilizante enriquecido con microorganismos de montaña nativos.\n• Broca: Recolectar a tiempo todos los granos maduros y caídos ("pepena") para cortar el ciclo de reproducción.\n• Secado: Usar zarandas o camas africanas elevadas del suelo para mantener humedad entre 10% y 12%.',
-        { type: 'dictamen_stellar' },
-        [
-          { id: 1, title: '📸 Evaluar con Foto', subtitle: 'Revisar si hay broca en muestra', icon: 'photo_camera', action: 'evaluar_foto' }
-        ],
-        800
-      );
-    } else if (
-      lower.includes('hola') ||
-      lower.includes('buenos') ||
-      lower.includes('buenas') ||
-      lower.includes('saludos')
-    ) {
-      dispatchSimulatedBotReply(
-        '🌱 Compañero Yucu (TecNM)',
-        '¡Hola paisano! Un gusto saludarte. Soy tu compañero del Tec de Tlaxiaco en la plataforma Yucu. ¿En qué te podemos apoyar hoy?',
-        undefined,
-        [
-          { id: 1, title: '📸 Evaluar Cosecha con Foto', subtitle: 'Revisar muestra con apoyo del Tec', icon: 'photo_camera', action: 'evaluar_foto' },
-          { id: 2, title: '💰 Ver Mis Pagos y Saldo', subtitle: 'Billetera comunitaria', icon: 'payments', action: 'ver_pagos' },
-          { id: 3, title: '❓ ¿Qué más puedo hacer aquí?', subtitle: 'Explicación sencilla paso a paso', icon: 'help', action: 'consulta' }
-        ],
-        700
-      );
-    } else if (lower.includes('tlaxiaco') || lower.includes('tec') || lower.includes('donde') || lower.includes('dónde')) {
-      dispatchSimulatedBotReply(
-        '🏛️ Tecnológico de Tlaxiaco',
-        'El Centro de Innovación y Acopio Comunitario se ubica en las instalaciones del Instituto Tecnológico de Tlaxiaco, Oaxaca. Apoyamos a productores de la Mixteca Alta con laboratorio de análisis físico-sensorial, pesaje certificado y tecnología blockchain sin costo.',
-        undefined,
-        [
-          { id: 1, title: '📸 Evaluar Muestra', subtitle: 'Prueba de laboratorio IA', icon: 'photo_camera', action: 'evaluar_foto' }
-        ],
-        800
-      );
+    if (activeChannel === 'asistente') {
+      setAssistantMessages((prev) => [...prev, botMsg]);
+    } else if (activeChannel === 'registro') {
+      setRegistrationMessages((prev) => [...prev, botMsg]);
     } else {
-      dispatchSimulatedBotReply(
-        defaultAgentLabel,
-        `Entendido, paisano. Estoy a su servicio para apoyarle con cosechas, evaluación con foto, pagos y dudas del campo. ¿Desea realizar alguna de estas acciones directas?`,
-        undefined,
-        [
-          { id: 1, title: '📸 Evaluar Cosecha con Foto', subtitle: 'Revisar muestra con IA', icon: 'photo_camera', action: 'evaluar_foto' },
-          { id: 2, title: '💰 Ver Mis Pagos y Saldo', subtitle: 'Consultar $38,250 MXN', icon: 'payments', action: 'ver_pagos' },
-          { id: 3, title: '❓ ¿Qué más hace esta app?', subtitle: 'Explicación en 4 pasos', icon: 'help', action: 'consulta' }
-        ],
-        800
-      );
+      setSupportMessages((prev) => [...prev, botMsg]);
     }
   };
 
@@ -1911,6 +1615,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                     <span className="text-[12px] font-bold text-[#032517] truncate">
                       {humanizeAgentTag(msg.agentTag)}
                     </span>
+                    {msg.source === 'simulated' && (
+                      <DemoBadge detail="Respuesta de demostración: no viene de un proveedor de IA." />
+                    )}
                     <span className="text-[10px] text-[#727973] shrink-0">{msg.time}</span>
                   </div>
                   <p className="text-[14px] text-[#1c1c18] whitespace-pre-line leading-relaxed">

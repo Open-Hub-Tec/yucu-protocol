@@ -34,13 +34,15 @@ El servidor es Express (`server.ts`). Corre en tu computadora con `npm run dev`,
 ```
 src/server/
 ├── routes/
-│   ├── ai.ts          /api/chat, /api/analyze-image, /api/transcribe-audio   (#154, #107)
+│   ├── ai.ts          /api/chat, /api/analyze-image, /api/transcribe-audio,
+│   │                  /api/extract-lot                                        (#154, #107)
 │   ├── chain.ts       /api/chain/*                                            (#92, #94)
 │   ├── escrow.ts      /api/escrow/*                                           (#96)
 │   ├── payout.ts      /api/payout/*                                           (#146)
 │   ├── auth.ts        /api/auth                                               (#157)
 │   ├── catalog.ts     /api/catalog/*, /api/profile                            (#156)
 │   └── legacy.ts      /api/v1/*                                               (#106)
+├── ai/                puertos de IA y un adaptador por proveedor (Gemini, simulado) (#154)
 ├── store/             estado compartido (sección 5)
 └── errors.ts          formato de error (sección 4)
 ```
@@ -61,9 +63,10 @@ Reglas:
 | Ruta | Hoy | Después | Issue |
 |---|---|---|---|
 | `GET /api/health` | ✅ Real | Igual; se prueba con la `app` exportada | #170 |
-| `POST /api/chat` | 🟡 Llama a Gemini; a veces inventa | Detrás del puerto de IA, sin inventar | #154 |
-| `POST /api/analyze-image` | 🟡 Llama a Gemini; diagnósticos fijos sin llave | Puerto de IA; solo con consentimiento | #154 · #107 |
-| `POST /api/transcribe-audio` | 🟡 Llama a Gemini; transcripción "verificada" falsa | Puerto de IA; el audio no se guarda | #154 · #107 |
+| `POST /api/chat` | 🟡 Detrás del puerto de IA (#154). Sin IA o si falla: 503 con un mensaje claro | Igual | #154 |
+| `POST /api/analyze-image` | 🟡 Puerto de IA; solo sugerencias, sin calificaciones ni normas. Sin IA: 503 | Solo con consentimiento | #154 · #107 |
+| `POST /api/transcribe-audio` | 🟡 Puerto de IA; el audio no se guarda. Sin IA: 503; si no entendió: 422 | Con consentimiento | #154 · #107 |
+| `POST /api/extract-lot` | 🟡 Puerto de IA: solo campos de `RegisterLotRequest` de las listas cerradas | Guiado por el manifiesto (ADR-007) | #154 · #164 |
 | `POST /api/chain/lots/prepare` | ❌ No existe | Prepara `register_lot` sin firmar; el certificador cofirma | #92 |
 | `POST /api/chain/submit` | ❌ No existe | Fee-bump patrocinado con lista blanca | #94 |
 | Alta de cuenta con reserva patrocinada | ❌ No existe | La firma una promotora o grupo dado de alta | #94 |
@@ -100,6 +103,7 @@ Los nombres que no fija una issue (por ejemplo, la ruta del alta de cuenta) los 
 | 404 | No existe |
 | 409 | Ya existe (por ejemplo, `LotAlreadyExists`) |
 | 413 | La petición es demasiado grande |
+| 422 | La IA respondió, pero no entendió (`NOT_UNDERSTOOD`, #154) |
 | 429 | Pasó el límite; agrega `Retry-After` |
 | 501 | La ruta todavía no tiene versión real (#106) |
 | 503 | Falta una variable de entorno; el servidor no se cae |

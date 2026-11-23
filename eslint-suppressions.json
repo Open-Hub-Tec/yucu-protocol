@@ -1,7 +1,7 @@
 {
   "server.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 16
+      "count": 10
     }
   },
   "src/components/BotCardView.tsx": {
@@ -36,7 +36,7 @@
   },
   "src/components/MicrophoneDiagnosticModal.tsx": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 4
+      "count": 3
     }
   },
   "src/components/ProductTypeCatalogScreen.tsx": {

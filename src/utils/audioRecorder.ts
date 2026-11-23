@@ -1,11 +1,14 @@
 // Audio Recording and Speech-to-Text Utility for Yucu
-// Supports MediaRecorder, Web Speech API (webkitSpeechRecognition) and Gemini backend transcription
+// Supports MediaRecorder, Web Speech API (webkitSpeechRecognition) and transcription through the AI port (#154)
+import { assistant } from '../core/ai';
 
 export interface AudioRecordingResult {
   audioBlob: Blob;
   audioUrl: string;
   base64Audio: string;
   transcript: string;
+  /** Mensaje para la persona si la transcripción falló o no se entendió. */
+  transcriptError?: string;
   durationSeconds: number;
 }
 
@@ -244,26 +247,14 @@ export async function startAudioRecording(
 
           let finalTranscript = speechTranscript;
 
-          // If client-side SpeechRecognition didn't capture text, transcribe via Gemini server endpoint
+          let transcriptError: string | undefined;
+
+          // Si el navegador no captó texto, se transcribe a través del puerto de IA (#154).
+          // Si falla o no entendió, se guarda el mensaje honesto; nunca se inventa el texto.
           if (!finalTranscript.trim() && base64Audio && base64Audio.length > 100) {
-            try {
-              const res = await fetch('/api/transcribe-audio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  audioBase64: base64Audio,
-                  mimeType: actualMimeType,
-                }),
-              });
-              if (res.ok) {
-                const data = await res.json();
-                if (data.transcript) {
-                  finalTranscript = data.transcript;
-                }
-              }
-            } catch (err) {
-              console.warn('Fallo transcripción server:', err);
-            }
+            const result = await assistant.transcribe(base64Audio, actualMimeType);
+            if (result.ok) finalTranscript = result.transcript;
+            else transcriptError = result.error;
           }
 
           resolve({
@@ -271,6 +262,7 @@ export async function startAudioRecording(
             audioUrl,
             base64Audio,
             transcript: finalTranscript,
+            transcriptError,
             durationSeconds,
           });
         };

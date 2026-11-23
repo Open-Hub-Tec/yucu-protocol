@@ -3,6 +3,8 @@ import { AppLanguage, ScreenView, PendingOfflineLot, ArtisanVisibilityLevel, Inf
 import { startAudioRecording, LiveRecorderSession } from '../utils/audioRecorder';
 import { getProductProfile, ProductProfile, sanitizeProductName } from '../utils/productUtils';
 import { saveOfflineLot } from '../utils/offlineStorage';
+import { assistant, type AISource } from '../core/ai';
+import { DemoBadge } from './DemoBadge';
 
 interface RegisterCoffeeLotScreenProps {
   selectedProductType?: string;
@@ -12,6 +14,16 @@ interface RegisterCoffeeLotScreenProps {
   appLanguage?: AppLanguage;
   isOnline?: boolean;
 }
+
+/** Perfil del formulario → código de categoría de `LOT_CATEGORIES`, para comparar con lo que ve la IA. */
+const PROFILE_TO_LOT_CATEGORY: Partial<Record<ProductProfile['key'], string>> = {
+  cafe: 'coffee',
+  miel: 'honey',
+  pulque: 'pulque',
+  maiz: 'maize',
+  textil: 'textile',
+  sombrero: 'palm',
+};
 
 export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = ({
   selectedProductType = 'Café',
@@ -147,18 +159,17 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
   };
 
   const [isAnalyzingAI, setIsAnalyzingAI] = useState<boolean>(false);
+  // Lo que la IA ve en la foto. Es una SUGERENCIA, nunca un dictamen (#154; ADR-007, D3).
   const [aiDiagnosis, setAiDiagnosis] = useState<{
-    matchesSelectedProduct?: boolean;
-    isCoffee?: boolean;
-    detectedCategory?: string;
-    detectedItem?: string;
-    estado: string;
-    calidadScore: number;
-    humedadEstimada: string;
-    defectosDetectados: string;
-    recomendacion: string;
+    /** null si la IA no reconoció el producto o si no hay con qué comparar. */
+    matchesSelectedProduct: boolean | null;
+    detectedItem: string | null;
     analysis: string;
+    disclaimer: string;
+    source: AISource;
   } | null>(null);
+  /** Mensaje honesto cuando la IA no está o falló. */
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const [easyMode, setEasyMode] = useState<boolean>(elderMode);
 
@@ -175,6 +186,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
     setAltitud(profile.field2Default);
     setProceso(profile.field3Default);
     setAiDiagnosis(null);
+    setAiError(null);
   }, [cleanProductName, profile.defaultPhotoOne]);
 
   const [isSpeakingDiagnosis, setIsSpeakingDiagnosis] = useState<boolean>(false);
@@ -193,16 +205,11 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
     const textToRead =
       customText ||
       (aiDiagnosis
-        ? `Dictamen de calidad emitido por el Instituto Tecnológico de Tlaxiaco para ${profile.displayName}. ` +
+        ? `Sugerencia de la IA sobre su foto de ${profile.displayName}. ` +
           (aiDiagnosis.matchesSelectedProduct === false
-            ? `Atención: La muestra analizada fue identificada como ${
-                aiDiagnosis.detectedItem || 'otro producto'
-              } y no corresponde a ${profile.displayName}. ${aiDiagnosis.recomendacion}`
-            : `Muestra verificada de ${profile.displayName}. Estado: ${aiDiagnosis.estado}. Resultado: ${
-                aiDiagnosis.humedadEstimada
-              }. Sanidad y pureza: ${aiDiagnosis.defectosDetectados}. Calificación comunal: ${
-                aiDiagnosis.calidadScore
-              } sobre 100. Recomendación: ${aiDiagnosis.recomendacion}`)
+            ? `Parece ${aiDiagnosis.detectedItem || 'otro producto'}, no ${profile.displayName}. `
+            : '') +
+          `${aiDiagnosis.analysis} ${aiDiagnosis.disclaimer}`
         : profile.assistiveGuideText);
 
     window.speechSynthesis.cancel();
@@ -356,80 +363,22 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
         }
       }
 
-      const res = await fetch('/api/analyze-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: base64Data,
-          mimeType: 'image/jpeg',
-          prompt: `Verifica cuidadosamente el contenido de la fotografía en el contexto de registro comunitario de ${profile.displayName}. Identifica si la imagen corresponde a ${profile.displayName} o a otro producto distinto (como café, miel, pulque, maguey, maíz, etc.).`,
-        }),
-      });
-
-      const data = await res.json();
-      const detectedCat = (data.detectedCategory || '').toLowerCase();
-      const isMismatch =
-        (!isCoffee && data.isCoffee === true && !detectedCat.includes(profile.key)) ||
-        (isCoffee && data.isCoffee === false) ||
-        (isPulque && !detectedCat.includes('pulque') && !detectedCat.includes('aguamiel') && !detectedCat.includes('maguey') && detectedCat !== '') ||
-        (isHoney && !detectedCat.includes('miel') && detectedCat !== '');
-
-      setAiDiagnosis({
-        matchesSelectedProduct: !isMismatch,
-        isCoffee: data.isCoffee !== false,
-        detectedCategory: data.detectedCategory || profile.key,
-        detectedItem: data.detectedItem || (isMismatch ? `Producto distinto a ${profile.displayName}` : profile.displayName),
-        estado: data.estado || profile.defaultAiDiagnosis.estado,
-        calidadScore: data.calidadScore || profile.defaultAiDiagnosis.calidadScore,
-        humedadEstimada: data.humedadEstimada || profile.defaultAiDiagnosis.humedadEstimada,
-        defectosDetectados: data.defectosDetectados || profile.defaultAiDiagnosis.defectosDetectados,
-        recomendacion: data.recomendacion || profile.defaultAiDiagnosis.recomendacion,
-        analysis: data.analysis || profile.defaultAiDiagnosis.analysis,
-      });
-    } catch (err) {
-      console.warn('Fallo análisis IA de visión, usando diagnóstico agroecológico de respaldo:', err);
-      const isHoneyControlUrl = activePhoto.includes('AB6AXuA8ZBROS9VsAw7NHM5L1DmOrsjS5_bgY5WUAX2CWi4t5af2aINWReGNta7MhraFl1vMglwJfhe52szbMFK3zJCSVdtzGS8Wxk4FAPcGg0ryh6r5SO--xklxpgEP7fXFnRFHhG28vL6IwUl3qW6cFysfAyubAB0o5lspYGGWJSMCYFqxBvweNm6W2qlz6HlxvvKjRiSwLsfBYXxK7Cv3WSoPy77qwwVCiEOx_s0cTXnQKPYnYNHr48piLg');
-      const isCoffeeControlUrl = activePhoto.includes('AB6AXuDVqal830zp_JFXZ3K1_Rr7bbte3jwc_lJwXPf-TxcAcEg2raHlxCK89btRwH4uwzhF2fLfO_VmIZsA4gTepWeTnnrV6vLEcToMhwFBkbarbh5uwCol3bpetHUY8kzwnxJxVdtmqGOZThqZnec77V9oKnLql4l29d8XAJan9Acm66pPUlaO6eAOQymtE0KneK_qV0L0sOeux4_wReZWm6lmbXiAdjKdpv5FSyJqzx_42kMz_U4T3L2q_g');
-
-      if (!isCoffee && isCoffeeControlUrl) {
+      setAiError(null);
+      const result = await assistant.analyzeImage(base64Data, 'image/jpeg', profile.displayName);
+      if (result.ok) {
+        const expected = PROFILE_TO_LOT_CATEGORY[profile.key] ?? null;
         setAiDiagnosis({
-          matchesSelectedProduct: false,
-          isCoffee: true,
-          detectedCategory: 'cafe',
-          detectedItem: 'Café Pergamino Seco (Muestra de Café)',
-          estado: `No corresponde a ${profile.displayName} (Muestra de Café)`,
-          calidadScore: 92,
-          humedadEstimada: '11.4% (Pergamino)',
-          defectosDetectados: 'Muestra de café, no de ' + profile.displayName,
-          recomendacion: `Esta muestra corresponde a café. Como está registrando ${profile.displayName}, por favor tome foto de su muestra correspondiente.`,
-          analysis: `⚠️ Observación del Instituto Tecnológico de Tlaxiaco:\n\n• La fotografía seleccionada corresponde a granos de café pergamino.\n• El registro actual es para "${profile.displayName}".\n• Por favor seleccione o capture una muestra de ${profile.displayName} para completar el registro.`,
-        });
-      } else if (!isHoney && isHoneyControlUrl) {
-        setAiDiagnosis({
-          matchesSelectedProduct: false,
-          isCoffee: false,
-          detectedCategory: 'miel',
-          detectedItem: 'Miel Virgen de Abeja (Producto Apícola)',
-          estado: `No corresponde a ${profile.displayName} (Muestra de Miel)`,
-          calidadScore: 96,
-          humedadEstimada: '18% (Miel)',
-          defectosDetectados: 'Muestra apícola, no de ' + profile.displayName,
-          recomendacion: `Esta muestra corresponde a miel de abeja. Para registrar ${profile.displayName}, por favor suba su foto correspondiente.`,
-          analysis: `🍯 Diagnóstico del Tecnológico de Tlaxiaco:\n\n• La fotografía analizada corresponde a un frasco de MIEL PURA de abeja y NO a ${profile.displayName}.\n• Por favor tome foto a su ${profile.displayName} para continuar.`,
+          matchesSelectedProduct:
+            expected && result.detectedCategory ? result.detectedCategory === expected : null,
+          detectedItem: result.detectedItem,
+          analysis: result.analysis,
+          disclaimer: result.disclaimer,
+          source: result.source,
         });
       } else {
-        setAiDiagnosis({
-          matchesSelectedProduct: true,
-          isCoffee: isCoffee,
-          detectedCategory: profile.key,
-          detectedItem: profile.displayName,
-          estado: profile.defaultAiDiagnosis.estado,
-          calidadScore: profile.defaultAiDiagnosis.calidadScore,
-          humedadEstimada: profile.defaultAiDiagnosis.humedadEstimada,
-          defectosDetectados: profile.defaultAiDiagnosis.defectosDetectados,
-          recomendacion: profile.defaultAiDiagnosis.recomendacion,
-          analysis: profile.defaultAiDiagnosis.analysis,
-        });
+        // Sin IA no hay diagnóstico de respaldo: se dice con honestidad (ADR-006, D4).
+        setAiDiagnosis(null);
+        setAiError(result.error);
       }
     } finally {
       setIsAnalyzingAI(false);
@@ -1171,7 +1120,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
                 type="button"
                 onClick={() => handleSpeakDiagnosis()}
                 className="px-3 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-[#032517] border border-emerald-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs shrink-0"
-                title="Escuchar dictamen en voz alta"
+                title="Escuchar la sugerencia en voz alta"
               >
                 <span className="material-symbols-outlined text-[16px] text-emerald-700">
                   {isSpeakingDiagnosis ? 'volume_off' : 'volume_up'}
@@ -1190,97 +1139,28 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
                   : 'bg-white border-emerald-300'
               }`}
             >
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 gap-2">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`material-symbols-outlined text-[24px] ${
-                      aiDiagnosis.matchesSelectedProduct === false ? 'text-amber-600' : 'text-emerald-600'
-                    }`}
-                  >
-                    {aiDiagnosis.matchesSelectedProduct === false ? 'warning' : 'verified'}
+                  <span className="material-symbols-outlined text-[24px] text-[#424843]">
+                    {aiDiagnosis.matchesSelectedProduct === false ? 'warning' : 'lightbulb'}
                   </span>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#727973] block">
-                      Resultado del Dictamen
-                    </span>
-                    <span
-                      className={`text-[14px] font-extrabold ${
-                        aiDiagnosis.matchesSelectedProduct === false ? 'text-amber-950' : 'text-[#032517]'
-                      }`}
-                    >
-                      {aiDiagnosis.estado}
-                    </span>
-                  </div>
+                  <span className="text-[14px] font-extrabold text-[#032517]">Lo que ve la IA (sugerencia)</span>
                 </div>
-                {aiDiagnosis.matchesSelectedProduct === false ? (
-                  <span className="bg-amber-200 text-amber-950 font-extrabold px-2.5 py-1 rounded-lg border border-amber-300 text-[12px] flex items-center gap-1">
-                    <span>⚠️</span> Muestra Distinta
-                  </span>
-                ) : (
-                  <span className="bg-emerald-100 text-emerald-900 font-extrabold px-2.5 py-1 rounded-lg border border-emerald-300 text-[13px]">
-                    {aiDiagnosis.calidadScore} / 100
-                  </span>
-                )}
+                {aiDiagnosis.source === 'simulated' && <DemoBadge detail="Respuesta de demostración." />}
               </div>
 
               {aiDiagnosis.matchesSelectedProduct === false && (
-                <div className="bg-white p-3 rounded-xl border border-amber-300 text-amber-950 flex items-start gap-2.5 shadow-2xs">
-                  <span className="text-[22px] shrink-0">💡</span>
-                  <div className="text-[12px] leading-snug">
-                    <strong className="font-extrabold block text-[13px] mb-0.5">Muestra Detectada: {aiDiagnosis.detectedItem}</strong>
-                    La computadora verificó que esta fotografía no corresponde a {profile.displayName}. Por favor seleccione o tome foto a su muestra de {profile.displayName} para continuar el registro.
-                  </div>
+                <div className="bg-white p-3 rounded-xl border border-amber-300 text-amber-950 text-[13px] leading-snug">
+                  Parece {aiDiagnosis.detectedItem || 'otro producto'}, no {profile.displayName}. Revise la foto antes de seguir.
                 </div>
               )}
 
-              {/* High-contrast accessible metrics */}
-              <div className="grid grid-cols-2 gap-2 text-[12px]">
-                <div className="bg-[#fcf9f3] p-2.5 rounded-xl border border-amber-200 flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-bold text-[#727973] block">
-                    {isPulque ? '🏺 Fermentación / Tinacal' : isHoney ? '🍯 Densidad' : isHandicraft || isSombrero ? '🧵 Trama' : '💧 Humedad'}
-                  </span>
-                  <span className="text-[14px] font-extrabold text-[#032517] mt-0.5">
-                    {aiDiagnosis.humedadEstimada}
-                  </span>
-                  <span className="text-[10px] text-[#424843] mt-0.5">
-                    {isPulque ? 'Tinacal tradicional' : isHoney ? 'Norma Apícola' : isCorn ? 'Grano seco' : isHandicraft || isSombrero ? 'Trama uniforme' : 'Norma NMX: 10% a 12%'}
-                  </span>
-                </div>
-                <div className="bg-[#fcf9f3] p-2.5 rounded-xl border border-amber-200 flex flex-col justify-between">
-                  <span className="text-[10px] uppercase font-bold text-[#727973] block">
-                    {isPulque ? '🛡️ Pureza Aguamiel' : isHoney ? '🛡️ Pureza' : isHandicraft || isSombrero ? '🛡️ Autenticidad' : '🛡️ Sanidad / Broca'}
-                  </span>
-                  <span className="text-[14px] font-extrabold text-[#032517] mt-0.5">
-                    {aiDiagnosis.defectosDetectados}
-                  </span>
-                  <span className="text-[10px] text-emerald-700 font-bold mt-0.5">
-                    {isPulque ? '100% Sin azúcar' : isHoney ? '100% Virgen' : isCorn ? 'Cero gorgojo' : isHandicraft || isSombrero ? 'Artesanal' : 'Cero grano negro'}
-                  </span>
-                </div>
-              </div>
-
-              <div
-                className={`text-[12px] leading-relaxed whitespace-pre-line p-2.5 rounded-xl border font-medium ${
-                  aiDiagnosis.matchesSelectedProduct === false
-                    ? 'bg-amber-100/70 text-amber-950 border-amber-200'
-                    : 'bg-[#f6f3ed] text-[#1c1c18] border-[#c1c8c2]/50'
-                }`}
-              >
+              <div className="text-[13px] leading-relaxed whitespace-pre-line p-2.5 rounded-xl border bg-[#f6f3ed] text-[#1c1c18] border-[#c1c8c2]/50">
                 {aiDiagnosis.analysis}
               </div>
 
               <div className="flex items-center justify-between gap-2 pt-1">
-                <div
-                  className={`text-[11px] font-bold flex items-center gap-1.5 flex-1 ${
-                    aiDiagnosis.matchesSelectedProduct === false ? 'text-amber-900' : 'text-emerald-900'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[16px] shrink-0">
-                    {aiDiagnosis.matchesSelectedProduct === false ? 'info' : 'verified'}
-                  </span>
-                  <span className="leading-tight">{aiDiagnosis.recomendacion}</span>
-                </div>
-
+                <span className="text-[11px] text-[#424843] leading-tight flex-1">{aiDiagnosis.disclaimer}</span>
                 <button
                   type="button"
                   onClick={() => triggerCoffeeVisionAnalysis()}
@@ -1288,7 +1168,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
                   className="px-3 py-1.5 rounded-xl bg-[#032517] hover:bg-[#1b3b2b] text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95 disabled:opacity-50 shrink-0"
                 >
                   <span className="material-symbols-outlined text-[14px]">refresh</span>
-                  <span>Reevaluar</span>
+                  <span>Revisar otra vez</span>
                 </button>
               </div>
             </div>
@@ -1306,6 +1186,11 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
+              {aiError && (
+                <div role="status" className="bg-amber-50 text-amber-950 border border-amber-300 rounded-xl p-3 text-[13px] font-bold">
+                  {aiError}
+                </div>
+              )}
               {/* Giant Accessible Button for Older Adults */}
               <button
                 type="button"
@@ -1316,13 +1201,13 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
                 <span className="material-symbols-outlined text-[24px] text-emerald-400">
                   search_check
                 </span>
-                <span>TOCAR AQUÍ PARA EVALUAR CON IA (Un solo toque)</span>
+                <span>TOCAR AQUÍ PARA QUE LA IA MIRE LA FOTO</span>
               </button>
 
               <div className="bg-white/90 rounded-xl p-2.5 border border-dashed border-emerald-400/80 text-[12px] text-[#424843] flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-emerald-700 text-[18px]">verified</span>
-                  <span>La IA del TecNM Tlaxiaco calcula humedad y sanidad de la foto arriba sin costo.</span>
+                  <span>La IA le dice lo que ve en la foto. Es una sugerencia, no un dictamen.</span>
                 </div>
                 <button
                   type="button"

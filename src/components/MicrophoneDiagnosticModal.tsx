@@ -5,6 +5,7 @@ import {
   getMicrophoneCapabilities,
   AudioRecordingResult
 } from '../utils/audioRecorder';
+import { assistant } from '../core/ai';
 
 interface MicrophoneDiagnosticModalProps {
   isOpen: boolean;
@@ -125,29 +126,14 @@ export const MicrophoneDiagnosticModal: React.FC<MicrophoneDiagnosticModalProps>
     setIsAiTranscribing(true);
     setErrorMessage(null);
 
-    try {
-      const res = await fetch('/api/transcribe-audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          audioBase64: testResult.base64Audio,
-          mimeType: testResult.audioBlob.type || 'audio/webm'
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAiTranscript(
-          data.transcript || 'Audio procesado, pero no se detectaron palabras audibles.'
-        );
-      } else {
-        setErrorMessage('El servidor no pudo procesar la transcripción del audio.');
-      }
-    } catch (err: any) {
-      setErrorMessage('Error de conexión con el servicio de transcripción.');
-    } finally {
-      setIsAiTranscribing(false);
+    const result = await assistant.transcribe(testResult.base64Audio, testResult.audioBlob.type || 'audio/webm');
+    if (result.ok) {
+      setAiTranscript(result.transcript);
+    } else {
+      // Mensaje honesto del servidor o del puerto (por ejemplo, "No te escuché bien...").
+      setErrorMessage(result.error);
     }
+    setIsAiTranscribing(false);
   };
 
   useEffect(() => {

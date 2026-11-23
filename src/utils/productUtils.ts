@@ -79,14 +79,6 @@ export interface ProductProfile {
   defectCheckText: string;
   aiEvaluatingText: string;
   aiEvaluatingSubtitle: string;
-  defaultAiDiagnosis: {
-    estado: string;
-    calidadScore: number;
-    humedadEstimada: string;
-    defectosDetectados: string;
-    recomendacion: string;
-    analysis: string;
-  };
   lotTags: string[];
 }
 
@@ -137,15 +129,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que el pulque mantenga su color blanco homogéneo, consistencia sedosa y aroma fresco sin notas agrias anómalas. 100% fermentación natural de maguey.',
       aiEvaluatingText: 'Evaluando muestra de pulque tradicional con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Revisando coloración blanco lechoso, consistencia, densidad y pureza de aguamiel',
-      defaultAiDiagnosis: {
-        estado: 'Pulque Tradicional de Primera Calidad (100% Puro)',
-        calidadScore: 97,
-        humedadEstimada: 'Fermentación Natural Activa',
-        defectosDetectados: '0% adulterantes, libre de azúcar añadida',
-        recomendacion: 'Lote de pulque aprobado. Listo para Pasaporte Digital y venta directa sin coyotes.',
-        analysis:
-          '🏺 Dictamen del Instituto Tecnológico de Tlaxiaco:\n\n• Muestra evaluada correspondiente a PULQUE ARTESANAL de la Mixteca.\n• Color blanco lechoso uniforme, consistencia sedosa propia del mucílago natural del maguey pulquero.\n• Libre de olores ácidos o amargos anómalos. Aguamiel cosechado con respeto y tradición comunitaria.\n• Apto para distribución directa en la comunidad y eventos regionales a precio justo.'
-      },
       lotTags: ['100% Aguamiel', 'Tinacal Artesanal', 'Sin Adulterar', 'Maguey Manso', 'Mixteca Alta']
     };
   }
@@ -193,15 +176,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que la muestra sea miel virgen sin adulteración ni azúcares comerciales añadidos. 100% floración silvestre de la Mixteca.',
       aiEvaluatingText: 'Evaluando muestra de miel pura con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Revisando pureza botánica, densidad apícola y transparencia ámbar',
-      defaultAiDiagnosis: {
-        estado: 'Miel Virgen 100% Pura de Campanilla',
-        calidadScore: 98,
-        humedadEstimada: '18% (norma de referencia Apícola)',
-        defectosDetectados: 'Muestra cristalina, sin adulteración ni separación de fases',
-        recomendacion: 'Muestra de miel certificada. Lista para comercialización directa con sello comunal.',
-        analysis:
-          '🍯 Dictamen del Instituto Tecnológico de Tlaxiaco:\n\n• Muestra identificada como MIEL VIRGEN SILVESTRE de la Mixteca Alta.\n• Densidad y transparencia óptimas correspondientes a floración de acahual y campanilla.\n• Libre de glucosa comercial o calentamiento perjudicial.'
-      },
       lotTags: ['Sin adulteración', 'Floración silvestre', 'Pura de abeja', 'Mixteca Alta']
     };
   }
@@ -249,15 +223,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica grano limpio sin gorgojo ni exceso de humedad. 100% autóctono libre de semillas transgénicas.',
       aiEvaluatingText: 'Evaluando muestra de maíz y granos con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Revisando pureza de grano nativo, sanidad y secado solar',
-      defaultAiDiagnosis: {
-        estado: 'Maíz Criollo Libre de Transgénicos',
-        calidadScore: 95,
-        humedadEstimada: '11.8% (Secado Solar Óptimo)',
-        defectosDetectados: '0% gorgojo, grano entero y vigoroso',
-        recomendacion: 'Lote de grano criollo validado para acopio y Pasaporte Digital.',
-        analysis:
-          '🌽 Dictamen del Instituto Tecnológico de Tlaxiaco:\n\n• Grano autóctono nativo libre de modificaciones genéticas.\n• Sanidad vegetal conforme, apto para consumo humano y conservación de semilla.'
-      },
       lotTags: ['Libre de OGM', 'Milpa comunitaria', 'Grano nativo', 'Mixteca']
     };
   }
@@ -305,15 +270,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que el fondo esté firme y no presente fisuras en la palma. La finura del tejido define el precio justo directo.',
       aiEvaluatingText: 'Evaluando tenate de palma artesanal con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Analizando puntada de doble nudo, remate de orilla y pureza de fibra',
-      defaultAiDiagnosis: {
-        estado: 'Tejido de Tenate con Puntada Fina Tradicional',
-        calidadScore: 98,
-        humedadEstimada: 'Fibra Flexible Hidratada',
-        defectosDetectados: 'Cero hebras sueltas, remate cerrado de alta resistencia',
-        recomendacion: 'Tenate tradicional mixteco aprobado para venta directa con sello de autenticidad.',
-        analysis:
-          '🧺 Dictamen del Instituto Tecnológico de Tlaxiaco:\n\n• Pieza de cestería correspondiente a TENATE DE PALMA DULCE tradicional mixteco.\n• Tejido cerrado de doble nudo con remate uniforme y sin hebras quebradizas.\n• Pieza aprobada para Pasaporte Digital con Sello de Autenticidad.'
-      },
       lotTags: ['Tenate mixteco', 'Palma dulce', 'Doble nudo', 'Artesanía Certificada', 'Mixteca Alta']
     };
   }
@@ -361,15 +317,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que no haya hebras quebradizas en la palma dulce. La finura del tejido define el precio justo directo.',
       aiEvaluatingText: 'Evaluando pieza de palma artesanal con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Analizando densidad de puntada, trama de palma y acabado',
-      defaultAiDiagnosis: {
-        estado: 'Tejido Fino Tradicional de Alta Durabilidad',
-        calidadScore: 96,
-        humedadEstimada: 'Fibra Flexible Hidratada',
-        defectosDetectados: 'Trama simétrica, ribete firme sin cortes',
-        recomendacion: 'Pieza artesanal aprobada para Vitrina con sello de trazabilidad.',
-        analysis:
-          '🤠 Dictamen de Artesanía Mixteca:\n\n• Pieza elaborada con técnica ancestral de tejido en cueva.\n• Excelente flexibilidad y protección UV garantizada.'
-      },
       lotTags: ['Palma dulce', 'Hecho a mano', 'Artesanía Certificada', 'Mixteca']
     };
   }
@@ -417,15 +364,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que la trama esté uniforme y los bordados firmes. El sello de origen protege tus regalías contra el plagio.',
       aiEvaluatingText: 'Evaluando pieza textil artesanal con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Analizando urdimbre, tinte natural y motivos iconográficos',
-      defaultAiDiagnosis: {
-        estado: 'Textil Auténtico de Telar Tradicional',
-        calidadScore: 99,
-        humedadEstimada: 'Hilos Naturales de Algodón',
-        defectosDetectados: 'Urdido perfecto, tintes vegetales firmes',
-        recomendacion: `Sello de autor con ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% de regalía en reventas (de demostración).`,
-        analysis:
-          '🧵 Dictamen de Iconografía y Técnica Textil:\n\n• Pieza auténtica mixteca en telar de cintura con tinte de grana cochinilla.\n• Alta valoración en mercado de comercio justo internacional.'
-      },
       lotTags: ['Telar de cintura', 'Grana cochinilla', 'Artesanía Certificada', 'Mixteca Alta']
     };
   }
@@ -473,15 +411,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         'Verifica que los frutos estén firmes, sin picaduras ni manchas. 100% fresco de invernadero campesino.',
       aiEvaluatingText: 'Evaluando muestra hortícola con Inteligencia Artificial...',
       aiEvaluatingSubtitle: 'Revisando firmeza, maduración y sanidad vegetal',
-      defaultAiDiagnosis: {
-        estado: 'Hortaliza Fresca de Primera Calidad',
-        calidadScore: 94,
-        humedadEstimada: 'Firmeza Óptima de Cosecha',
-        defectosDetectados: 'Sin presencia de plagas ni residuos químicos',
-        recomendacion: 'Cosecha aprobada para comercialización en mercados locales.',
-        analysis:
-          '🍅 Dictamen Agrícola:\n\n• Muestra de jitomate saladette con excelente turgencia y maduración homogénea.\n• Proceso libre de pesticidas sintéticos comprobado.'
-      },
       lotTags: ['Libre de pesticidas', 'Cosecha fresca', 'Riego limpio', 'Mixteca Alta']
     };
   }
@@ -1032,15 +961,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
         `Verifica que ${articleDef} ${customTitle.toLowerCase()} ${verbBe} ${adjClean} y en óptimas condiciones para su comercialización directa.`,
       aiEvaluatingText: `Evaluando muestra de ${customTitle.toLowerCase()} con Inteligencia Artificial...`,
       aiEvaluatingSubtitle: 'Verificando sanidad, origen regional y estándares comunitarios',
-      defaultAiDiagnosis: {
-        estado: `${customTitle} Comunitario de Calidad Garantizada`,
-        calidadScore: 95,
-        humedadEstimada: 'Excelente condición y pureza',
-        defectosDetectados: '0% contaminantes, producto fresco y legítimo',
-        recomendacion: `Lote de ${customTitle.toLowerCase()} aprobado. Listo para Pasaporte Digital y venta directa sin intermediarios.`,
-        analysis:
-          `🌿 Dictamen del Instituto Tecnológico de Tlaxiaco:\n\n• Muestra evaluada correspondiente a ${customTitle.toUpperCase()} de la región Mixteca y Oaxaca.\n• Producto legítimo, cosechado/elaborado con métodos tradicionales sustentables.\n• Apto para registro en la red comunitaria con Pasaporte Digital inmutable.`
-      },
       lotTags: [customTitle, 'Mixteca Alta', 'Comercio Justo', '100% Auténtico']
     };
   }
@@ -1087,15 +1007,6 @@ export function getProductProfile(rawType?: string): ProductProfile {
       'Verifica que no haya grano agrio, negro o broca visible. Esto acelera el cálculo del precio base comunal.',
     aiEvaluatingText: 'Evaluando muestra de café con Inteligencia Artificial...',
     aiEvaluatingSubtitle: 'Revisando coloración de grano, porcentaje de humedad y presencia de broca',
-    defaultAiDiagnosis: {
-      estado: 'Pergamino Lavado Grado Exportación',
-      calidadScore: 92,
-      humedadEstimada: '11.4%',
-      defectosDetectados: '0% broca aparente, color uniforme',
-      recomendacion: 'Apto para recepción y emisión de Pasaporte Digital.',
-      analysis:
-        '• Muestra visual de grano pergamino seco con excelente sanidad vegetal.\n• Sin presencia de broca (Hypothenemus hampei) ni mancha de humedad.\n• Secado uniforme adecuado para el acopio en el Tec.'
-    },
     lotTags: ['Cero broca', 'Grano parejo', 'Fermentación en frío', 'NMX-F-083']
   };
 }
