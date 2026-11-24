@@ -65,8 +65,8 @@ Reglas:
 | `POST /api/analyze-image` | 🟡 Llama a Gemini; diagnósticos fijos sin llave | Puerto de IA; solo con consentimiento | #154 · #107 |
 | `POST /api/transcribe-audio` | 🟡 Llama a Gemini; transcripción "verificada" falsa | Puerto de IA; el audio no se guarda | #154 · #107 |
 | `POST /api/chain/lots/prepare` | ❌ No existe | Prepara `register_lot` sin firmar; el certificador cofirma | #92 |
-| `POST /api/chain/submit` | ❌ No existe | Fee-bump patrocinado con lista blanca | #94 |
-| Alta de cuenta con reserva patrocinada | ❌ No existe | La firma una promotora o grupo dado de alta | #94 |
+| `POST /api/chain/submit` | ✅ Testnet (almacén en memoria) | Fee-bump patrocinado con lista blanca; PostgreSQL con #156 | #94 |
+| `POST /api/chain/accounts` · `POST /api/chain/accounts/confirm` | ✅ Testnet (almacén en memoria) | Alta en dos pasos: la pide una promotora dada de alta; la artesana firma; el servidor agrega la firma patrocinadora | #94 |
 | `/api/escrow/*` | ❌ No existe | Proxy de Trustless Work; devuelve XDR sin firmar | #96 |
 | `/api/payout/*` | ❌ No existe | Proxy del sandbox de Etherfuse; no guarda datos personales | #146 |
 | `GET /api/auth` · `POST /api/auth` | ❌ No existe | Reto SEP-10 y sesión corta | #157 |
@@ -132,8 +132,10 @@ Todas van en `.env` (ignorado por git) y aparecen en `.env.example` **sin valore
 | `GEMINI_API_KEY` | Llave de la IA. Gratuita = solo datos inventados (ADR-006, D1) | #154 | Production y Preview |
 | `AI_PROVIDER` | `gemini` o `simulated` | #154 | Production y Preview |
 | `STELLAR_CERTIFIER_SECRET` | Llave del certificador de `lot_passport` (de la plataforma) | #92 | Solo Production, *Sensitive* |
-| Llave de la cuenta patrocinadora | Paga comisiones y reservas (nombre lo propone #94) | #94 | Solo Production, *Sensitive* |
-| `SPONSOR_MAX_FEE`, `SPONSOR_MAX_TX_PER_DAY`, `SPONSOR_MAX_ACCOUNTS_PER_DAY` | Topes del patrocinio | #94 | Production y Preview |
+| `STELLAR_SPONSOR_SECRET` | Llave de la cuenta patrocinadora: paga comisiones y reservas (de la plataforma) | #94 | Solo Production, *Sensitive* |
+| `SPONSOR_MAX_FEE`, `SPONSOR_MAX_TX_PER_DAY`, `SPONSOR_MAX_ACCOUNTS_PER_DAY`, `SPONSOR_MAX_FEE_PER_DAY` | Topes del patrocinio (por transacción, por cuenta al día, altas al día y gasto al día) | #94 | Production y Preview |
+| `SPONSOR_USDC_ISSUER` | Emisor del USDC de testnet cuya trustline se patrocina | #94 | Production y Preview |
+| `SPONSOR_PROMOTERS` | Solo con el almacén en memoria: promotoras dadas de alta (direcciones `G…`) mientras llega #156 | #94 | Production y Preview |
 | Llave de la API de Trustless Work | Cada equipo usa la suya | #96 | Production y Preview |
 | `ETHERFUSE_API_KEY` | Sandbox de Etherfuse | #146 | Production y Preview |
 | Llave que firma el reto SEP-10 y secreto de la sesión | De la plataforma | #157 | Solo Production, *Sensitive* |

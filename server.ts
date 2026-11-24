@@ -4,6 +4,7 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import { legacyRoutes } from "./src/server/routes/legacy";
+import { chainRoutes, chainStore } from "./src/server/routes/chain";
 
 const app = express();
 const PORT = 3000;
@@ -1153,6 +1154,12 @@ app.post("/api/transcribe-audio", async (req: Request, res: Response) => {
 
 // Rutas /api/v1/* (#106): viven en src/server/routes/legacy.ts
 app.use("/api/v1", legacyRoutes);
+
+// Rutas /api/chain/* (#94): patrocinio de comisiones y altas de cuenta; viven en src/server/routes/chain.ts
+app.use("/api/chain", chainRoutes);
+if (chainStore.kind === "memory") {
+  console.warn("Aviso: /api/chain usa MemorySponsorStore (en memoria). No sirve con varias copias del servidor (#156).");
+}
 
 
 async function startServer() {
