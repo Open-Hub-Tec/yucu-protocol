@@ -78,11 +78,11 @@ Explicamos de forma clara y transparente cómo cuidamos su privacidad:
 
 - La carta se lee en lenguaje sencillo, o en su lengua con apoyo de quien la organización elija.
 - La organización tiene tiempo para consultarla en asamblea antes de decidir. **No se firma con prisa.**
-- De la lectura se levanta una minuta en `docs/gestion/equipo-3/minutas/`.
+- De la lectura se levanta una minuta en `docs/gestion/equipo-3/minutas/` coordinada por el eduScrum Master (@IsaiasBrayanLopez).
 
 | Por la organización | Por el equipo |
 |---|---|
-| Cargo: ____________________ | eduScrum Master del Equipo 3 |
+| Cargo: ____________________ | eduScrum Master del Equipo 3 (@IsaiasBrayanLopez) |
 | Firma: ____________________ | Firma: ____________________ |
 | Fecha: ____________________ | Fecha: ____________________ |
 
