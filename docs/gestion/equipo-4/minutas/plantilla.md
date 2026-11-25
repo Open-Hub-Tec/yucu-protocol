@@ -7,7 +7,7 @@
 - **Fecha y hora:** por confirmar
 - **Modalidad y lugar:** por confirmar
 - **Organización / grupo participante:** nombre autorizado por el equipo
-- **Responsable de la minuta:** por confirmar
+- **Responsable de la minuta:** Equipo 4
 - **Revisión/aprobación:** por confirmar
 
 ## Participantes por rol
@@ -38,7 +38,7 @@
 
 | Pendiente | Responsable | Fecha de seguimiento | Evidencia esperada |
 |---|---|---|---|
-| Por confirmar | Equipo 4 | Por confirmar | Link, captura, exportación o acuse autorizado |
+| Por confirmar | Equipo 4 | Por confirmar | Enlace, captura, exportación o acuse autorizado |
 
 - **Decisión de la organización:** por confirmar.
 - **Bloqueos informados:** por confirmar.
@@ -52,7 +52,6 @@
 - Utilizar únicamente información autorizada.
 - Revisar los documentos y evidencias antes de publicarlos en el repositorio.
 - Mantener los archivos originales que contengan información identificable fuera del repositorio público.
-
 - No subir audio, voces, fotografías o números personales.
 - Guardar solo texto autorizado y anonimizado.
 - Consultar la política de privacidad del repositorio antes de publicar evidencia.
