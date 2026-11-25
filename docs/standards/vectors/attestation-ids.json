@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "description": "Public deterministic test vectors; these fixed salts MUST NOT be used in real attestations.",
+  "cases": [
+    {
+      "id": "origin-lot",
+      "kind": "lot",
+      "subject": "LOTE-001",
+      "schema": "origen-comunitario",
+      "saltHex": "00112233445566778899aabbccddeeff",
+      "content": {
+        "categoria": "cafe",
+        "municipio_codigo": "201",
+        "lote_referencia": "LOTE-001",
+        "evidencia_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "subjectRef": "86a08345c37654fd3020790b0266bea12c7e344ff290f8bafd6db0ae8a812e18",
+      "saltedHash": "262cbe3729e57964c1a02b34c86e30778db36bfd0cd78e1c7ab32065403a2c06",
+      "manifestHash": "d8c9c643c034b123e3f5c9b0084fff2224483b05633ddbbfc88b75acce60abcf",
+      "value": "yucu:1:86a08345c37654fd3020790b0266bea12c7e344ff290f8bafd6db0ae8a812e18:262cbe3729e57964c1a02b34c86e30778db36bfd0cd78e1c7ab32065403a2c06"
+    },
+    {
+      "id": "consent-item",
+      "kind": "item",
+      "subject": "PIEZA-002",
+      "schema": "consentimiento",
+      "saltHex": "102132435465768798a9bacbdcedfe0f",
+      "content": {
+        "finalidad": "catalogo",
+        "referencia_objeto": "PIEZA-002",
+        "vigencia_hasta": "2027-01-01"
+      },
+      "subjectRef": "098a223510801258fa943749815456913f2b4bc29ab9212ef266b72f7336ba2a",
+      "saltedHash": "8590000987949c14b76facbd16533b8277708ec4c307ff333dffb2696c503960",
+      "manifestHash": "ad2abd73bca0dee89aea2548c35680468ce46bdf548eec6d859eddf4e6653a53",
+      "value": "yucu:1:098a223510801258fa943749815456913f2b4bc29ab9212ef266b72f7336ba2a:8590000987949c14b76facbd16533b8277708ec4c307ff333dffb2696c503960"
+    },
+    {
+      "id": "collaboration-ref",
+      "kind": "addr",
+      "subject": "GDEMOACCOUNTONLY0001",
+      "schema": "colaboracion",
+      "saltHex": "2031425364758697a8b9cadbecfd0e1f",
+      "content": {
+        "tipo_colaboracion": "diseno",
+        "referencia_acuerdo": "ACUERDO-003",
+        "consentimiento_ref_uid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "refUid": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "subjectRef": "f708139b9330bf8c53e7e7980748ae551a182450c1478607410d81ecdac88456",
+      "saltedHash": "b62069af2f44f5e37c4e6bbfb01c484e08f190975e3ab5b6377a4043d1de4294",
+      "manifestHash": "8a50a00a15054805c21c83f3fbcf5fcadf469c86d90020a1c4292c1ecf403f09",
+      "value": "yucu:1:f708139b9330bf8c53e7e7980748ae551a182450c1478607410d81ecdac88456:b62069af2f44f5e37c4e6bbfb01c484e08f190975e3ab5b6377a4043d1de4294:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "delivery-sale",
+      "kind": "sale",
+      "subject": "VENTA-004",
+      "schema": "entrega",
+      "saltHex": "30415263748596a7b8c9daebfc0d1e2f",
+      "content": {
+        "estado_entrega": "recibida",
+        "fecha_entrega": "2026-11-01",
+        "referencia_envio": "GUIA-004"
+      },
+      "subjectRef": "a7801b3c93af5e53ebf62ce05b2c4d7f359872f0d4875e0f95e042691dfb706d",
+      "saltedHash": "8d90164727d0810f673066e394e7c2a684dbdd9e6c32cce6876e6af5ffcede2d",
+      "manifestHash": "ea788478ccd9d94cc045d5a94cc3578134a8d93dbaac44c58270abb0023d9142",
+      "value": "yucu:1:a7801b3c93af5e53ebf62ce05b2c4d7f359872f0d4875e0f95e042691dfb706d:8d90164727d0810f673066e394e7c2a684dbdd9e6c32cce6876e6af5ffcede2d"
+    },
+    {
+      "id": "transit-unicode",
+      "kind": "lot",
+      "subject": "ÑU-005",
+      "schema": "transito",
+      "saltHex": "405162738495a6b7c8d9eafb0c1d2e3f",
+      "content": {
+        "tipo_medicion": "humedad",
+        "rango_medicion": "5-10",
+        "evidencia_merkle": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "municipio_codigo": "205"
+      },
+      "subjectRef": "3450a27aa63088db47ef86c50608646b1d2f2b3b705d556b055eba64adc47fa5",
+      "saltedHash": "3fcff3a2b383729f0b416cf7a1c0fda0d67be27e7417645d77e4c856dfabce90",
+      "manifestHash": "a792b91d3d93c073a89d4a3f51ccb601efd2e44f12d501f173b6b662a3b335ec",
+      "value": "yucu:1:3450a27aa63088db47ef86c50608646b1d2f2b3b705d556b055eba64adc47fa5:3fcff3a2b383729f0b416cf7a1c0fda0d67be27e7417645d77e4c856dfabce90"
+    },
+    {
+      "id": "origin-long-salt",
+      "kind": "item",
+      "subject": "ARTESANIA-006",
+      "schema": "origen-comunitario",
+      "saltHex": "5061728394a5b6c7d8e9fa0b1c2d3e4f5061728394a5b6c7",
+      "content": {
+        "municipio_codigo": "208",
+        "categoria": "textil",
+        "lote_referencia": "ARTESANIA-006",
+        "evidencia_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "subjectRef": "ae031b59ad7b0cfbdaa14f051efba86d4cf3f92e380d30816c480f4f7ed0b11a",
+      "saltedHash": "89f77277048310ae46a05bac0ac215bee6325600104aaf883d188df6a3e96656",
+      "manifestHash": "d8c9c643c034b123e3f5c9b0084fff2224483b05633ddbbfc88b75acce60abcf",
+      "value": "yucu:1:ae031b59ad7b0cfbdaa14f051efba86d4cf3f92e380d30816c480f4f7ed0b11a:89f77277048310ae46a05bac0ac215bee6325600104aaf883d188df6a3e96656"
+    }
+  ]
+}

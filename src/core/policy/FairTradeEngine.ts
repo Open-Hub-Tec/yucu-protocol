@@ -69,7 +69,7 @@ export class FairTradeEngine {
   }
 
   /**
-   * Calcula la regalía de reventa para la artesana o productor (por defecto, el porcentaje oficial del protocolo)
+   * Calcula la regalía de reventa para la artesana o productor (por defecto, el porcentaje del protocolo)
    */
   public static calculateSecondaryRoyalty(salePriceMxn: number, royaltyPercentage: number = PROTOCOL_FEES.artisanResaleRoyaltyPct): {
     artisanRoyaltyMxn: number;

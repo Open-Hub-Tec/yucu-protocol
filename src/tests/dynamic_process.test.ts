@@ -1,6 +1,8 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 import { ProcessStage, DynamicSpec, DigitalPassportLot } from '../types';
 import { CryptoEngine } from '../core/crypto/CryptoEngine';
+import { RegisterLotRequest } from '../core/chain/ports';
 
 let passed = 0;
 let failed = 0;
@@ -84,45 +86,44 @@ assert(chocolateStages.length === 4, 'Lista dinámica de chocolate tradicional e
 console.log('\n--- 2. Criptografía y Sellado Inmutable en Stellar ---');
 
 async function testCrypto() {
-  // Serialización de la lista dinámica para el cálculo del Community Digest
-  const stagesSummaryTextile = textileStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
-  const stagesSummaryHoney = honeyStages.map(s => `${s.name}:${s.metricValue || ''}`).join('>');
+  const photoTextileHash = await CryptoEngine.sha256('photo_telar_cintura_coyuchi_sample');
+  const photoHoneyHash = await CryptoEngine.sha256('photo_colmenas_campanilla_sample');
 
-  const digestTextile = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_tuun_savi_sample',
-    photoBase64: 'photo_telar_cintura_coyuchi_sample',
-    processStagesSummary: stagesSummaryTextile
-  });
+  const lotTextile: RegisterLotRequest = {
+    code: 'MX-2024-CUQ-001',
+    producerAddress: 'GARTISAN1TEXTILE7777777777777777777777777777777777777777777',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textile',
+    variety: 'Telar de cintura con tinte de grana cochinilla',
+    volumeRange: 1,
+    photoHashHex: photoTextileHash,
+  };
 
-  const digestHoney = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
-    processStagesSummary: stagesSummaryHoney
-  });
+  const lotHoney: RegisterLotRequest = {
+    code: 'MX-2024-HON-002',
+    producerAddress: 'GPRODUCER2HONEY8888888888888888888888888888888888888888888',
+    location: 'Magdalena Peñasco',
+    category: 'honey',
+    variety: 'Miel virgen de campanilla',
+    volumeRange: 2,
+    photoHashHex: photoHoneyHash,
+  };
+
+  const digestTextile = await CryptoEngine.generateLotDigest(lotTextile);
+  const digestHoney = await CryptoEngine.generateLotDigest(lotHoney);
 
   assert(digestTextile.length === 64, `Digest SHA-256 Textile válido de 64 caracteres: ${digestTextile.slice(0, 16)}...`);
   assert(digestHoney.length === 64, `Digest SHA-256 Miel válido de 64 caracteres: ${digestHoney.slice(0, 16)}...`);
-  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de las etapas del proceso');
+  assert(digestTextile !== digestHoney, 'Los digests son únicos y estrictamente dependientes de los datos del lote');
 
   // Prueba de Detección de Fraude (Tamper Evidence)
-  // Si un intermediario altera "17.8% humedad" por "22.0% humedad" o cambia el tinte:
-  const tamperedStagesSummary = stagesSummaryHoney.replace('17.8%', '22.0%');
-  const tamperedDigest = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Don Efraín López',
-    community: 'Magdalena Peñasco, Tlaxiaco',
-    timestamp: 1727000000000,
-    audioBase64: 'audio_testimonio_mixteco_miel_sample',
-    photoBase64: 'photo_colmenas_campanilla_sample',
-    processStagesSummary: tamperedStagesSummary
-  });
+  const tamperedLot: RegisterLotRequest = {
+    ...lotHoney,
+    variety: 'Miel adulterada con jarabe de maíz',
+  };
+  const tamperedDigest = await CryptoEngine.generateLotDigest(tamperedLot);
 
-  assert(digestHoney !== tamperedDigest, 'Detección antifraude: Modificar una etapa invalida inmediatamente el hash de Stellar');
+  assert(digestHoney !== tamperedDigest, 'Detección antifraude: Modificar un campo invalida inmediatamente el hash de Stellar');
 }
 
 // -------------------------------------------------------------
@@ -180,7 +181,7 @@ assert(normalizeMixtecoVoiceIntent(voiceSample1).length > 0, 'Normalizador de vo
 assert(normalizeMixtecoVoiceIntent(voiceSample2).includes('opcion 1'), 'Detección robusta de opción por comando de voz');
 assert(normalizeMixtecoVoiceIntent(voiceSample3).includes('telar'), 'Captura de texto para la creación de etapas');
 
-// C. Verificación de Regalías Justas Comunitarias (10% Productor + 2% Tequio, ver src/config/protocolFees.ts)
+// C. Verificación de Regalías Justas Comunitarias (ver src/config/protocolFees.ts)
 function calculateSplits(saleAmountMxn: number) {
   const r = FairTradeEngine.calculateSecondaryRoyalty(saleAmountMxn);
   return { producerRoyalty: r.artisanRoyaltyMxn, tequioFund: r.cooperativeFundMxn, sellerNet: r.sellerNetMxn };
@@ -189,8 +190,8 @@ function calculateSplits(saleAmountMxn: number) {
 const sampleResale = 5000; // Un textil de reventa en galería de arte por $5,000 MXN
 const splits = calculateSplits(sampleResale);
 
-assert(splits.producerRoyalty === 500, `Regalía del 10% calculada con exactitud ($500 MXN de $5,000 MXN)`);
-assert(splits.tequioFund === 100, `Fondo comunitario de tequio del 2% asignado ($100 MXN de $5,000 MXN)`);
+assert(splits.producerRoyalty === Math.round((sampleResale * PROTOCOL_FEES.artisanResaleRoyaltyPct) / 100), `Regalía del ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% calculada con exactitud ($500 MXN de $5,000 MXN)`);
+assert(splits.tequioFund === Math.round((sampleResale * PROTOCOL_FEES.resaleTequioPct) / 100), `Fondo comunitario de tequio del ${PROTOCOL_FEES.resaleTequioPct}% asignado ($100 MXN de $5,000 MXN)`);
 assert(splits.producerRoyalty + splits.tequioFund + splits.sellerNet === sampleResale, 'Conservación matemática del 100% de los fondos sin fuga financiera');
 
 // Ejecución asíncrona de pruebas criptográficas

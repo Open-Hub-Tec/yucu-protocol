@@ -9,7 +9,7 @@ pptx.defineLayout({ name: 'WIDESCREEN_16_9', width: 13.333, height: 7.5 });
 pptx.layout = 'WIDESCREEN_16_9';
 
 // Propiedades de la Presentación
-pptx.title = 'Protocolo Yucu - Presentación Oficial en Español';
+pptx.title = 'Protocolo Yucu - Presentación en Español';
 pptx.subject = 'Infraestructura de Atestaciones RWA y Pagos en Custodia en Stellar Soroban';
 pptx.author = 'Prof. José Alfredo Román Cruz & Open Hub TecNM';
 pptx.company = 'Instituto Tecnológico de Tlaxiaco / Open Hub TecNM';
@@ -112,7 +112,7 @@ const C_CARD_BORDER = 'E5E7EB';// Borde Suave
     });
   });
 
-  slide.addText('Presentación Oficial · Desarrollada por el Tecnológico Nacional de México Campus Tlaxiaco', {
+  slide.addText('Presentación · Desarrollada por el Tecnológico Nacional de México Campus Tlaxiaco', {
     x: 0.8,
     y: 6.4,
     w: 11.5,
@@ -540,7 +540,7 @@ const C_CARD_BORDER = 'E5E7EB';// Borde Suave
       activity: 'Miel Virgen de Campanilla (Unión Flor de la Mixteca)',
       pain: 'Registros a mano en libretas viejas y hojas sueltas. 3 días para transcribir listas a mano.',
       market: 'Pérdida de hojas de cosecha; miel vendida 2 veces a clientes por falta de inventario digital.',
-      quote: 'Rogelio Martínez (Presidente): “A veces se ofrece miel y resulta que ya se había vendido a otro.”',
+      quote: 'el presidente de la Unión: “A veces se ofrece miel y resulta que ya se había vendido a otro.”',
       tagColor: 'DCFCE7',
       tagText: '166534'
     },
@@ -1703,7 +1703,7 @@ const C_CARD_BORDER = 'E5E7EB';// Borde Suave
         { role: 'Rust / Soroban & Escrow:', name: 'Integración Trustless Work Escrow & LotPassport' },
         { role: 'Frontend & PWA Offline:', name: 'React 19, IndexedDB Outbox y Modo Abuelo 112px' },
         { role: 'Oráculos de IA Multimodales:', name: 'Normalización Tu’un Savi, Calidad SCAA y Satélite EUDR' },
-        { role: 'Gobernanza & Drips Splits:', name: 'Open Hub TecNM – 100% Código Abierto con Licencia MIT' }
+        { role: 'Gobernanza:', name: 'Open Hub TecNM – 100% Código Abierto con Licencia MIT' }
       ]
     }
   ];

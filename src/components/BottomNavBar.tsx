@@ -117,7 +117,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             ? 'bg-[#032517] text-[#c7ebd4] shadow-xs'
             : 'text-[#424843] hover:bg-[#f0eee8]'
         }`}
-        aria-label="Ver Landing Page Oficial del Protocolo"
+        aria-label="Ver página del protocolo"
       >
         <span
           className={`material-symbols-outlined ${elderMode ? 'text-[28px]' : 'text-[24px]'}`}

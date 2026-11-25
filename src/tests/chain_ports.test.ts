@@ -2,6 +2,7 @@
  * Pruebas de los puertos de src/core/chain (ADR-003).
  * Cualquier implementación real debe cumplir el mismo flujo: preparar -> firmar -> enviar.
  */
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import {
   SimulatedCardWallet,
   SimulatedEscrow,
@@ -77,7 +78,7 @@ async function run() {
   const escrow = new SimulatedEscrow();
   const order = (orderId: string, percents: number[]) => ({
     orderId, buyerAddress: 'GBUYER', serviceProviderAddress: 'GGRUPO', releaseSignerAddress: address,
-    platformAddress: 'GPLATAFORMA', platformFeePercent: 0, disputeResolverAddress: 'GTERCERO',
+    platformAddress: 'GPLATAFORMA', platformFeePercent: PROTOCOL_FEES.platformFeePct, disputeResolverAddress: 'GTERCERO',
     amount: 1000, asset: { code: 'USDC', issuer: 'GEMISOR' },
     milestones: percents.map((percent, i) => ({ description: `Hito ${i + 1}`, percent, receiverAddress: address })),
   });

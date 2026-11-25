@@ -214,24 +214,3 @@ export interface PendingOfflineLot {
   recordedAt: number;
   syncStatus: 'pending' | 'syncing' | 'synced';
 }
-
-/**
- * Interface for Field Buyer Validation & Early-Adopter Phone Registry
- * Used by TecNM students to save buyer contacts for future launch notification
- */
-export interface BuyerLeadRecord {
-  id: string;
-  timestamp: string;
-  studentName?: string;
-  studentGroup?: string;
-  buyerName: string;
-  buyerPhone: string;
-  buyerCity: string;
-  buyerSegment: string;
-  interestedProducts: string;
-  willingnessToPayExtraMxn?: number;
-  susScore?: number;
-  consentForFutureContact: boolean;
-  notes?: string;
-  createdVia: 'field_interview' | 'showcase_optin';
-}

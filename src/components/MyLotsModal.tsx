@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DigitalPassportLot } from '../types';
+import { ExplicacionSello } from './accesibilidad/ExplicacionSello';
 
 interface MyLotsModalProps {
   isOpen: boolean;
@@ -55,6 +56,8 @@ export const MyLotsModal: React.FC<MyLotsModalProps> = ({
 
         {/* Content list */}
         <div className="p-4 overflow-y-auto space-y-3 flex-1">
+          {/* El sello explicado en la lista de lotes (W53 #182) */}
+          <ExplicacionSello compacta />
           {lots.map((lot) => (
             <div
               key={lot.id}

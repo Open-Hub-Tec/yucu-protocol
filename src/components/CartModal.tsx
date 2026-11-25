@@ -53,7 +53,7 @@ export const CartModal: React.FC<CartModalProps> = ({
   const getPaymentLabel = (m: 'spei' | 'efectivo' | 'escrow') => {
     switch (m) {
       case 'spei':
-        return 'SPEI Directo a Artesano (0% Comisión)';
+        return 'SPEI Directo a Artesano (sin comisión)';
       case 'efectivo':
         return 'Efectivo Contra Entrega (En Mano)';
       case 'escrow':
@@ -114,13 +114,13 @@ export const CartModal: React.FC<CartModalProps> = ({
   const handleCopyReceiptText = () => {
     if (!confirmedReceipt) return;
     const text =
-      `🧾 COMPROBANTE OFICIAL DE COMPRA DIRECTA · PROTOCOLO RAÍZ\n` +
+      `🧾 COMPROBANTE DE DEMOSTRACIÓN DE COMPRA DIRECTA · PROTOCOLO RAÍZ\n` +
       `Folio: #${confirmedReceipt.id}\n` +
       `Fecha: ${confirmedReceipt.date}\n` +
       `Taller: ${confirmedReceipt.artisanName} (${confirmedReceipt.location})\n` +
       `Método de Pago: ${confirmedReceipt.paymentMethod}\n` +
       `Total: $${confirmedReceipt.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN\n` +
-      `Estatus: ✅ PAGO CONFIRMADO (100% Directo a Artesanas - 0% Comisiones)\n` +
+      `Estatus: ✅ PAGO CONFIRMADO (100% Directo a Artesanas - sin comisiones)\n` +
       `Stellar Ledger: #${confirmedReceipt.stellarTxLedger}\n` +
       `Hash Blockchain: ${confirmedReceipt.stellarTxHash}\n\n` +
       `Paso siguiente: Coordinación de entrega en taller o paquetería comercial.`;
@@ -150,7 +150,7 @@ export const CartModal: React.FC<CartModalProps> = ({
               {confirmedReceipt ? 'verified' : 'local_mall'}
             </span>
             <h3 className="text-[17px] font-bold text-[#032517]">
-              {confirmedReceipt ? 'Comprobante Oficial de Compra' : 'Bolsa de Compra Directa'}
+              {confirmedReceipt ? 'Comprobante de Demostración de Compra' : 'Bolsa de Compra Directa'}
             </h3>
           </div>
           <button
@@ -189,7 +189,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                   Último evento del flujo completado: el taller de la artesana ha sido notificado para preparar tus piezas.
                 </p>
                 <div className="inline-block mt-1 bg-emerald-950 px-3 py-1 rounded-full border border-emerald-400/40 text-[11px] font-mono text-emerald-300 font-bold">
-                  Folio Oficial #{confirmedReceipt.id}
+                  Folio de Demostración #{confirmedReceipt.id}
                 </div>
               </div>
 
@@ -241,7 +241,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                 <div className="p-3 bg-[#e8f5e9] rounded-2xl border border-emerald-300 text-[12px] space-y-1">
                   <p className="font-bold text-emerald-950 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[16px] text-emerald-700">account_balance</span>
-                    <span>Datos para Transferencia SPEI (0% Comisiones):</span>
+                    <span>Datos para Transferencia SPEI (sin comisiones):</span>
                   </p>
                   <p className="text-emerald-900 font-mono text-[11.5px] bg-white p-2 rounded-lg border border-emerald-200">
                     Banco: <strong>Banco del Bienestar / BBVA</strong><br />
@@ -368,7 +368,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                       <div>
                         <p className="leading-tight">Transferencia Directa SPEI</p>
                         <p className="text-[10.5px] text-[#727973] font-normal">
-                          0% comisiones bancarias · Directo a cuenta Bienestar/BBVA
+                          sin comisiones bancarias · Directo a cuenta Bienestar/BBVA
                         </p>
                       </div>
                     </div>
@@ -441,7 +441,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                   verified_user
                 </span>
                 <p>
-                  <strong>100% Directo a Artesanas:</strong> Al pagar, obtienes tu Comprobante Oficial y te enlazamos por Chat o WhatsApp para acordar la entrega libremente.
+                  <strong>100% Directo a Artesanas:</strong> Al pagar, obtienes tu Comprobante de Demostración y te enlazamos por Chat o WhatsApp para acordar la entrega libremente.
                 </p>
               </div>
             </>
@@ -510,7 +510,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                     <span className="material-symbols-outlined text-[19px] animate-spin">
                       progress_activity
                     </span>
-                    <span>Emitiendo Comprobante Oficial...</span>
+                    <span>Emitiendo Comprobante de Demostración...</span>
                   </>
                 ) : (
                   <>

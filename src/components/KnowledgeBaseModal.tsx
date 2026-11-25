@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PROTOCOL_FEES } from '../config/protocolFees';
 
 interface KnowledgeBaseModalProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ export const KnowledgeBaseModal: React.FC<KnowledgeBaseModalProps> = ({
   onClose,
   onOpenCard
 }) => {
-  const [activeTab, setActiveTab] = useState<'vision' | 'logistica' | 'regalias' | 'micopay' | 'becas' | 'markdown'>('vision');
+  const [activeTab, setActiveTab] = useState<'vision' | 'logistica' | 'regalias' | 'micopay' | 'estudiantes' | 'markdown'>('vision');
   const [copied, setCopied] = useState(false);
 
   if (!isOpen) return null;
@@ -27,9 +28,9 @@ Combina:
 1. **Módulo Único de Registro Universal**: Registro ágil de café, miel, telar de cintura, barro y palma mediante interfaces ultraligeras y notas de voz en Tu'un Savi / Español.
 2. **Dictamen Agroecológico TecNM**: Verificación científica de calidad (humedad, libre de plaguicidas, altitud) anclada criptográficamente en Stellar Testnet.
 3. **Trato y Entrega Directa (Deslinde Logístico)**: Yucu no opera paqueterías ni fletes. La entrega física se acuerda directamente entre comprador y artesano en taller o parcela, eliminando al intermediario especulador.
-4. **Regalías Perpetuas On-Chain**: Smart contracts en Soroban que garantizan un 10% perpetuo a las artesanas y creadores sobre cualquier reventa secundaria en galerías o el extranjero.
+4. **Regalías Perpetuas On-Chain**: Smart contracts en Soroban que garantizan un ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% perpetuo a las artesanas y creadores sobre cualquier reventa secundaria en galerías o el extranjero.
 5. **MicoPay & Billetera Comunitaria**: Custodia en Escrow con USDC, cobros con código QR y red de liquidación en efectivo sin intermediación bancaria tradicional.
-6. **Sostenibilidad Académica**: Micro-becas y residencias para estudiantes de ingeniería del Tec de Tlaxiaco por resolver Issues en GitHub.
+6. **Estudiantes TecNM**: Estudiantes del TecNM Campus Tlaxiaco programan Yucu como parte de sus materias.
 
 ---
 
@@ -46,7 +47,7 @@ Combina:
 - **Problema Histórico**: Un huipil comprado en $2,000 MXN en Tlaxiaco se revende en $15,000 MXN en boutiques de Polanco o Europa sin que la artesana reciba un centavo adicional.
 - **Solución Soroban**:
   - Cada pieza tiene un Pasaporte Digital NFT/Tokenizado con la identidad de la artesana.
-  - Si el comprador revende la pieza en el mercado secundario integrado, el contrato retiene el 10% del monto total de la reventa y lo transfiere automáticamente a la billetera MicoPay de la artesana creadora.
+  - Si el comprador revende la pieza en el mercado secundario integrado, el contrato retiene el ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% del monto total de la reventa y lo transfiere automáticamente a la billetera MicoPay de la artesana creadora.
 
 ---
 
@@ -58,8 +59,8 @@ Combina:
 ---
 
 ## 5. VINCULACIÓN ACADÉMICA Y PARTICIPACIÓN ESTUDIANTIL
-- El fondo de desarrollo del proyecto Open Hub vincula a estudiantes de ingeniería con tareas reales de software.
-- Cada estudiante del TecNM Tlaxiaco que programa módulos, valida sensores o asiste a productores recibe micro-becas y créditos de residencia profesional al resolver issues en GitHub.
+- Estudiantes del TecNM Campus Tlaxiaco programan Yucu como parte de sus materias.
+- Si una issue forma parte de Drips Wave, Drips le paga directamente a quien la resolvió.
 `;
 
   const handleCopyMarkdown = () => {
@@ -141,7 +142,7 @@ Combina:
                 : 'text-[#424843] hover:bg-[#e4e1d9]'
             }`}
           >
-            💎 10% Regalías Soroban
+            💎 {`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% Regalías Soroban`}
           </button>
           <button
             type="button"
@@ -156,14 +157,14 @@ Combina:
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('becas')}
+            onClick={() => setActiveTab('estudiantes')}
             className={`px-3 py-1.5 rounded-xl text-[12px] font-bold shrink-0 transition-all cursor-pointer ${
-              activeTab === 'becas'
+              activeTab === 'estudiantes'
                 ? 'bg-purple-900 text-white shadow-xs'
                 : 'text-[#424843] hover:bg-[#e4e1d9]'
             }`}
           >
-            🎓 Becas &amp; TecNM
+            🎓 Estudiantes TecNM
           </button>
           <button
             type="button"
@@ -260,11 +261,11 @@ Combina:
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[20px]">💎</span>
                   <h4 className="font-extrabold text-rose-950 text-[14px]">
-                    Regalías Perpetuas On-Chain (10% en Soroban)
+                    Regalías Perpetuas On-Chain ({`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% en Soroban`})
                   </h4>
                 </div>
                 <p className="text-rose-900 text-[12.5px]">
-                  Blindaje definitivo contra la apropiación cultural y la especulación artística. Si una pieza textil o cerámica es revendida en el mercado secundario internacional por coleccionistas o galerías, la artesana original recibe automáticamente el 10%.
+                  {`Blindaje definitivo contra la apropiación cultural y la especulación artística. Si una pieza textil o cerámica es revendida en el mercado secundario internacional por coleccionistas o galerías, la artesana original recibe automáticamente el ${PROTOCOL_FEES.artisanResaleRoyaltyPct}%.`}
                 </p>
               </div>
 
@@ -278,8 +279,8 @@ Combina:
                   <span className="font-bold text-amber-700">$10,000 MXN</span>
                 </div>
                 <div className="flex justify-between items-center bg-emerald-50 p-2 rounded-lg border border-emerald-200">
-                  <span className="font-bold text-emerald-950">10% Transferido Automáticamente:</span>
-                  <span className="font-extrabold text-emerald-800 text-[13px]">+$1,000 MXN (50 USDC)</span>
+                  <span className="font-bold text-emerald-950">{`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% Transferido Automáticamente:`}</span>
+                  <span className="font-extrabold text-emerald-800 text-[13px]">{`+$${(10000 * PROTOCOL_FEES.artisanResaleRoyaltyPct / 100).toLocaleString('es-MX')} MXN (50 USDC)`}</span>
                 </div>
               </div>
 
@@ -329,17 +330,17 @@ Combina:
             </div>
           )}
 
-          {activeTab === 'becas' && (
+          {activeTab === 'estudiantes' && (
             <div className="space-y-3">
               <div className="bg-purple-50 border border-purple-200 rounded-2xl p-3.5">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[20px]">🎓</span>
                   <h4 className="font-extrabold text-purple-950 text-[14px]">
-                    Sostenibilidad Académica &amp; GitHub Open Hub
+                    Estudiantes TecNM &amp; GitHub Open Hub
                   </h4>
                 </div>
                 <p className="text-purple-900 text-[12.5px]">
-                  Para garantizar que el software viva por décadas en la comunidad, los estudiantes de ingeniería reciben micro-becas y residencias por contribución directa.
+                  Estudiantes del TecNM Campus Tlaxiaco programan Yucu como parte de sus materias. Si una issue forma parte de Drips Wave, Drips le paga directamente a quien la resolvió.
                 </p>
               </div>
 
@@ -347,10 +348,6 @@ Combina:
                 <p className="text-[#424843]">
                   Los estudiantes de Ingeniería en Sistemas e Informática del Instituto Tecnológico de Tlaxiaco resuelven tareas de mantenimiento, conexión de sensores IoT o soporte a campesinos.
                 </p>
-                <div className="p-2.5 bg-[#f0eee8] rounded-xl flex items-center justify-between font-mono text-[11px]">
-                  <span>GitHub Issue Resuelto #42</span>
-                  <span className="text-emerald-700 font-bold font-sans">Beca: 120 USDC · Residencia</span>
-                </div>
               </div>
             </div>
           )}

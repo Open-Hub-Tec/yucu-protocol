@@ -1,8 +1,10 @@
 name: TecNM Contributor & Roadmap Verification
 
+# pull_request_target: corre con los permisos del repo también en PRs que vienen de forks.
+# Es seguro porque NO hace checkout ni ejecuta código del PR: solo lee la descripción y usa la API.
 on:
-  pull_request:
-    types: [opened, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, reopened, ready_for_review, closed]
 
 permissions:
   pull-requests: write
@@ -12,29 +14,110 @@ permissions:
 jobs:
   contributor-welcome:
     name: Contributor Guidance & Issue Link Verification
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Verify Issue Reference
-        id: check_issue
+      - name: Verify issue reference and look for duplicate PRs
         uses: actions/github-script@v7
         with:
           script: |
+            const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
-            const body = pr.body || '';
-            const issueRegex = /(closes|fixes|resolves)\s+#(\d+)/i;
-            const match = body.match(issueRegex);
-            
-            let message = '';
-            if (match) {
-              const issueNumber = match[2];
-              message = `### 🌾 Welcome, contributor!\n\nThank you for opening this pull request!\n\n- **Linked Issue:** #${issueNumber}\n- **Roadmap & Drips:** This PR resolves an issue tracked under the [Yucu Delivery Roadmap](https://github.com/orgs/Open-Hub-Tec/projects/1).\n- **Quality Check:** The automated CI test suite will run linting, tests, and build verification.\n- **Privacy:** If you add research or UX results, follow [PRIVACIDAD.md](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/research/PRIVACIDAD.md): no names, audio, video or photos of interviewees.\n\nPlease ensure your code satisfies the acceptance criteria before requesting maintainer review.`;
+            const re = /(?:closes|fixes|resolves)\s+#(\d+)/gi;
+            const refs = (text) => [...new Set([...(text || '').matchAll(re)].map((m) => Number(m[1])))];
+            const nums = refs(pr.body);
+
+            let message;
+            if (nums.length === 0) {
+              message = [
+                '### 🌾 Welcome, contributor!',
+                '',
+                'Thank you for contributing to Yucu Protocol!',
+                '',
+                '> ⚠️ **Notice:** No linked issue was detected in your PR description.',
+                '>',
+                '> To link this PR to the Roadmap and keep it **Drips-eligible**, add a line such as',
+                '> `Resolves #18` in the PR body.',
+                '',
+                'See the active roadmap at [Yucu Project Board](https://github.com/orgs/Open-Hub-Tec/projects/1).',
+              ].join('\n');
             } else {
-              message = `### 🌾 Welcome, contributor!\n\nThank you for contributing to Yucu Protocol!\n\n> ⚠️ **Notice:** No linked issue was detected in your PR description.\n>\n> To link this PR to the Roadmap and keep it **Drips-eligible**, please add a line such as:\n> \`Resolves #18\` or \`Closes #22\` in the PR body.\n\nSee the active roadmap at [Yucu Project Board](https://github.com/orgs/Open-Hub-Tec/projects/1).`;
+              const notes = [];
+              const open = await github.paginate(github.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 });
+              for (const n of nums) {
+                let issue;
+                try {
+                  ({ data: issue } = await github.rest.issues.get({ owner, repo, issue_number: n }));
+                } catch (e) {
+                  notes.push(`- #${n} does not exist. Check the number in \`Resolves #${n}\`.`);
+                  continue;
+                }
+                if (issue.state === 'closed') {
+                  notes.push(`- #${n} is **already closed**. If another PR already solved it, close this one.`);
+                }
+                const others = open.filter((p) => p.number !== pr.number && refs(p.body).includes(n));
+                if (others.length) {
+                  const list = others.map((p) => `#${p.number} by \`${p.user.login}\``).join(', ');
+                  notes.push(`- Another open PR already resolves #${n}: ${list}. **One PR per issue:** if that PR is yours, push your changes to it and close this one.`);
+                }
+              }
+              message = [
+                '### 🌾 Welcome, contributor!',
+                '',
+                'Thank you for opening this pull request!',
+                '',
+                `- **Linked issue:** ${nums.map((n) => '#' + n).join(', ')}`,
+                '- **Roadmap & Drips:** This PR resolves an issue tracked under the [Yucu Delivery Roadmap](https://github.com/orgs/Open-Hub-Tec/projects/1).',
+                '- **Quality check:** The automated CI runs linting, tests and build verification.',
+                '- **One PR per issue:** if a reviewer asks for changes, push them to this same branch. Do not open a new PR.',
+                '- **Privacy:** If you add research or UX results, follow [PRIVACIDAD.md](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/research/PRIVACIDAD.md): no names, audio, video or photos of interviewees.',
+                ...(notes.length ? ['', '> ⚠️ **Please check:**', ...notes.map((l) => '> ' + l)] : []),
+                '',
+                'Please make sure your work meets the acceptance criteria before requesting a maintainer review.',
+              ].join('\n');
             }
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr.number,
-              body: message
-            });
+            await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: message });
+
+  close-duplicates:
+    name: Close duplicate PRs for the same issue
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Close other open PRs that resolve the same issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const merged = context.payload.pull_request;
+            const re = /(?:closes|fixes|resolves)\s+#(\d+)/gi;
+            const refs = (text) => [...new Set([...(text || '').matchAll(re)].map((m) => Number(m[1])))];
+            const solved = refs(merged.body);
+            if (solved.length === 0) return;
+
+            const open = await github.paginate(github.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 });
+            for (const p of open) {
+              if (p.number === merged.number) continue;
+              const theirs = refs(p.body);
+              const shared = theirs.filter((n) => solved.includes(n));
+              if (shared.length === 0) continue;
+              const issues = shared.map((n) => '#' + n).join(', ');
+
+              if (theirs.some((n) => !solved.includes(n))) {
+                // Also resolves other issues: do not close it, only warn.
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: p.number,
+                  body: `Heads-up @${p.user.login}: #${merged.number} was merged and already resolves ${issues}. Please remove that part from this PR and keep only the rest.`,
+                });
+                continue;
+              }
+
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: p.number,
+                body: `Thanks @${p.user.login}! #${merged.number} was merged and already resolves ${issues}, so this pull request is closed as a duplicate. Nothing else is needed from you. If you think this is a mistake, comment here and a maintainer will reopen it.`,
+              });
+              await github.rest.pulls.update({ owner, repo, pull_number: p.number, state: 'closed' });
+              core.info(`Closed #${p.number} (duplicate of #${merged.number}).`);
+            }

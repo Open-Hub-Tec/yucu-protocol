@@ -1,3 +1,5 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
+
 export function sanitizeProductName(raw: string): string {
   if (!raw) return 'Café';
   let cleaned = raw.trim();
@@ -194,7 +196,7 @@ export function getProductProfile(rawType?: string): ProductProfile {
       defaultAiDiagnosis: {
         estado: 'Miel Virgen 100% Pura de Campanilla',
         calidadScore: 98,
-        humedadEstimada: '18% (Norma Oficial Apícola)',
+        humedadEstimada: '18% (norma de referencia Apícola)',
         defectosDetectados: 'Muestra cristalina, sin adulteración ni separación de fases',
         recomendacion: 'Muestra de miel certificada. Lista para comercialización directa con sello comunal.',
         analysis:
@@ -420,7 +422,7 @@ export function getProductProfile(rawType?: string): ProductProfile {
         calidadScore: 99,
         humedadEstimada: 'Hilos Naturales de Algodón',
         defectosDetectados: 'Urdido perfecto, tintes vegetales firmes',
-        recomendacion: 'Certificación de autor otorgada con 10% de regalías inmutables.',
+        recomendacion: `Sello de autor con ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% de regalía en reventas (de demostración).`,
         analysis:
           '🧵 Dictamen de Iconografía y Técnica Textil:\n\n• Pieza auténtica mixteca en telar de cintura con tinte de grana cochinilla.\n• Alta valoración en mercado de comercio justo internacional.'
       },

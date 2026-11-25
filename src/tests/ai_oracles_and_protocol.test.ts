@@ -26,19 +26,19 @@ console.log('================================================================');
 
 // 1. Voice Oracle Test
 console.log('\n📍 1. ORÁCULO DE VOZ Y DIALECTO INDÍGENA (Tu\'un Savi / Español)');
-const voiceResultMixtec = RaizAIOracles.parseAcousticVoiceInput('Kuni yu kiti 120 kilos café en la loma de San Pedro');
+const voiceResultMixtec = await RaizAIOracles.parseAcousticVoiceInput('Kuni yu kiti 120 kilos café en la loma de San Pedro');
 assert(voiceResultMixtec.detectedLanguage === 'tuun_savi', 'Detecta idioma mixteco Tu\'un Savi');
 assert(voiceResultMixtec.extractedFields.productType === 'coffee', 'Extrae producto café');
 assert(voiceResultMixtec.extractedFields.quantity === 120, 'Extrae cantidad numérica 120 kg');
 assert(voiceResultMixtec.payloadDigest.length === 64, 'Genera digest SHA-256 canónico para Stellar');
 
-const voiceResultTextile = RaizAIOracles.parseAcousticVoiceInput('Quiero registrar 2 rebozos de telar de cintura con grana cochinilla');
+const voiceResultTextile = await RaizAIOracles.parseAcousticVoiceInput('Quiero registrar 2 rebozos de telar de cintura con grana cochinilla');
 assert(voiceResultTextile.extractedFields.productType === 'textile', 'Identifica dominio textil de telar');
 assert(voiceResultTextile.extractedFields.community === 'San Pablo Tijaltepec', 'Asigna comunidad artesanal');
 
 // 2. AI Quality Oracle Test
 console.log('\n📍 2. ORÁCULO DE CALIDAD RWA (Visión Computacional & SCAA)');
-const coffeeQuality = RaizAIOracles.evaluateLotQuality({
+const coffeeQuality = await RaizAIOracles.evaluateLotQuality({
   productType: 'coffee',
   sampleMetrics: { moistureInput: 11.2, defectRatio: 0.02 },
 });
@@ -47,13 +47,13 @@ assert(coffeeQuality.tier === 'Specialty Q-Grade (Export)', 'Clasificación expo
 assert(coffeeQuality.exportReady === true, 'Bandera exportReady activada');
 assert(coffeeQuality.attestationHash.length === 64, 'Hash de atestación criptográfica generado');
 
-const textileQuality = RaizAIOracles.evaluateLotQuality({ productType: 'textile' });
+const textileQuality = await RaizAIOracles.evaluateLotQuality({ productType: 'textile' });
 assert(textileQuality.tier === 'Master Artisan Heritage', 'Clasificación de patrimonio artesanal maestro');
 assert(textileQuality.metrics.naturalDyeDetected === true, 'Detección de tintes naturales verificada');
 
 // 3. EUDR Satellite Oracle Test
 console.log('\n📍 3. ORÁCULO SATELITAL ANTI-DEFORESTACIÓN (EUDR Unión Europea)');
-const eudrReport = RaizAIOracles.verifyEUDRCompliance({
+const eudrReport = await RaizAIOracles.verifyEUDRCompliance({
   community: 'Heroica Ciudad de Tlaxiaco',
   latitude: 17.268,
   longitude: -97.681,
@@ -82,7 +82,7 @@ assert(routeMexicoCash.targetRail === 'MICOPAY_CASH', 'Rutea a efectivo MicoPay 
 
 // 5. Universal SDK Test
 console.log('\n📍 5. SDK UNIVERSAL DEL YUCU PROTOCOL (@yucu-protocol/sdk)');
-const sdk = new RaizProtocolSDK({ network: 'stellar-mainnet' });
+const sdk = new RaizProtocolSDK({ network: 'stellar-testnet' });
 const metrics = sdk.getMetrics();
 assert(metrics.aiOraclesOnline === 4, '4 oráculos de IA activos en la infraestructura');
 assert(metrics.totalTokenizedRWAKg > 40000, 'Volumen de RWA registrado');

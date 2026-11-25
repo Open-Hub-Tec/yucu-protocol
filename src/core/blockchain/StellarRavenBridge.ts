@@ -2,7 +2,7 @@
  * Yucu Core - Stellar Raven MCP Bridge & Assistant Context Layer
  * 
  * Configura la integración con Stellar Raven (https://raven.stellar.buzz/mcp),
- * el servidor oficial de Model Context Protocol (MCP) de la Stellar Development Foundation.
+ * el servidor de Model Context Protocol (MCP) de Stellar Raven (comunidad).
  */
 
 export interface StellarRavenConfig {

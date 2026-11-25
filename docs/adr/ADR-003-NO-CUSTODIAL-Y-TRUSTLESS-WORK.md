@@ -1,5 +1,9 @@
 # ADR-003: Arquitectura no custodial con Trustless Work
 
+> **English summary.**
+> **Context:** An October 2026 audit found the Stellar integration was simulated: invented hashes, an escrow in an in-memory Map, and no real transactions. To be verifiable, it must use the real network. The question is who controls the keys and the money. If the platform holds producers' keys or third-party funds, it takes custody, with legal duties under Mexico's Ley Fintech and CNBV supervision that an academic project cannot meet.
+> **Decision:** Yucu stays non-custodial (D1): it never generates, stores, receives, or recovers a private key, and it never holds funds. Conditional payments use Trustless Work escrow (D2); contracts/fair_escrow is teaching material only, never used in the app. All flows follow one pattern: prepare, sign, then submit (D3). An unsigned transaction is prepared first, the user signs it on their phone with a PIN, and the phone submits the signed XDR. The server may pay fees (fee-bump, CAP-15) and sponsor reserves (CAP-33), but it never signs. Everything runs on Stellar testnet first (D4); mainnet needs a new decision with legal review. Each producer's key lives on their phone, encrypted with a PIN in IndexedDB, with a paper recovery card kept by the person (D5). Lot registration needs two signatures, the producer's and the certifier node's (D6). The interface only uses the ports in src/core/chain/ (WalletPort, EscrowPort).
+> **Consequences:** This removes custody of keys and funds, the biggest legal and security risk, and gives every flow one testable pattern. Trade-offs: recovery, losing phone and card means losing access; PIN signing must stay clear for older users; dependence on the Trustless Work API; and XLM costs for sponsoring fees and reserves, limited per account.
 * **Estado:** Aceptada
 * **Fecha:** 26 de octubre de 2026
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco)

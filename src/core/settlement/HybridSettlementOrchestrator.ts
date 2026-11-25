@@ -12,8 +12,10 @@
  * 4. STELLAR & SOROBAN CORE:
  *    - Path Payments y AMM para conversión automática de divisas sin pérdida cambiaria
  *    - Contrato Soroban FairEscrow para custodia y liberación automática
- *    - 10% de regalías perpetuas para artesanas
+ *    - Regalías perpetuas para artesanas según PROTOCOL_FEES
  */
+
+import { PROTOCOL_FEES } from '../../config/protocolFees';
 
 export type SupportedCountry = 'MX' | 'BO' | 'BR';
 
@@ -34,7 +36,7 @@ export interface CountrySettlementConfig {
   anchorProvider: 'Etherfuse' | 'Polar' | 'PIX Central' | 'MicoPay';
   features: string[];
   settlementTimeSec: number;
-  producerFeePercent: number; // 0% para el campesino
+  producerFeePercent: number; // sin costo para el campesino
 }
 
 export const COUNTRY_CONFIGS: Record<SupportedCountry, CountrySettlementConfig> = {
@@ -47,13 +49,13 @@ export const COUNTRY_CONFIGS: Record<SupportedCountry, CountrySettlementConfig> 
     localRailName: 'SPEI Interbancario & Tarjeta Bienestar',
     anchorProvider: 'Etherfuse',
     features: [
-      'Etherfuse MXNe: Peso mexicano tokenizado sobre Stellar con reservas auditadas',
+      'Etherfuse MXNe: Peso mexicano tokenizado sobre Stellar con reservas declaradas',
       'Liquidación directa SPEI a Banco del Bienestar, BBVA, Banorte y Azteca',
       'MicoPay: Red de transportistas como cajeros móviles en parcelas de la Mixteca',
       'Rendimiento seguro en CETES tokenizados para fondos de ahorro comunitario'
     ],
     settlementTimeSec: 3,
-    producerFeePercent: 0,
+    producerFeePercent: PROTOCOL_FEES.producerFeePct,
   },
   BO: {
     countryCode: 'BO',
@@ -70,7 +72,7 @@ export const COUNTRY_CONFIGS: Record<SupportedCountry, CountrySettlementConfig> 
       'Ideal para café de Los Yungas, quinua real de Oruro y tejidos andinos de La Paz'
     ],
     settlementTimeSec: 5,
-    producerFeePercent: 0,
+    producerFeePercent: PROTOCOL_FEES.producerFeePct,
   },
   BR: {
     countryCode: 'BR',
@@ -87,7 +89,7 @@ export const COUNTRY_CONFIGS: Record<SupportedCountry, CountrySettlementConfig> 
       'Cero contracargos y confirmación criptográfica en menos de 2 segundos'
     ],
     settlementTimeSec: 2,
-    producerFeePercent: 0,
+    producerFeePercent: PROTOCOL_FEES.producerFeePct,
   },
 };
 
