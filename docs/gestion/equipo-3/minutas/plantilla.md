@@ -14,7 +14,7 @@
 
 ## Acuerdos
 
-Cada acuerdo se convierte en una issue en el tablero del equipo, con el mismo responsable y fecha.
+Cada acuerdo se convierte en una issue en el tablero del equipo, con el mismo responsable y fecha, bajo seguimiento del eduScrum Master (@IsaiasBrayanLopez).
 
 | # | Acuerdo | Responsable | Fecha límite | Issue en el tablero | Aprobado por |
 |---|---|---|---|---|---|
@@ -31,7 +31,7 @@ Cada acuerdo se convierte en una issue en el tablero del equipo, con el mismo re
 
 - [ ] Se leyó la minuta en voz alta al final de la reunión.
 - [ ] La organización aprobó los acuerdos (de palabra o en su asamblea): sí / no / pendiente.
-- [ ] Revisó y aprobó la minuta por el equipo: @usuario, fecha AAAA-MM-DD.
-- [ ] Se creó una issue por cada acuerdo.
+- [ ] Revisó y validó la minuta por el equipo: @IsaiasBrayanLopez (eduScrum Master), fecha AAAA-MM-DD.
+- [ ] Se creó una issue por cada acuerdo en el tablero de GitHub Projects.
 
 **Próxima reunión:** AAAA-MM-DD
