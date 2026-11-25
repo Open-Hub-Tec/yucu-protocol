@@ -1,10 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { BuyerLeadRecord } from '../types';
+import React, { useState } from 'react';
+import { browserStorage } from '../core/privacy/legacyBuyerLeads';
+import {
+  readContactConsentTally,
+  recordContactConsent,
+  type ContactConsentTally,
+} from '../core/privacy/contactConsentTally';
+
+// #121: esta pantalla no guarda nombres ni teléfonos de compradores (PRIVACIDAD.md, reglas 2 y 5).
+// Solo se anota si la persona aceptó que la contacten (sí/no); el contacto va en la carpeta privada.
+type BuyerResearchTab = 'template' | 'campo' | 'guide' | 'example';
 
 interface BuyerResearchIssueModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultTab?: 'template' | 'campo' | 'leads' | 'guide' | 'example';
+  defaultTab?: BuyerResearchTab;
 }
 
 export const BuyerResearchIssueModal: React.FC<BuyerResearchIssueModalProps> = ({
@@ -12,15 +21,13 @@ export const BuyerResearchIssueModal: React.FC<BuyerResearchIssueModalProps> = (
   onClose,
   defaultTab = 'template'
 }) => {
-  const [activeTab, setActiveTab] = useState<'template' | 'campo' | 'leads' | 'guide' | 'example'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<BuyerResearchTab>(defaultTab);
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Estados del Formulario de Campo para Estudiantes (Captura de Entrevista y Teléfono)
+  // Formulario de campo: resumen de la entrevista, sin datos de contacto del comprador.
   const [studentName, setStudentName] = useState('Castro Jared & Dulce Maetzy');
   const [studentGroup, setStudentGroup] = useState('5º Semestre Grupo B - Ing. en Sistemas Computacionales');
-  const [buyerName, setBuyerName] = useState('');
-  const [buyerPhone, setBuyerPhone] = useState('');
   const [buyerCity, setBuyerCity] = useState('Tlaxiaco, Oaxaca');
   const [buyerSegment, setBuyerSegment] = useState('Barista / Cafetería de especialidad');
   const [interestedProducts, setInterestedProducts] = useState('Café de especialidad (2kg), Huipil Triqui de telar');
@@ -34,60 +41,10 @@ export const BuyerResearchIssueModal: React.FC<BuyerResearchIssueModalProps> = (
   const [buyerQuote, setBuyerQuote] = useState('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
-  // Directorio de contactos guardados en localStorage
-  const [leads, setLeads] = useState<BuyerLeadRecord[]>(() => {
-    try {
-      const stored = localStorage.getItem('raiz_buyer_leads');
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return [
-      {
-        id: 'lead-1',
-        timestamp: '2026-10-08 16:30',
-        studentName: 'Castro Jared & Dulce Maetzy',
-        studentGroup: '5º Semestre Grupo B',
-        buyerName: 'Rodrigo Vásquez',
-        buyerPhone: '+52 953 145 8921',
-        buyerCity: 'Tlaxiaco, Oaxaca',
-        buyerSegment: 'Barista / Cafetería Nuu Savi',
-        interestedProducts: 'Café de especialidad en grano (5kg)',
-        willingnessToPayExtraMxn: 150,
-        susScore: 95,
-        consentForFutureContact: true,
-        notes: 'Desea entrega directa en su cafetería cuando inicie la cosecha oficial certificada.',
-        createdVia: 'field_interview'
-      },
-      {
-        id: 'lead-2',
-        timestamp: '2026-10-09 11:15',
-        studentName: 'Cruz Bautista Alexis',
-        studentGroup: '7º Semestre Residencia',
-        buyerName: 'Lucía Mendoza',
-        buyerPhone: '+52 951 289 4410',
-        buyerCity: 'Oaxaca de Juárez, Oax.',
-        buyerSegment: 'Diseñadora textil / Coleccionista',
-        interestedProducts: 'Rebozo de telar de cintura con tinte natural',
-        willingnessToPayExtraMxn: 300,
-        susScore: 90,
-        consentForFutureContact: true,
-        notes: 'Pide aviso urgente por WhatsApp cuando el taller de San Pablo Tijaltepec tenga lote nuevo.',
-        createdVia: 'field_interview'
-      }
-    ];
-  });
-
-  // Sincronizar en localStorage cuando leads cambian
-  useEffect(() => {
-    try {
-      localStorage.setItem('raiz_buyer_leads', JSON.stringify(leads));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [leads]);
+  // Solo cuántas personas aceptaron (sí) o no que las contacten. Sin nombres ni teléfonos.
+  const [consentTally, setConsentTally] = useState<ContactConsentTally>(() =>
+    readContactConsentTally(browserStorage())
+  );
 
   if (!isOpen) return null;
 
@@ -135,7 +92,7 @@ assignees: ''
 ---
 
 ## 👤 2. Buyer Profile & Demographics
-- **Identifier / Alias:** <!-- e.g., Buyer-01 (Rodrigo V., 32, Barista & cultural collector) -->
+- **Identifier / Alias:** <!-- e.g., Buyer-01 (barista & cultural collector). No name or exact age. -->
 - **Age & Occupation:** 
 - **City of Residence:** <!-- e.g., Tlaxiaco, Oaxaca / Mexico City / International tourist -->
 - **Buyer Segment:**
@@ -149,17 +106,10 @@ assignees: ''
 
 ---
 
-## 📱 2.1 Early Adopter Contact & Future Launch Notification (Pre-Order Lead)
-> 💡 **Instructions for TecNM Students:** The strongest validation signal is whether a buyer is willing to leave their phone number to be notified when the platform and artisan logistics officially launch. Always ask for explicit verbal consent.
+## 🔒 2.1 Contact details
+> **Do not publish them here.** This issue is public. If the buyer agrees to be contacted at launch, store the contact in the team's private folder (\`.investigacion_privada/\`), never in an issue ([\`docs/research/PRIVACIDAD.md\`](../../docs/research/PRIVACIDAD.md), rules 2 and 5).
 
-- **Buyer Full Name / Contact Person:** <!-- e.g., Rodrigo Vásquez -->
-- **WhatsApp / Phone Number:** <!-- e.g., +52 953 123 4567 -->
-- **City / Destination for Future Delivery:** <!-- e.g., Tlaxiaco, Oaxaca / CDMX / Querétaro -->
-- **Interested Products / Pieces:** <!-- e.g., High-altitude specialty coffee (2kg), Backstrap-loom rebozo -->
-- **Target Budget / Willingness to Pay:** <!-- e.g., $1,200 MXN -->
-- **Re-Contact Authorization Consent:**
-  - [ ] **YES:** Buyer explicitly agreed to save their phone/WhatsApp to be notified as soon as the project is officially launched and artisan production orders open.
-  - [ ] **NO:** Buyer preferred anonymous feedback only.
+- **Agreed to be contacted?** [ ] Yes (stored in the private folder) · [ ] No
 
 ---
 
@@ -282,7 +232,7 @@ Technical engineering tasks identified for upcoming Pull Requests in the reposit
   // SPANISH OFFICIAL TEMPLATE
   const rawSpanishTemplate = `---
 name: 🛍️ Entrevista a Compradores y Evaluación de Usabilidad UX
-about: Plantilla oficial para que los estudiantes del TecNM registren entrevistas de validación con compradores y pruebas de usabilidad del Pasaporte Digital Yucu
+about: Plantilla del proyecto para que los estudiantes del TecNM registren entrevistas de validación con compradores y pruebas de usabilidad del Pasaporte Digital Yucu
 title: "[UX-RESEARCH]: Entrevista a Comprador y Prueba de Usabilidad - [Perfil/Ubicación]"
 labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluation"]
 assignees: ''
@@ -306,7 +256,7 @@ assignees: ''
 ---
 
 ## 👤 2. Perfil del Comprador Entrevistado
-- **Identificador / Alias:** <!-- Ej. Comprador-01 (Rodrigo V., 32 años, Barista) -->
+- **Identificador / Alias:** <!-- Ej. Comprador-01 (diseñadora y coleccionista textil). Sin nombre ni edad exacta. -->
 - **Edad y Ocupación:** 
 - **Lugar de Residencia:** <!-- Ej. Tlaxiaco, Oaxaca / CDMX / Extranjero -->
 - **Segmento de Comprador:**
@@ -320,17 +270,10 @@ assignees: ''
 
 ---
 
-## 📱 2.1 Datos de Contacto y Autorización de Notificación a Futuro (Lead de Preventa)
-> 💡 **Instrucción para Estudiantes del TecNM:** La mayor señal de validación de dolor y necesidad es si el comprador acepta dar su teléfono para ser contactado cuando la plataforma y las entregas con las artesanas estén formalmente activas.
+## 🔒 Datos de contacto
+> **No se publican aquí.** Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (\`.investigacion_privada/\`), nunca en una issue ([\`docs/research/PRIVACIDAD.md\`](../../docs/research/PRIVACIDAD.md), reglas 2 y 5).
 
-- **Nombre o Contacto del Comprador:** <!-- Ej. Rodrigo Vásquez -->
-- **Número Celular / WhatsApp:** <!-- Ej. +52 953 123 4567 -->
-- **Ciudad y Destino de Envío Futuro:** <!-- Ej. Tlaxiaco, Oax. / Roma Norte, CDMX -->
-- **Productos / Artesanías de Interés:** <!-- Ej. Café de especialidad Nuu Savi (2kg), Huipil Triqui de telar -->
-- **Presupuesto Estimado / Disposición a Pagar:** <!-- Ej. $1,200 MXN -->
-- **Consentimiento de Contacto al Lanzamiento:**
-  - [ ] **SÍ AUTORIZADO:** El comprador aceptó expresamente guardar su número de WhatsApp/teléfono para ser avisado en cuanto el proyecto esté listo y se abran pedidos formales.
-  - [ ] **NO AUTORIZADO:** El comprador prefirió retroalimentación anónima.
+- **¿Aceptó que la contacten?** [ ] Sí (contacto guardado en la carpeta privada) · [ ] No
 
 ---
 
@@ -399,118 +342,19 @@ assignees: ''
     URL.revokeObjectURL(url);
   };
 
-  // Guardar lead de campo en el directorio local
-  const handleSaveFieldLead = (e: React.FormEvent) => {
+  // Guarda solo la respuesta sí/no de la entrevista (#121). Nada de nombre ni teléfono.
+  const handleSaveConsent = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!buyerName.trim()) {
-      alert('Por favor introduce el nombre o alias del comprador.');
-      return;
-    }
-    if (!buyerPhone.trim()) {
-      alert('Por favor introduce el teléfono o WhatsApp para poder contactarlo en el futuro.');
-      return;
-    }
-
-    const newLead: BuyerLeadRecord = {
-      id: 'lead-' + Date.now(),
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      studentName: studentName.trim() || 'Estudiante TecNM',
-      studentGroup: studentGroup.trim() || 'Ing. Sistemas',
-      buyerName: buyerName.trim(),
-      buyerPhone: buyerPhone.trim(),
-      buyerCity: buyerCity.trim(),
-      buyerSegment,
-      interestedProducts: interestedProducts.trim(),
-      willingnessToPayExtraMxn: Number(willingnessToPayExtra) || 0,
-      susScore: Number(susScore) || 85,
-      consentForFutureContact,
-      notes: buyerQuote.trim(),
-      createdVia: 'field_interview'
-    };
-
-    setLeads([newLead, ...leads]);
-    setSaveSuccessMsg(`¡Contacto de ${buyerName} guardado con éxito en el directorio!`);
+    setConsentTally(recordContactConsent(browserStorage(), consentForFutureContact));
+    setSaveSuccessMsg(
+      consentForFutureContact
+        ? 'Guardado: aceptó que la contacten.'
+        : 'Guardado: no aceptó que la contacten.'
+    );
     setTimeout(() => setSaveSuccessMsg(null), 4000);
 
     // Limpiar formulario para la siguiente entrevista
-    setBuyerName('');
-    setBuyerPhone('');
     setBuyerQuote('');
-  };
-
-  // Generar Markdown individual para un lead
-  const generateLeadMarkdown = (lead: BuyerLeadRecord) => {
-    return `---
-name: 🛍️ Buyer Research Interview & Usability Evaluation (TecNM)
-title: "[UX-RESEARCH]: Buyer Interview - ${lead.buyerName} (${lead.buyerCity})"
-labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluation"]
----
-
-# 🛍️ Reporte de Entrevista a Comprador y Prueba de Usabilidad UX
-**Proyecto:** Yucu Mixteca Open Hub (\`Open-Hub-Tec/yucu\`)  
-**Institución:** Instituto Tecnológico de Tlaxiaco (TecNM) – Depto. de Sistemas y Computación  
-**Estudiante(s):** ${lead.studentName} (${lead.studentGroup})  
-**Fecha:** ${lead.timestamp}  
-
----
-
-## 👤 Perfil y Teléfono del Comprador (Validación de Dolor y Demanda)
-- **Nombre:** ${lead.buyerName}
-- **WhatsApp / Teléfono de Contacto:** **${lead.buyerPhone}**
-- **Ciudad:** ${lead.buyerCity}
-- **Segmento:** ${lead.buyerSegment}
-- **Productos de Interés:** ${lead.interestedProducts}
-- **Disposición a Pagar Sobreprecio Ético:** +$${lead.willingnessToPayExtraMxn} MXN
-- **Autorización para ser contactado al lanzamiento del proyecto:** ${lead.consentForFutureContact ? '✅ SÍ AUTORIZADO (Guardado para notificación)' : '❌ No autorizado'}
-- **Puntuación SUS Reportada:** ${lead.susScore} / 100
-- **Cita Textual del Comprador:** "${lead.notes || 'Excelente iniciativa de comercio directo sin intermediarios.'}"
-`;
-  };
-
-  // Abrir issue en GitHub para un lead específico
-  const handleOpenGitHubForLead = (lead: BuyerLeadRecord) => {
-    const md = generateLeadMarkdown(lead);
-    const title = `[UX-RESEARCH]: Entrevista Comprador - ${lead.buyerName} (${lead.buyerCity})`;
-    const url = `https://github.com/Open-Hub-Tec/yucu/issues/new?title=${encodeURIComponent(title)}&labels=user-research,usability-testing,buyer-interviews,ux-evaluation&body=${encodeURIComponent(md)}`;
-    window.open(url, '_blank');
-  };
-
-  // Exportar todos los leads a CSV
-  const handleExportCsv = () => {
-    const headers = ['ID', 'Fecha', 'Estudiante', 'Grupo', 'Comprador', 'Telefono_WhatsApp', 'Ciudad', 'Segmento', 'Productos_Interes', 'Sobreprecio_MXN', 'SUS_Score', 'Consentimiento_Contacto', 'Notas'];
-    const rows = leads.map(l => [
-      l.id,
-      `"${l.timestamp}"`,
-      `"${l.studentName || ''}"`,
-      `"${l.studentGroup || ''}"`,
-      `"${l.buyerName}"`,
-      `"${l.buyerPhone}"`,
-      `"${l.buyerCity}"`,
-      `"${l.buyerSegment}"`,
-      `"${l.interestedProducts}"`,
-      l.willingnessToPayExtraMxn || 0,
-      l.susScore || 0,
-      l.consentForFutureContact ? 'SI_AUTORIZADO' : 'NO',
-      `"${(l.notes || '').replace(/"/g, '""')}"`
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `DIRECTORIO_COMPRADORES_TECNM_${new Date().toISOString().substring(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Eliminar lead
-  const handleDeleteLead = (id: string) => {
-    if (confirm('¿Eliminar este registro de comprador del dispositivo?')) {
-      setLeads(leads.filter(l => l.id !== id));
-    }
   };
 
   return (
@@ -530,9 +374,6 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-700/50">
                   TecNM Tlaxiaco · Open Hub Milestone
-                </span>
-                <span className="text-[11px] text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/40 font-bold">
-                  {leads.length} Teléfonos Guardados
                 </span>
               </div>
               <h3 className="text-base sm:text-lg font-black text-white leading-tight mt-0.5">
@@ -593,24 +434,8 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   : 'text-stone-600 hover:text-stone-900 border-transparent hover:bg-stone-200/60'
               }`}
             >
-              <span>📱</span>
-              <span>Modo Campo (Registrar Teléfono)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('leads')}
-              className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-t-xl transition-all cursor-pointer border-t border-x flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === 'leads'
-                  ? 'bg-[#fcfaf6] text-[#032517] border-stone-300 shadow-2xs font-black'
-                  : 'text-stone-600 hover:text-stone-900 border-transparent hover:bg-stone-200/60'
-              }`}
-            >
-              <span>📞</span>
-              <span>Directorio de Compradores</span>
-              <span className="bg-amber-400 text-stone-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
-                {leads.length}
-              </span>
+              <span>📝</span>
+              <span>Modo Campo</span>
             </button>
 
             <button
@@ -681,30 +506,19 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
 
         {/* CONTENT BODY */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 text-sm">
-          {/* TAB 1: MODO CAMPO (REGISTRAR TELÉFONO Y ENTREVISTA EN VIVO) */}
+          {/* TAB 1: MODO CAMPO (RESUMEN DE LA ENTREVISTA, SIN DATOS DE CONTACTO) */}
           {activeTab === 'campo' && (
             <div className="space-y-5">
-              <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-950">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl mt-0.5">💡</div>
-                  <div>
-                    <h4 className="font-black text-sm text-amber-900">
-                      Captura en Campo para Estudiantes del TecNM
-                    </h4>
-                    <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
-                      Al entrevistar a un comprador en Tlaxiaco o en la Mixteca, registra su <strong>teléfono celular / WhatsApp</strong> y su autorización para contactarlo cuando el proyecto esté listo. Esto valida la intención real de compra y genera la lista de espera oficial.
-                    </p>
-                  </div>
+              <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl flex items-start gap-3 text-amber-950">
+                <div className="text-2xl mt-0.5">🔒</div>
+                <div>
+                  <h4 className="font-black text-sm text-amber-900">
+                    Datos de contacto
+                  </h4>
+                  <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
+                    <strong>No se publican aquí.</strong> Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (<code>.investigacion_privada/</code>), nunca en una issue (<code>docs/research/PRIVACIDAD.md</code>, reglas 2 y 5).
+                  </p>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('leads')}
-                  className="shrink-0 bg-amber-400 hover:bg-amber-300 text-stone-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[16px]">contacts</span>
-                  <span>Ver Directorio ({leads.length})</span>
-                </button>
               </div>
 
               {saveSuccessMsg && (
@@ -714,7 +528,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 </div>
               )}
 
-              <form onSubmit={handleSaveFieldLead} className="bg-white p-5 rounded-2xl border border-stone-300 shadow-xs space-y-4">
+              <form onSubmit={handleSaveConsent} className="bg-white p-5 rounded-2xl border border-stone-300 shadow-xs space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Datos del estudiante */}
                   <div>
@@ -744,38 +558,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 </div>
 
                 <div className="border-t border-stone-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* Datos del Comprador */}
-                  <div>
-                    <label className="block text-xs font-black text-stone-900 mb-1">
-                      Nombre o Contacto del Comprador: *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700 outline-none font-bold"
-                      value={buyerName}
-                      onChange={(e) => setBuyerName(e.target.value)}
-                      placeholder="Ej. Rodrigo Vásquez (Barista)"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-black text-emerald-950 mb-1">
-                      📱 Teléfono Celular / WhatsApp: *
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      className="w-full px-3 py-2 text-xs rounded-xl border-2 border-emerald-600 focus:border-emerald-800 focus:ring-1 focus:ring-emerald-800 outline-none font-bold text-emerald-950"
-                      value={buyerPhone}
-                      onChange={(e) => setBuyerPhone(e.target.value)}
-                      placeholder="+52 953 123 4567"
-                    />
-                    <span className="text-[10px] text-stone-500 mt-0.5 block">
-                      Para avisarle cuando los lotes y entregas estén listos
-                    </span>
-                  </div>
-
+                  {/* Datos del comprador: sin nombre ni teléfono (#121) */}
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1">
                       Ciudad / Ubicación de la Prueba:
@@ -788,9 +571,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                       placeholder="Ej. Tlaxiaco / Oaxaca / CDMX"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1">
                       Perfil o Segmento de Comprador:
@@ -891,7 +672,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   </div>
                 </div>
 
-                {/* Consentimiento de Teléfono */}
+                {/* Solo sí/no: el contacto nunca se escribe aquí (#121) */}
                 <div className="bg-emerald-50 border border-emerald-300 p-3.5 rounded-xl">
                   <label className="flex items-start gap-2.5 cursor-pointer select-none">
                     <input
@@ -902,10 +683,10 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     />
                     <div className="text-xs text-emerald-950">
                       <strong className="block font-black text-emerald-900">
-                        ✅ Consentimiento Ético de Contacto al Lanzamiento Oficial:
+                        ¿Aceptó que la contacten?
                       </strong>
                       <span>
-                        El comprador autoriza guardar su número telefónico / WhatsApp para ser contactado en el futuro una vez que el proyecto esté listo y las artesanas reciban pedidos y entregas de producción.
+                        Marca la casilla si dijo que sí. Su contacto se guarda en la carpeta privada del equipo, no en esta app.
                       </span>
                     </div>
                   </label>
@@ -919,7 +700,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   <textarea
                     rows={2}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-emerald-700 outline-none"
-                    placeholder="Ej. 'Me encanta poder hablar directo por WhatsApp con la artesana sin que una aplicación intermediaria le quite el 30% de su trabajo...'"
+                    placeholder="Ej. 'Me encanta poder hablar directo por WhatsApp con la artesana sin que una aplicación intermediaria le quite una parte de su trabajo...'"
                     value={buyerQuote}
                     onChange={(e) => setBuyerQuote(e.target.value)}
                   />
@@ -928,7 +709,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 {/* Botones de acción */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                   <span className="text-[11px] text-stone-500">
-                    Se guarda localmente en el dispositivo de la brigada y se puede exportar a CSV o subir a GitHub.
+                    En el dispositivo solo se guarda si aceptó o no que la contacten. Aceptaron: {consentTally.si} · No aceptaron: {consentTally.no}
                   </span>
 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -937,159 +718,11 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                       className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#032517] hover:bg-emerald-950 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-base">save</span>
-                      <span>Guardar en Directorio</span>
+                      <span>Guardar respuesta</span>
                     </button>
                   </div>
                 </div>
               </form>
-            </div>
-          )}
-
-          {/* TAB 2: DIRECTORIO DE CONTACTOS GUARDADOS */}
-          {activeTab === 'leads' && (
-            <div className="space-y-4">
-              <div className="bg-[#f0eee8] border border-stone-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📞</span>
-                    <h4 className="text-base font-black text-[#032517]">
-                      Directorio de Compradores Validados ({leads.length} Contactos)
-                    </h4>
-                  </div>
-                  <p className="text-xs text-stone-600 mt-1 max-w-2xl">
-                    Registro de prospectos y primeros adoptantes que validaron la plataforma y autorizaron ser contactados vía WhatsApp/teléfono cuando el proyecto esté terminado.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleExportCsv}
-                    className="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                    title="Descargar tabla compatible con Excel o Google Sheets"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">file_download</span>
-                    <span>Exportar CSV</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('campo')}
-                    className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">person_add</span>
-                    <span>Nuevo Registro</span>
-                  </button>
-                </div>
-              </div>
-
-              {leads.length === 0 ? (
-                <div className="p-8 text-center bg-white rounded-2xl border border-stone-200">
-                  <p className="text-stone-500 font-medium">Aún no hay contactos registrados en este dispositivo.</p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('campo')}
-                    className="mt-3 px-4 py-2 bg-[#032517] text-white rounded-xl text-xs font-bold"
-                  >
-                    Capturar primer comprador
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {leads.map((lead) => (
-                    <div
-                      key={lead.id}
-                      className="bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs hover:border-emerald-800/40 transition-all space-y-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-2 border-b border-stone-100 pb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h5 className="font-black text-sm text-[#032517]">{lead.buyerName}</h5>
-                            <span className="text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-full font-mono">
-                              {lead.buyerCity}
-                            </span>
-                          </div>
-                          <span className="text-xs text-stone-500 block mt-0.5 font-medium">
-                            {lead.buyerSegment}
-                          </span>
-                        </div>
-
-                        <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
-                          SUS: {lead.susScore || 85}/100
-                        </span>
-                      </div>
-
-                      <div className="space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-stone-700">
-                          <span className="text-stone-500">Teléfono / WhatsApp:</span>
-                          <strong className="text-emerald-900 font-mono text-sm">{lead.buyerPhone}</strong>
-                        </div>
-
-                        <div className="flex items-center justify-between text-stone-700">
-                          <span className="text-stone-500">Interés:</span>
-                          <span className="font-medium text-stone-900 text-right">{lead.interestedProducts}</span>
-                        </div>
-
-                        {lead.willingnessToPayExtraMxn ? (
-                          <div className="flex items-center justify-between text-stone-700">
-                            <span className="text-stone-500">Sobreprecio Ético:</span>
-                            <span className="font-bold text-amber-700">+${lead.willingnessToPayExtraMxn} MXN</span>
-                          </div>
-                        ) : null}
-
-                        {lead.notes ? (
-                          <p className="text-[11px] text-stone-600 italic bg-stone-50 p-2 rounded-lg border border-stone-150 mt-1">
-                            &ldquo;{lead.notes}&rdquo;
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-stone-100 gap-2 flex-wrap">
-                        <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-bold">
-                          <span className="material-symbols-outlined text-[15px] text-emerald-600">verified</span>
-                          <span>Autorizado al lanzamiento</span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 ml-auto">
-                          {/* Botón WhatsApp directo */}
-                          <a
-                            href={`https://api.whatsapp.com/send?phone=${lead.buyerPhone.replace(/[^0-9]/g, '')}&text=${encodeURIComponent(
-                              `Hola ${lead.buyerName}, te saludamos de la brigada de validación de Yucu (TecNM Tlaxiaco). Respecto a tu interés en: ${lead.interestedProducts}, te guardamos en nuestro directorio de preventa oficial.`
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg bg-[#25D366] text-white hover:bg-[#20ba59] transition-all cursor-pointer"
-                            title="Enviar WhatsApp de confirmación"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">chat</span>
-                          </a>
-
-                          {/* Botón Subir Issue a GitHub */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenGitHubForLead(lead)}
-                            className="px-2.5 py-1.5 rounded-lg bg-stone-900 text-white hover:bg-stone-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all"
-                            title="Crear Issue en GitHub con los datos de esta entrevista"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                            <span>Issue GitHub</span>
-                          </button>
-
-                          {/* Botón Borrar */}
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteLead(lead.id)}
-                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
-                            title="Eliminar registro"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -1100,7 +733,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <div className="flex items-center gap-2.5">
                   <span className="text-xl">💡</span>
                   <div>
-                    <strong>Instrucción para el Alumno:</strong> Copia esta plantilla oficial o abre directamente la nueva issue con la plantilla en GitHub:
+                    <strong>Instrucción para el Alumno:</strong> Copia esta plantilla del proyecto o abre directamente la nueva issue con la plantilla en GitHub:
                     <div className="mt-0.5">
                       <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono font-bold text-xs">
                         github.com/Open-Hub-Tec/yucu/issues/new?template=buyer_interview_and_usability.md
@@ -1158,7 +791,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     Captura del Teléfono para el Lanzamiento
                   </h5>
                   <p className="text-xs text-stone-600 leading-relaxed">
-                    Pregunta: <em>&ldquo;¿Nos autorizas guardar tu número celular para avisarte por WhatsApp en cuanto el proyecto esté listo y se puedan hacer compras oficiales?&rdquo;</em> Si acepta, regístralo en la pestaña &ldquo;Modo Campo&rdquo;.
+                    Pregunta: <em>&ldquo;¿Nos autorizas guardar tu número celular para avisarte por WhatsApp en cuanto el proyecto esté listo y se puedan hacer compras?&rdquo;</em> Si acepta, regístralo en la pestaña &ldquo;Modo Campo&rdquo;.
                   </p>
                 </div>
               </div>
@@ -1218,7 +851,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <div className="flex items-center justify-between border-b border-stone-200 pb-2">
                   <div>
                     <span className="font-black text-[#032517] text-sm sm:text-base block">
-                      Ejemplo de Referencia: Rodrigo V. (Barista en Nuu Savi, Tlaxiaco, 32 años)
+                      Ejemplo de Referencia: Comprador-01 (barista, Tlaxiaco)
                     </span>
                     <span className="text-xs text-stone-500">
                       Evaluado por: Castro Jared &amp; Dulce Maetzy (TecNM Tlaxiaco - ISC)
@@ -1235,10 +868,6 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     Barista y copropietario de cafetería Nuu Savi, Tlaxiaco.
                   </div>
                   <div className="bg-white p-3 rounded-lg border border-stone-200">
-                    <strong className="block text-stone-900 mb-0.5">📱 Teléfono:</strong>
-                    +52 953 145 8921 (Autorizado para aviso de lanzamiento).
-                  </div>
-                  <div className="bg-white p-3 rounded-lg border border-stone-200">
                     <strong className="block text-stone-900 mb-0.5">Velocidad QR (T1):</strong>
                     6 segundos (Cámara nativa Xiaomi Redmi).
                   </div>
@@ -1253,7 +882,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     &ldquo;Me parece brillante que la blockchain no guarde mi INE ni datos invasivos de la artesana. Si ella quiere pausar su ficha, mantiene soberanía. El hecho de que Stellar solo registre la huella digital prueba la autenticidad física sin vulnerar la privacidad. Y tener un botón directo de WhatsApp para pactar la entrega sin intermediarios es el modelo más honesto posible.&rdquo;
                   </p>
                   <p className="font-bold text-emerald-800 text-right">
-                    — Rodrigo V., Nuu Savi Specialty Café, Tlaxiaco, Oaxaca
+                    — Comprador-01, barista, Tlaxiaco, Oaxaca
                   </p>
                 </div>
               </div>
@@ -1270,16 +899,6 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            {activeTab === 'campo' && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('leads')}
-                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white hover:bg-stone-200 text-stone-700 border border-stone-300 transition-all cursor-pointer"
-              >
-                Ver Contactos ({leads.length})
-              </button>
-            )}
-
             <button
               type="button"
               onClick={onClose}

@@ -1,4 +1,3 @@
-import { PROTOCOL_FEES } from '../config/protocolFees';
 import React, { useState } from 'react';
 import { DigitalPassportLot, ScreenView } from '../types';
 
@@ -34,10 +33,9 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
         const retailResalePricePerKg = 420; // Roasted retail price in CDMX
         const coyoteTotal = volume * coyotePricePerKg;
         const yucuTotal = volume * yucuFairPricePerKg;
-        const tequioFund = yucuTotal * (PROTOCOL_FEES.escrowTequioPct / 100); // fondo Tequio
         const addedValueToProducer = yucuTotal - coyoteTotal;
         const gapPercent = Math.round(((retailResalePricePerKg - coyotePricePerKg) / retailResalePricePerKg) * 100);
-        return { unit: 'kg de café pergamino', coyoteTotal, yucuTotal, tequioFund, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerKg, coyotePrice: coyotePricePerKg };
+        return { unit: 'kg de café pergamino', coyoteTotal, yucuTotal, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerKg, coyotePrice: coyotePricePerKg };
       }
       case 'textil': {
         const coyotePricePerPiece = 350; // Coyote pays $350 for backstrap loom
@@ -45,10 +43,9 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
         const retailResalePricePerPiece = 3200; // Boutique CDMX/Oaxaca
         const coyoteTotal = volume * coyotePricePerPiece;
         const yucuTotal = volume * yucuFairPricePerPiece;
-        const tequioFund = yucuTotal * (PROTOCOL_FEES.escrowTequioPct / 100);
         const addedValueToProducer = yucuTotal - coyoteTotal;
         const gapPercent = Math.round(((retailResalePricePerPiece - coyotePricePerPiece) / retailResalePricePerPiece) * 100);
-        return { unit: 'rebozos / huipiles bordados', coyoteTotal, yucuTotal, tequioFund, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerPiece, coyotePrice: coyotePricePerPiece };
+        return { unit: 'rebozos / huipiles bordados', coyoteTotal, yucuTotal, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerPiece, coyotePrice: coyotePricePerPiece };
       }
       case 'miel': {
         const coyotePricePerLiter = 45; // Coyote pays $45 MXN/L
@@ -56,10 +53,9 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
         const retailResalePricePerLiter = 380;
         const coyoteTotal = volume * coyotePricePerLiter;
         const yucuTotal = volume * yucuFairPricePerLiter;
-        const tequioFund = yucuTotal * (PROTOCOL_FEES.escrowTequioPct / 100);
         const addedValueToProducer = yucuTotal - coyoteTotal;
         const gapPercent = Math.round(((retailResalePricePerLiter - coyotePricePerLiter) / retailResalePricePerLiter) * 100);
-        return { unit: 'litros de miel virgen de campanilla', coyoteTotal, yucuTotal, tequioFund, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerLiter, coyotePrice: coyotePricePerLiter };
+        return { unit: 'litros de miel virgen de campanilla', coyoteTotal, yucuTotal, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerLiter, coyotePrice: coyotePricePerLiter };
       }
       case 'palma': {
         const coyotePricePerUnit = 25; // Coyote pays $25 for handmade palm hat
@@ -67,10 +63,9 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
         const retailResalePricePerUnit = 320;
         const coyoteTotal = volume * coyotePricePerUnit;
         const yucuTotal = volume * yucuFairPricePerUnit;
-        const tequioFund = yucuTotal * (PROTOCOL_FEES.escrowTequioPct / 100);
         const addedValueToProducer = yucuTotal - coyoteTotal;
         const gapPercent = Math.round(((retailResalePricePerUnit - coyotePricePerUnit) / retailResalePricePerUnit) * 100);
-        return { unit: 'sombreros / tenates de palma fina', coyoteTotal, yucuTotal, tequioFund, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerUnit, coyotePrice: coyotePricePerUnit };
+        return { unit: 'sombreros / tenates de palma fina', coyoteTotal, yucuTotal, addedValueToProducer, gapPercent, fairPrice: yucuFairPricePerUnit, coyotePrice: coyotePricePerUnit };
       }
     }
   };
@@ -226,7 +221,7 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-[#e5dfd5]">
                 <div>
                   <div className="text-2xl sm:text-3xl font-black text-[#032517]">79</div>
-                  <div className="text-xs text-stone-600 mt-1">Productores reales auditados en campo</div>
+                  <div className="text-xs text-stone-600 mt-1">Productores entrevistados en campo</div>
                 </div>
                 <div>
                   <div className="text-2xl sm:text-3xl font-black text-[#a73918]">1,200%</div>
@@ -397,7 +392,7 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
               <div className="text-xs font-semibold text-stone-500 mb-1">Pilar 3 · Liquidación Condicionada</div>
               <h3 className="text-xl font-bold text-[#032517] mb-3">Escrow Trustless Work</h3>
               <p className="text-sm text-stone-600 leading-relaxed mb-4">
-                En lugar de reinventar contratos de custodia, Yucu adopta la infraestructura auditada de <strong>Trustless Work en Soroban</strong>. El comprador institucional bloquea el pago (USDC). Se libera un <strong>30% de anticipo</strong> al registrar la cosecha y el <strong>70% restante</strong> cuando la bodega comunitaria valida la entrega física.
+                En lugar de reinventar contratos de custodia, Yucu adopta la infraestructura de <strong>Trustless Work en Soroban</strong>. El comprador institucional bloquea el pago (USDC). Se libera un <strong>30% de anticipo</strong> al registrar la cosecha y el <strong>70% restante</strong> cuando la bodega comunitaria valida la entrega física.
               </p>
               <ul className="text-xs text-stone-700 space-y-2 border-t border-stone-200 pt-4">
                 <li className="flex items-center gap-1.5">
@@ -410,7 +405,7 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
                 </li>
                 <li className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px] text-emerald-700">check_circle</span>
-                  <span>0% costo y cero comisiones al productor</span>
+                  <span>sin costo y sin comisiones para el productor</span>
                 </li>
               </ul>
             </div>
@@ -531,7 +526,7 @@ export const RaizLandingPage: React.FC<RaizLandingPageProps> = ({
                   +${metrics.addedValueToProducer.toLocaleString('es-MX')} MXN
                 </div>
                 <p className="text-xs text-stone-300">
-                  Brecha de explotación superada: <strong>{metrics.gapPercent}%</strong>. Fondo de Tequio comunitario: <strong>${metrics.tequioFund.toLocaleString('es-MX')} MXN</strong>.
+                  Brecha de explotación superada: <strong>{metrics.gapPercent}%</strong>. El pago va directo a la artesana, sin descuentos.
                 </p>
               </div>
             </div>

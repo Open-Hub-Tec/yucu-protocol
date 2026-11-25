@@ -1,0 +1,35 @@
+{
+  "schema": "entrega",
+  "version": 1,
+  "fields": {
+    "estado_entrega": {
+      "type": "enum",
+      "values": [
+        "preparada",
+        "enviada",
+        "recibida"
+      ],
+      "privacy": "public"
+    },
+    "fecha_entrega": {
+      "type": "string",
+      "format": "date",
+      "privacy": "public"
+    },
+    "referencia_envio": {
+      "type": "string",
+      "privacy": "hash-only"
+    }
+  },
+  "voice": {
+    "ask": {
+      "es": "¿Cuál es el estado y la fecha de la entrega?"
+    },
+    "confirm": {
+      "es": "La entrega está {estado_entrega} con fecha {fecha_entrega}. ¿Lo confirma?"
+    }
+  },
+  "signer": "buyer-or-group",
+  "cosigner": null,
+  "rules": "Delivery must reference the related sale or escrow via ref_uid"
+}

@@ -1,6 +1,7 @@
 import React, { StrictMode, Component, ReactNode, ErrorInfo } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { browserStorage, purgeLegacyBuyerLeads } from './core/privacy/legacyBuyerLeads';
 import './index.css';
 
 interface ErrorBoundaryProps {
@@ -56,6 +57,9 @@ class RootErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundar
     return this.props.children;
   }
 }
+
+// #121: borra los nombres y teléfonos de compradores que guardaban versiones anteriores.
+purgeLegacyBuyerLeads(browserStorage());
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

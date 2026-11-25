@@ -5,6 +5,7 @@
  * the Yucu RWA Infrastructure & AI Oracles on Stellar with 3 lines of code.
  */
 
+import { PROTOCOL_FEES } from '../../config/protocolFees';
 import { RaizAIOracles, VoiceParsingResult, QualityAttestation, EUDRComplianceReport, SettlementRouteSolution } from '../ai/RaizAIOracles';
 import { RaizAuthEngine, UserProfile } from '../auth/RaizAuthEngine';
 import { HybridSettlementOrchestrator, SupportedCountry } from '../settlement/HybridSettlementOrchestrator';
@@ -12,7 +13,7 @@ import { SorobanAdapter } from '../blockchain/SorobanAdapter';
 import { CryptoEngine } from '../crypto/CryptoEngine';
 
 export interface RaizProtocolConfig {
-  network: 'stellar-mainnet' | 'stellar-testnet';
+  network: 'stellar-testnet';
   appId?: string;
   sponsorGas?: boolean;
 }
@@ -34,7 +35,7 @@ export class RaizProtocolSDK {
 
   constructor(config?: Partial<RaizProtocolConfig>) {
     this.config = {
-      network: config?.network || 'stellar-mainnet',
+      network: config?.network || 'stellar-testnet',
       appId: config?.appId || 'open-hub-tecnm-yucu-v1',
       sponsorGas: config?.sponsorGas ?? true,
     };
@@ -46,7 +47,7 @@ export class RaizProtocolSDK {
    */
   public get ai() {
     return {
-      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): VoiceParsingResult => {
+      processVoiceLot: (transcriptOrVoice: string, language?: 'tuun_savi' | 'spanish'): Promise<VoiceParsingResult> => {
         return RaizAIOracles.parseAcousticVoiceInput(transcriptOrVoice, language);
       },
 
@@ -54,11 +55,11 @@ export class RaizProtocolSDK {
         productType: 'coffee' | 'textile' | 'honey' | 'chocolate' | 'artesania';
         imageUrlOrBase64?: string;
         sampleMetrics?: { moistureInput?: number; defectRatio?: number; isHandWoven?: boolean };
-      }): QualityAttestation => {
+      }): Promise<QualityAttestation> => {
         return RaizAIOracles.evaluateLotQuality(params);
       },
 
-      verifyEUDR: (community: string, lat?: number, lng?: number): EUDRComplianceReport => {
+      verifyEUDR: (community: string, lat?: number, lng?: number): Promise<EUDRComplianceReport> => {
         return RaizAIOracles.verifyEUDRCompliance({ community, latitude: lat, longitude: lng });
       },
 
@@ -126,7 +127,7 @@ export class RaizProtocolSDK {
         {
           uid: '0x03_ORIG',
           name: 'IndigenousProvenanceAttestation',
-          description: 'Ancestral cultural heritage provenance, natural dyes, and 10% perpetual artisan resale royalties',
+          description: `Ancestral cultural heritage provenance, natural dyes, and ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% perpetual artisan resale royalties`,
           revocable: false,
           issuer: 'AIVoiceOracle + Municipal Agrarian Assembly',
         },
@@ -147,7 +148,7 @@ export class RaizProtocolSDK {
         {
           uid: '0x06_INDIP',
           name: 'IndigenousCollectiveIPAttestation',
-          description: 'Ancestral cultural heritage defense under 2022 Federal Law, WeaveGrammarDigest, anti-biopiracy shield, and perpetual 10%+2% royalty',
+          description: `Ancestral cultural heritage defense under 2022 Federal Law, WeaveGrammarDigest, anti-biopiracy shield, and perpetual ${PROTOCOL_FEES.artisanResaleRoyaltyPct}%+${PROTOCOL_FEES.resaleTequioPct}% royalty`,
           revocable: false,
           issuer: 'IndigenousIPGuardianAgent + Communal Assembly',
         },
@@ -188,7 +189,7 @@ export class RaizProtocolSDK {
         return CryptoEngine.computeCommunityDigest(params);
       },
       sha256: (input: string) => {
-        return CryptoEngine.sha256Hex(input);
+        return CryptoEngine.sha256(input);
       },
     };
   }

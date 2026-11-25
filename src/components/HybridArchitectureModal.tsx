@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DemoBadge } from './DemoBadge';
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import {
   COUNTRY_CONFIGS,
   HybridPaymentIntent,
@@ -150,7 +151,7 @@ export const HybridArchitectureModal: React.FC<HybridArchitectureModalProps> = (
           </div>
 
           <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-            0% Comisión Campesina
+            Sin comisión campesina
           </span>
         </div>
 
@@ -252,7 +253,7 @@ export const HybridArchitectureModal: React.FC<HybridArchitectureModalProps> = (
                   </div>
                   <div className="bg-white/10 p-2.5 rounded-xl border border-white/10">
                     <span className="text-[18px]">👑</span>
-                    <span className="text-[11px] font-bold block text-white mt-1">10% Regalía Perpetua</span>
+                    <span className="text-[11px] font-bold block text-white mt-1">{`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% Regalía Perpetua`}</span>
                     <span className="text-[9.5px] text-emerald-200 block">Artesanas en Reventas</span>
                   </div>
                 </div>
@@ -381,7 +382,7 @@ export const HybridArchitectureModal: React.FC<HybridArchitectureModalProps> = (
                       <span className="text-[16px] font-black text-emerald-900">
                         {COUNTRY_CONFIGS[simTargetCountry].currencySymbol} {simResult.amountLocal.toLocaleString()} {simResult.currencyCode}
                       </span>
-                      <span className="text-[9.5px] text-emerald-700 block font-semibold">Comisión cobrada: $0.00 (0%)</span>
+                      <span className="text-[9.5px] text-emerald-700 block font-semibold">Cobro al productor: ninguno en el prototipo</span>
                     </div>
 
                     <div className="bg-white p-2 rounded-xl border border-emerald-200">

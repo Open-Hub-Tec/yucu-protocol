@@ -1,0 +1,35 @@
+{
+  "schema": "colaboracion",
+  "version": 1,
+  "fields": {
+    "tipo_colaboracion": {
+      "type": "enum",
+      "values": [
+        "diseno",
+        "comercializacion",
+        "exhibicion"
+      ],
+      "privacy": "public"
+    },
+    "referencia_acuerdo": {
+      "type": "string",
+      "privacy": "hash-only"
+    },
+    "consentimiento_ref_uid": {
+      "type": "string",
+      "format": "hex-32",
+      "privacy": "public"
+    }
+  },
+  "voice": {
+    "ask": {
+      "es": "¿Qué tipo de colaboración se propone y qué consentimiento la respalda?"
+    },
+    "confirm": {
+      "es": "La colaboración es {tipo_colaboracion}. ¿Está confirmado su consentimiento previo?"
+    }
+  },
+  "signer": "brand",
+  "cosigner": null,
+  "rules": "Requires a currently valid artisan consent referenced by ref_uid"
+}

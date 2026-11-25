@@ -559,7 +559,7 @@ const C_CARD_BORDER = 'E5E7EB';// Card Border
       activity: 'Wild Campanilla Honey (Flor de la Mixteca Union)',
       pain: 'Written on loose sheets and old paper notebooks. 3 days needed to transcribe member lists.',
       market: 'Lost harvest records; honey batches committed twice to buyers due to lack of real-time inventory.',
-      quote: 'President Rogelio Martínez: “Sometimes honey is offered, and later we find it was already sold.”',
+      quote: 'el presidente de la Unión: “Sometimes honey is offered, and later we find it was already sold.”',
       tagColor: 'DCFCE7',
       tagText: '166534'
     },
@@ -1727,7 +1727,7 @@ const C_CARD_BORDER = 'E5E7EB';// Card Border
         { role: 'Rust / Soroban & Escrow:', name: 'Trustless Work Escrow Adapter & LotPassport' },
         { role: 'Frontend & Offline PWA:', name: 'React 19, IndexedDB Outbox & 112px Elder Mode' },
         { role: 'Autonomous AI Oracles:', name: 'Tu’un Savi Voice STT, SCAA Quality & EUDR Geofence' },
-        { role: 'Governance & Drips Splits:', name: 'Open Hub TecNM – 100% MIT Open Source Public Good' }
+        { role: 'Governance:', name: 'Open Hub TecNM – 100% MIT Open Source Public Good' }
       ]
     }
   ];

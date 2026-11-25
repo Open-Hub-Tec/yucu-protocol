@@ -1,5 +1,5 @@
 /**
- * Suite de Pruebas: Cliente Oficial @stellar/stellar-sdk & Soroban Live Client
+ * Suite de Pruebas: Cliente @stellar/stellar-sdk & Soroban Live Client
  * Valida la conectividad con Stellar, derivación Ed25519, ScVal y Fee-Bump
  */
 
@@ -7,7 +7,7 @@ import { StellarLiveClient, STELLAR_TESTNET_CONFIG } from '../core/blockchain/St
 import { Keypair } from '@stellar/stellar-sdk';
 
 console.log('================================================================');
-console.log('   PRUEBAS: CLIENTE OFICIAL STELLAR & SOROBAN (@stellar/stellar-sdk) ');
+console.log('   PRUEBAS: CLIENTE STELLAR & SOROBAN (@stellar/stellar-sdk) ');
 console.log('================================================================');
 
 const client = new StellarLiveClient(STELLAR_TESTNET_CONFIG);

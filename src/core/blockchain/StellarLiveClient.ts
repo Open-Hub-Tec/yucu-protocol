@@ -1,12 +1,12 @@
 /**
- * Yucu Core - Cliente Oficial de Stellar & Soroban RPC (@stellar/stellar-sdk)
+ * Yucu Core - Cliente de Stellar & Soroban RPC (@stellar/stellar-sdk)
  * 
  * Implementa conectividad directa con Horizon y Soroban RPC:
  * - Generación de llaves Ed25519 con derivación determinista rural
  * - Construcción y serialización XDR de transacciones
  * - Envoltura Fee-Bump (CAP-0015) para transacciones 100% patrocinadas
  * - Conversión de tipos nativos a ScVal de Soroban
- * - Simulación de contratos en Soroban Testnet y Mainnet
+ * - Contratos en Soroban testnet (la red pública requiere una nueva ADR)
  */
 
 import crypto from 'crypto';
@@ -25,7 +25,7 @@ import {
 } from '@stellar/stellar-sdk';
 
 export interface StellarNetworkConfig {
-  network: 'testnet' | 'mainnet';
+  network: 'testnet';
   horizonUrl: string;
   rpcUrl: string;
   networkPassphrase: string;
@@ -38,13 +38,6 @@ export const STELLAR_TESTNET_CONFIG: StellarNetworkConfig = {
   rpcUrl: 'https://soroban-testnet.stellar.org',
   networkPassphrase: Networks.TESTNET,
   feeSponsorPublicKey: 'GRELAYER_TECNM_FEE_BUMP_SPONSOR_MASTER_TREASURY_0001',
-};
-
-export const STELLAR_MAINNET_CONFIG: StellarNetworkConfig = {
-  network: 'mainnet',
-  horizonUrl: 'https://horizon.stellar.org',
-  rpcUrl: 'https://mainnet.sorobanrpc.com',
-  networkPassphrase: Networks.PUBLIC,
 };
 
 export class StellarLiveClient {

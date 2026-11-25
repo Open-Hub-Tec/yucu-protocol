@@ -219,3 +219,12 @@ Revisado en el contrato oficial de EAS (`EAS.sol`) el 28 de octubre de 2026. Sol
 * [Soroban Security Audit Bank](https://stellar.org/grants-and-funding/soroban-audit-bank).
 * [Stellar Attestation Service en el SCF](https://communityfund.stellar.org/project/stellar-attestation-service-lda).
 * EAS, [`EAS.sol`](https://github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/EAS.sol) y [sitio oficial](https://attest.org/).
+
+
+**English summary.**
+
+**Context:** Yucu needs a way for external organizations to issue attestations and for buyers, stores, contracts, and AI agents to verify them without requiring an account or wallet. The previous custom registry had important limitations. It allowed only one issuer per schema, stored free text on-chain, and did not verify its signature field. Attest Protocol already provides a shared attestation registry on Stellar. Its maintainers accepted several proposed improvements for v3.
+
+**Decision:** Yucu will use Attest Protocol as its attestation foundation instead of building a separate registry (D10). The architecture has four layers (D1): Attest Protocol, an open Yucu index with lists and counters (D2), independent rules for each schema (D5), and the application layer through `AttestationPort` (D9). Attestation data follows a fixed format with salted hashes and optional references to previous attestations (D3). Until v3 is available, development will use v2 on testnet and a simulated version of `AttestationPort`.
+
+**Consequences:** Yucu will not develop or deploy its own attestation registry or build a separate indexer. Development will focus on the Yucu index, schema rules, the adapter, and verification tools. The SDK must renew important storage entries with `ExtendFootprintTTL` while v2 remains in use (D7). The payment of storage rent remains an open question. Mainnet deployment also requires verification of the deployed build and an external audit of Yucu's index and rules contracts.
