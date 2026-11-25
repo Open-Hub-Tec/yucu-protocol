@@ -168,6 +168,7 @@ El costo de la calidad sigue las categorías del Plan de Calidad del Sprint 2: *
 |---|---|---|
 | Solicitar formalmente en GitHub la asignación de #120 al Product Owner aclarando la discrepancia con #199 | 2026-11-21 | @IsaiasBrayanLopez |
 | Coordinar con el equipo asignado la revisión cruzada de esta propuesta en el PR #340 y atender observaciones | 2026-11-22 | @IsaiasBrayanLopez |
+| Atender observaciones finales de revisión cruzada y dar seguimiento a la fusión de la propuesta | 2026-11-25 | @IsaiasBrayanLopez |
 | Terminar E3: limpieza de GPS y metadatos en la foto antes de la huella | 2026-11-26 | @Jazlynn22 |
 | Informe de avance a la organización (plan de #213) | 2026-11-27 | @Jazlynn22 |
 | Demostración en la Feria de Integración | 2026-12-01 | Todo el equipo |
