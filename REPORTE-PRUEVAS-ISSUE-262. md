@@ -1,0 +1,41 @@
+* **Target Application / Demo URL:** `https://yucu-protocol.vercel.app`
+* **Referenced Repository and Issue:** `Open-Hub-Tec/yucu-protocol#262`
+* **Test Focus:** Real-device usability, layout stability, responsiveness, and behavior under varying network conditions for the target user base (older adults / users with limited digital experience).
+* **Testing Environment:** Mobile device testing covering initial entry, text scaling behavior, and minor network quality drops (`[Insert device model/OS and network conditions tested, e.g., mobile data / slow Wi-Fi]`).
+A usability evaluation of the Vercel demo (`https://yucu-protocol.vercel.app`) was conducted on a real mobile device in connection with **Issue #262**.
+
+Given that the target users of Yucu include older adults with limited digital experience, unintended text enlargement and freezes or crashes during minor network fluctuations represent high-priority usability and reliability concerns that should be addressed before a wider rollout.
+
+
+* **Description of Behavior:** Upon entering the application, displayed text appears enlarged. Additionally, when the network connection drops slightly, the text enlarges again.
+* **Technical and UX Implications:** Uncontrolled or unexpected text enlargement alters screen layout proportions and visual hierarchy on mobile viewports, potentially shifting controls, increasing vertical scrolling, or affecting comfortable reading without manual adjustment.
+* **Severity Assessment:** Moderate to High (directly impacts visual readability and layout consistency on mobile devices).
+
+
+* **Description of Behavior:** When network quality decreases slightly, the application tends to freeze or crash.
+* **Technical and UX Implications:** Freezes or sudden crashes during minor network degradation interrupt active user workflows and erode trust in the application's stability, particularly when users rely on mobile data or slower/unstable connections.
+* **Severity Assessment:** High (interrupts core usability and continuity on real mobile networks).
+
+### 2.3 Remaining Application Behavior
+* **Description of Behavior:** Aside from text enlargement upon entry and when network quality drops slightly, as well as the application freezing or crashing under minor network drops, the rest of the tested interface and functionality worked properly.
+* **Assessment:** The baseline experience outside these specific scaling and network-drop behaviors performed satisfactorily during testing.
+
+
+
+## 3. Test Area Matrix (Issue #262 Criteria)
+
+| Evaluation Area | Issue #262 Focus | Observed Status | Notes |
+
+| **Initial Load & Network Drops** | Loading time on mobile data / slow Wi-Fi | Partial / Needs Attention | Text enlarges and app freezes or crashes when network drops slightly (`[Add load time notes if applicable]`). |
+| **Text & Layout Proportions** | Readability without zoom; no clipped or overlapping text | Needs Attention | Text appears enlarged upon entry and when network quality drops slightly (`[Add clipping/overlap notes if any]`). |
+| **Touch Targets & Controls** | Buttons easy to tap with thumb; adequate size and spacing | Satisfactory / Baseline OK | Rest of tested functionality worked properly (`[Add specific button notes if applicable]`). |
+| **Chat & AI Responsiveness** | Voice or text chat; AI response or server/mock behavior | Satisfactory / Baseline OK | Rest of tested functionality worked properly (`[Add specific chat/AI notes if applicable]`). |
+| **Airplane Mode After Load** | Application state and message shown after enabling airplane mode | Pending Verification | `[Describe what the app showed after enabling airplane mode]`. |
+
+
+
+## 4. Recommendations for Maintainers and Developers
+
+1. **Audit Mobile Typography and Viewport Scaling:** Review CSS viewport meta tags, root `font-size`, and responsive scaling rules to ensure text renders at consistent, intentional sizes upon initial load and does not unexpectedly enlarge when network conditions shift.
+2. **Harden Network Error and Degraded-Connection Handling:** Inspect how the application handles minor drops in connectivity or slow/interrupted network requests (e.g., adding timeouts, fallback states, or error boundaries) so transient network dips do not trigger UI freezes or crashes.
+3. **Preserve Clear Visual Hierarchy for Target Users:** Ensure any upcoming fixes maintain clear, legible typography and predictable layout behavior tailored to users with limited digital experience.
