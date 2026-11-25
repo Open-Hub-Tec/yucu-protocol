@@ -1,5 +1,10 @@
 # ADR-004: La artesana cobra en pesos con una cuenta invisible
 
+> **English summary.**
+> **Context:** Artisans in the Mixteca region price and collect their sales in Mexican pesos (mostly cash), often share an Android phone with family members or have no smartphone at all, and belong to community groups that are not legally incorporated. To remain strictly non-custodial from end to end, neither Yucu nor the informal group can hold keys or receive funds on behalf of an artisan.
+> **Decision:** Every artisan owns her own Stellar account, but it stays invisible: the UI only shows pesos and never exposes crypto terms (`D1`). In Phase 1, domestic buyers pay directly in pesos via SPEI or cash while Stellar records only the `lot_passport` (`D2`), co-signed by the artisan and the certifier (`D3`) with minimal on-chain metadata (`D5`) and client-built transaction summaries (`D6`). Her key is stored encrypted with a 4-digit PIN on her phone or a 6-digit PIN on a QR card that is wiped from the helper phone after signing (`D4`). In Phase 2 (testnet), international buyers pay in USDC from their own wallet (`D7`) into a multi-release Trustless Work escrow where the artisan is the recipient and release signer (`D8`). Cash-outs to pesos via MicoPay (cash QR in local shops) or Etherfuse (optional SPEI with offline pre-checks for CURP, RFC, CLABE, and INE) run behind `PayoutPort` (`D9`). Community groups never touch sales money (`D10`), and platform fees or B2B services are charged on top so the artisan always receives her full price (`D11`).
+> **Consequences:** Artisans keep full custody, authorship proof, and peso-only UX, at the cost of managing a PIN and recovery/QR card and resolving legal, tax, and ramp questions before mainnet.
+
 * **Estado:** Fase 1 aceptada · Fase 2 aceptada solo en testnet (mainnet requiere resolver la sección 5)
 * **Fecha:** 26 de octubre de 2026
 * **Decide:** Mantenedores de Yucu Protocol (Open Hub TecNM, Tlaxiaco), después de una validación de arquitectura con revisión de código, contratos, integraciones, amenazas, privacidad y experiencia de uso

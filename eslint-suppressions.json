@@ -16,7 +16,7 @@
   },
   "src/components/ChatScreen.tsx": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 6
+      "count": 5
     }
   },
   "src/components/ExplainerVideoModal.tsx": {
@@ -60,11 +60,6 @@
   "src/core/blockchain/StellarLiveClient.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 4
-    }
-  },
-  "src/core/crypto/CryptoEngine.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
     }
   },
   "src/core/hooks/useYucuProtocol.ts": {

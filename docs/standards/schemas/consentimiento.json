@@ -1,0 +1,35 @@
+{
+  "schema": "consentimiento",
+  "version": 1,
+  "fields": {
+    "finalidad": {
+      "type": "enum",
+      "values": [
+        "catalogo",
+        "colaboracion",
+        "exhibicion"
+      ],
+      "privacy": "public"
+    },
+    "referencia_objeto": {
+      "type": "string",
+      "privacy": "hash-only"
+    },
+    "vigencia_hasta": {
+      "type": "string",
+      "format": "date",
+      "privacy": "public"
+    }
+  },
+  "voice": {
+    "ask": {
+      "es": "¿Para qué uso da su consentimiento y hasta qué fecha?"
+    },
+    "confirm": {
+      "es": "Da consentimiento para {finalidad} hasta {vigencia_hasta}. ¿Lo confirma?"
+    }
+  },
+  "signer": "artisan",
+  "cosigner": null,
+  "rules": "The affected artisan issues and may revoke their own consent"
+}

@@ -24,6 +24,7 @@ export interface VoiceParsingResult {
   };
   canonicalJson: string;
   payloadDigest: string;
+  source?: 'simulated';
 }
 
 export interface QualityAttestation {
@@ -43,6 +44,7 @@ export interface QualityAttestation {
   aiModelSignature: string;
   attestationHash: string;
   exportReady: boolean;
+  source?: 'simulated';
 }
 
 export interface EUDRComplianceReport {
@@ -63,6 +65,7 @@ export interface EUDRComplianceReport {
     eudrComplianceCertified: boolean;
   };
   certificationDigest: string;
+  source?: 'simulated';
 }
 
 export interface SettlementRouteSolution {
@@ -87,10 +90,10 @@ export class RaizAIOracles {
   /**
    * 1. AIVoiceOracle - Natural Voice & Dialect Normalization to Stellar Soroban Payload
    */
-  public static parseAcousticVoiceInput(
+  public static async parseAcousticVoiceInput(
     transcriptOrVoice: string,
     forcedLanguage?: 'tuun_savi' | 'spanish'
-  ): VoiceParsingResult {
+  ): Promise<VoiceParsingResult> {
     const text = transcriptOrVoice.trim().toLowerCase();
     let detectedLanguage: 'tuun_savi' | 'spanish' | 'zapotec' = forcedLanguage || 'spanish';
 
@@ -154,7 +157,7 @@ export class RaizAIOracles {
     };
 
     const canonicalJson = JSON.stringify(extractedFields, Object.keys(extractedFields).sort());
-    const payloadDigest = CryptoEngine.sha256Hex(canonicalJson);
+    const payloadDigest = await CryptoEngine.sha256(canonicalJson);
 
     return {
       rawTranscript: transcriptOrVoice,
@@ -163,13 +166,14 @@ export class RaizAIOracles {
       extractedFields,
       canonicalJson,
       payloadDigest,
+      source: 'simulated',
     };
   }
 
   /**
    * 2. AIQualityOracle - Computer Vision Defect and Authenticity Attestation
    */
-  public static evaluateLotQuality(params: {
+  public static async evaluateLotQuality(params: {
     productType: 'coffee' | 'textile' | 'honey' | 'chocolate' | 'artesania';
     imageUrlOrBase64?: string;
     sampleMetrics?: {
@@ -177,7 +181,7 @@ export class RaizAIOracles {
       defectRatio?: number;
       isHandWoven?: boolean;
     };
-  }): QualityAttestation {
+  }): Promise<QualityAttestation> {
     const isTextile = params.productType === 'textile';
     const analysisTimestamp = Date.now();
 
@@ -190,7 +194,7 @@ export class RaizAIOracles {
       };
 
       const rawAttestation = `AI_QUALITY_TEXTILE:${overallScore}:${JSON.stringify(metrics)}:${analysisTimestamp}`;
-      const attestationHash = CryptoEngine.sha256Hex(rawAttestation);
+      const attestationHash = await CryptoEngine.sha256(rawAttestation);
 
       return {
         oracleVersion: 'v2.4-soroban-cv-textile',
@@ -202,6 +206,7 @@ export class RaizAIOracles {
         aiModelSignature: `ED25519_SIG_AI_QUALITY_${attestationHash.slice(0, 16)}`,
         attestationHash,
         exportReady: true,
+        source: 'simulated',
       };
     }
 
@@ -217,7 +222,7 @@ export class RaizAIOracles {
     };
 
     const rawAttestation = `AI_QUALITY_COFFEE:${overallScore}:${JSON.stringify(metrics)}:${analysisTimestamp}`;
-    const attestationHash = CryptoEngine.sha256Hex(rawAttestation);
+    const attestationHash = await CryptoEngine.sha256(rawAttestation);
 
     return {
       oracleVersion: 'v3.1-scaa-cv-classifier',
@@ -229,25 +234,26 @@ export class RaizAIOracles {
       aiModelSignature: `ED25519_SIG_AI_QUALITY_${attestationHash.slice(0, 16)}`,
       attestationHash,
       exportReady: true,
+      source: 'simulated',
     };
   }
 
   /**
    * 3. AIEUDRSatelliteOracle - European Union Deforestation Regulation Verification
    */
-  public static verifyEUDRCompliance(params: {
+  public static async verifyEUDRCompliance(params: {
     community: string;
     latitude?: number;
     longitude?: number;
     harvestYear?: number;
-  }): EUDRComplianceReport {
+  }): Promise<EUDRComplianceReport> {
     const lat = params.latitude || 17.268;
     const lng = params.longitude || -97.681;
     const altitude = 1850;
     const verifiedAt = Date.now();
 
     const reportContent = `EUDR_GEOPROOF:${params.community}:${lat}:${lng}:${altitude}:NO_DEFORESTATION_SINCE_2020`;
-    const certificationDigest = CryptoEngine.sha256Hex(reportContent);
+    const certificationDigest = await CryptoEngine.sha256(reportContent);
 
     return {
       complianceId: `EUDR-MX-OAX-${certificationDigest.slice(0, 8).toUpperCase()}`,
@@ -267,6 +273,7 @@ export class RaizAIOracles {
         eudrComplianceCertified: true,
       },
       certificationDigest,
+      source: 'simulated',
     };
   }
 

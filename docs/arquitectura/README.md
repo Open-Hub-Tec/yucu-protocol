@@ -91,3 +91,14 @@ yucu-protocol/
 ```
 
 **Cuándo revisar esta decisión:** cuando se publique el primer paquete en npm, cuando haya más de un servidor, o cuando el CI tarde tanto que convenga correr solo lo que cambió. Si el índice o el motor necesitan su propio repositorio para que otros los adopten (ADR-005, pregunta 6; ADR-007, pregunta 4), se separa con `git subtree split`, que conserva el historial y los commits de los estudiantes.
+## English summary
+
+This document describes the v2 architecture of Yucu Protocol, accepted on October 29, 2026, together with ADR-005, ADR-006, and ADR-007. It is intended for contributors and students who need to understand how the system is organized before writing code.
+
+The architecture has six layers: people, apps, ports, prepare-and-sign, Stellar, and off-chain payments. Apps only talk to ports (`src/core/chain/ports.ts`), and the server never receives private keys or money.
+
+On Stellar: escrow through Trustless Work, lot passports, and attestation records stored on-chain. Off-chain: fiat payments in pesos directly to the artisan, the attestation index, Yucu's rules, and the voice/text attestation engine.
+
+An open assumption is whether the public verifier and issuer console are separate apps from the artisan's PWA, or a single PWA with roles. Currently they share `src/core/` as Vite entries (`verificar.html`, `consola.html`, `impacto.html`) in one monorepo (`yucu-protocol`).
+
+New pieces include `AttestationPort`, a public verifier, an issuer console, and Yucu's index and rules built on top of Attest Protocol (audited, external). Attestations use Attest Protocol as a base, not a custom registry. The system follows a "prepare on server, sign on phone, send via port" pattern, with no custodial keys.

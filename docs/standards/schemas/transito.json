@@ -1,0 +1,39 @@
+{
+  "schema": "transito",
+  "version": 1,
+  "fields": {
+    "tipo_medicion": {
+      "type": "enum",
+      "values": [
+        "peso",
+        "humedad"
+      ],
+      "privacy": "public"
+    },
+    "rango_medicion": {
+      "type": "string",
+      "privacy": "public"
+    },
+    "evidencia_merkle": {
+      "type": "string",
+      "format": "hex-32",
+      "privacy": "hash-only"
+    },
+    "municipio_codigo": {
+      "type": "string",
+      "source": "catalogo-municipios",
+      "privacy": "public"
+    }
+  },
+  "voice": {
+    "ask": {
+      "es": "¿Qué medición se registró y en qué rango?"
+    },
+    "confirm": {
+      "es": "Registró {tipo_medicion} en el rango {rango_medicion}. ¿Lo confirma?"
+    }
+  },
+  "signer": "group-or-promoter",
+  "cosigner": null,
+  "rules": "Only configured transit issuers may submit a measurement"
+}

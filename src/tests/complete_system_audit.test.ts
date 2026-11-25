@@ -1,3 +1,4 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 /**
  * SUITE INTEGRAL DE PRUEBAS DE PUNTA A PUNTA (E2E)
@@ -6,6 +7,7 @@ import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 
 import { INITIAL_VERIFIED_LOTS } from '../data/mockData';
 import { CryptoEngine } from '../core/crypto/CryptoEngine';
+import { RegisterLotRequest } from '../core/chain/ports';
 import { generateQrSvg, generateQrDataUri } from '../utils/qrCode';
 import { getProductProfile, sanitizeProductName } from '../utils/productUtils';
 import { ProcessStage, DynamicSpec, DigitalPassportLot } from '../types';
@@ -109,31 +111,30 @@ async function runCompleteSystemAudit() {
 
   const audioPruebaBase64 = 'UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
   const fotoPruebaBase64 = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/';
-  const resumenEtapas = listaActualizada.map((e) => `${e.name}:${e.metricValue}`).join('>');
+  const photoHash = await CryptoEngine.hashPhoto(fotoPruebaBase64);
 
-  const digestStellar = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila',
-    timestamp: 1727008800000,
-    audioBase64: audioPruebaBase64,
-    photoBase64: fotoPruebaBase64,
-    processStagesSummary: resumenEtapas
-  });
+  const lotRequest: RegisterLotRequest = {
+    code: 'MX-2024-CUQ-001',
+    producerAddress: 'GDOÑA8JUANA9BAUTISTA7MIXTECACOMMUNITYACCOUNT001',
+    location: 'Heroica Ciudad de Tlaxiaco',
+    category: 'textile',
+    variety: 'Telar de cintura con grana cochinilla',
+    volumeRange: 1,
+    photoHashHex: photoHash,
+  };
 
-  check(digestStellar.length === 64, `Community Digest SHA-256 válido generado para Stellar: ${digestStellar.substring(0, 16)}...`);
+  const digestStellar = await CryptoEngine.generateLotDigest(lotRequest);
 
-  // Prueba matemática antifraude: Modificar 1 letra en el proceso invalida el hash
-  const resumenAlterado = resumenEtapas.replace('Lana criolla', 'Fibra sintética comercial');
-  const digestAlterado = await CryptoEngine.generateCommunityDigest({
-    producerName: 'Doña Juana Bautista',
-    community: 'Santa María Cuquila',
-    timestamp: 1727008800000,
-    audioBase64: audioPruebaBase64,
-    photoBase64: fotoPruebaBase64,
-    processStagesSummary: resumenAlterado
-  });
+  check(digestStellar.length === 64, `Lot Digest SHA-256 canónico válido generado para Stellar: ${digestStellar.substring(0, 16)}...`);
 
-  check(digestStellar !== digestAlterado, 'Detección matemática de fraude: El cambio de 1 palabra invalida el sello en Stellar');
+  // Prueba matemática antifraude: Modificar 1 campo en el lote invalida el hash
+  const lotAlterado: RegisterLotRequest = {
+    ...lotRequest,
+    variety: 'Fibra sintética comercial',
+  };
+  const digestAlterado = await CryptoEngine.generateLotDigest(lotAlterado);
+
+  check(digestStellar !== digestAlterado, 'Detección matemática de fraude: El cambio de 1 campo invalida el sello en Stellar');
 
   // -------------------------------------------------------------------------
   // MÓDULO 4: REGLAS ECONÓMICAS Y SMART CONTRACTS (FAIRESCROW SOROBAN)
@@ -142,13 +143,13 @@ async function runCompleteSystemAudit() {
 
   // Simulación de reventa en una boutique o cafetería de especialidad en EE.UU. o Europa
   const montoVentaMxn = 12000; // $12,000 MXN por un huipil ceremonial
-  const reparto = FairTradeEngine.calculateSecondaryRoyalty(montoVentaMxn); // porcentajes oficiales
-  const regaliaCampesina = reparto.artisanRoyaltyMxn; // 10%
-  const fondoTequio = reparto.cooperativeFundMxn;     // 2%
+  const reparto = FairTradeEngine.calculateSecondaryRoyalty(montoVentaMxn); // porcentajes del protocolo
+  const regaliaCampesina = reparto.artisanRoyaltyMxn; // según PROTOCOL_FEES
+  const fondoTequio = reparto.cooperativeFundMxn;     // según PROTOCOL_FEES
   const liquidezVendedor = reparto.sellerNetMxn;      // 88%
 
-  check(regaliaCampesina === 1200, `Regalía de la artesana del 10% liquidada con exactitud ($1,200 MXN de $12,000 MXN)`);
-  check(fondoTequio === 240, `Aporte al Tequio Comunal del 2% acreditado ($240 MXN para obras del pueblo)`);
+  check(regaliaCampesina === Math.round((montoVentaMxn * PROTOCOL_FEES.artisanResaleRoyaltyPct) / 100), `Regalía de la artesana del ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% liquidada con exactitud ($1,200 MXN de $12,000 MXN)`);
+  check(fondoTequio === Math.round((montoVentaMxn * PROTOCOL_FEES.resaleTequioPct) / 100), `Aporte al Tequio Comunal del ${PROTOCOL_FEES.resaleTequioPct}% acreditado ($240 MXN para obras del pueblo)`);
   check(regaliaCampesina + fondoTequio + liquidezVendedor === montoVentaMxn, 'Conservación estricta del 100% del dinero sin comisiones ocultas');
 
   // -------------------------------------------------------------------------

@@ -124,7 +124,7 @@ export const ResearchPresentationModal: React.FC<ResearchPresentationModalProps>
                 </span>
               </div>
               <span className="text-xs bg-emerald-950/80 text-emerald-200 border border-emerald-700/60 px-3 py-1 rounded-full font-mono font-semibold">
-                7 Municipios Auditados
+                Comunidades visitadas en campo
               </span>
             </div>
 
@@ -175,12 +175,12 @@ export const ResearchPresentationModal: React.FC<ResearchPresentationModalProps>
             <div className="bg-white p-4.5 rounded-xl border border-stone-200 shadow-xs">
               <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm mb-2.5 pb-2 border-b border-stone-100">
                 <span className="material-symbols-outlined text-emerald-700 text-lg">location_city</span>
-                <span>Comunidades Auditadas en Terreno</span>
+                <span>Comunidades visitadas en campo</span>
               </div>
               <ul className="space-y-2 text-xs sm:text-sm text-stone-700">
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-700 font-bold">•</span>
-                  <span><strong>San Juan Ñumí:</strong> Unión de Productores de Miel (Rogelio Martínez / Guadalupe Ramírez).</span>
+                  <span><strong>San Juan Ñumí:</strong> Unión de Productores de Miel (el presidente de la Unión / la encargada de comercialización).</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-700 font-bold">•</span>
@@ -373,7 +373,7 @@ export const ResearchPresentationModal: React.FC<ResearchPresentationModalProps>
     {
       id: 'friccion_ux',
       tag: 'USABILIDAD & ACCESIBILIDAD RURAL',
-      title: 'Auditoría de Fricción Cognitiva: De 85% de Fracaso a 98.6% de Éxito',
+      title: 'Observaciones de usabilidad en campo: hallazgos y retos',
       subtitle: 'La brecha no es de software, es de lenguaje, conectividad y ergonomía táctil en campo',
       content: (
         <div className="space-y-4">
@@ -632,7 +632,7 @@ export const ResearchPresentationModal: React.FC<ResearchPresentationModalProps>
             <div>
               <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase mb-1">
                 <span>📋</span>
-                <span>Issue Oficial de GitHub para Estudiantes</span>
+                <span>Issue de GitHub para estudiantes</span>
               </div>
               <h4 className="text-sm sm:text-base font-black text-white">
                 Plantilla: .github/ISSUE_TEMPLATE/buyer_interview_and_usability.md
@@ -692,7 +692,7 @@ export const ResearchPresentationModal: React.FC<ResearchPresentationModalProps>
               type="button"
               onClick={handleDownloadPptx}
               disabled={isDownloading}
-              title="Descargar presentación oficial en formato PowerPoint (.pptx)"
+              title="Descargar presentación en formato PowerPoint (.pptx)"
               className="p-1.5 sm:px-3 sm:py-1 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:bg-amber-300 text-stone-950 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs active:scale-95"
             >
               <span className={`material-symbols-outlined text-[18px] ${isDownloading ? 'animate-spin' : ''}`}>

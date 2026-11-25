@@ -57,7 +57,7 @@ async function generateWordDocEs() {
             spacing: { after: 400 },
             children: [
               new TextRun({
-                text: 'Presentación Oficial y Dossier de Campo para Autoridades, Red TecNM y Aliados Estratégicos',
+                text: 'Presentación y Dossier de Campo para Autoridades, Red TecNM y Aliados Estratégicos',
                 bold: true,
                 size: 18,
                 color: '4B5563',

@@ -95,7 +95,8 @@ cargo test --locked
    * **Validar entregas** checks course deliverables in `docs/gestion/` (in Spanish, for TecNM students).
 
    If a bot shows ❌, fix it on the same branch: it checks again on every push.
-4. A maintainer reviews it. **Be ready to explain your code**: a PR you cannot explain is not merged, even if it works. AI-generated code is welcome only when it is tested and you understand it.
+4. **One pull request per issue.** Work in a branch named `feat/issue-<number>`, not in the `main` of your fork. If a reviewer asks for changes, push them to the same branch: the PR updates by itself. Do not open a new PR. When a PR that resolves an issue is merged, a bot closes any other open PR for that issue.
+5. A maintainer reviews it. **Be ready to explain your code**: a PR you cannot explain is not merged, even if it works. AI-generated code is welcome only when it is tested and you understand it.
 
 `main` is protected: every change needs green CI and an approving review from a code owner ([`CODEOWNERS`](./.github/CODEOWNERS)).
 

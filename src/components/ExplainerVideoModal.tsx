@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { PROTOCOL_FEES } from '../config/protocolFees';
 
 interface ExplainerVideoModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ const CHAPTERS: Chapter[] = [
       'Bienvenidos. El Instituto Tecnológico de Tlaxiaco presenta la infraestructura validada con más de 50 productores y artesanos en San Juan Mixtepec, Yucuhiti, Ñumí, Xochixtlán, Tijaltepec y Tlaxiaco, eliminando el intermediarismo abusivo con tecnología de frontera.',
     highlights: [
       '52 productores y artesanos censados activos en el piloto',
-      '79 artesanos auditados por 5 brigadas de estudiantes TecNM',
+      'Artesanos y artesanas entrevistados por brigadas estudiantiles (muestra cualitativa)',
       '0% pérdida de datos bajo condiciones de parcela offline'
     ],
     visualTag: '🌿 Mixteca Alta Oaxaqueña',
@@ -43,16 +44,16 @@ const CHAPTERS: Chapter[] = [
   {
     id: 'openhub',
     title: '2. Open Hub TecNM',
-    badge: 'Innovación & Becas',
+    badge: 'Estudiantes TecNM',
     durationSec: 20,
     icon: 'hub',
     color: '#0e7490',
     headline: 'Open Hub: El Centro de Innovación Abierta de Tlaxiaco',
     narration:
-      'Open Hub es el nodo de desarrollo tecnológico y vinculación académica del Tec de Tlaxiaco. Aquí los estudiantes de ingeniería programan módulos, validan contratos inteligentes y auditan fricción en campo, recibiendo reconocimientos y micro-becas de residencia al resolver tareas abiertas en GitHub.',
+      'Open Hub es el nodo de desarrollo tecnológico y vinculación académica del Tec de Tlaxiaco. Aquí los estudiantes de ingeniería programan módulos, validan contratos inteligentes y auditan fricción en campo como parte de sus materias. Si una issue forma parte de Drips Wave, Drips le paga directamente a quien la resolvió.',
     highlights: [
       'Nodo de investigación y desarrollo de software comunitario',
-      'Micro-becas y residencias a estudiantes por código y soporte en GitHub',
+      'Estudiantes del TecNM Campus Tlaxiaco programan Yucu como parte de sus materias',
       'Auditorías de usabilidad con adultos mayores (tejedoras de Xochixtlán y Mixtepec, productor de café)'
     ],
     visualTag: '🏫 TecNM Campus Tlaxiaco',
@@ -67,7 +68,7 @@ const CHAPTERS: Chapter[] = [
     color: '#b45309',
     headline: 'Trustless Work: Escrow por Hitos y Liquidación SPEI Banxico',
     narration:
-      'Siguiendo la decisión de arquitectura ADR-001, Yucu integra Trustless Work en Soroban. Los fondos del comprador se custodian en smart contracts auditados: se libera un 30% de anticipo al certificar origen, y el 70% restante al entregar en la bodega municipal de Tlaxiaco, liquidado directo a tarjetas Bienestar vía Etherfuse SPEI.',
+      'Siguiendo la decisión de arquitectura ADR-001, Yucu integra Trustless Work en Soroban. Los fondos del comprador se custodian en contratos de Trustless Work: se libera un 30% de anticipo al certificar origen, y el 70% restante al entregar en la bodega municipal de Tlaxiaco, liquidado directo a tarjetas Bienestar vía Etherfuse SPEI.',
     highlights: [
       'Hito 1 (30% Anticipo): Liberado contra atestación inmutable de origen (0x01_ORIGIN)',
       'Hito 2 (70% Liquidación): Al registrar entrega física en bodega cooperativa',
@@ -120,13 +121,13 @@ const CHAPTERS: Chapter[] = [
     durationSec: 20,
     icon: 'diamond',
     color: '#be123c',
-    headline: '10% de Regalías Perpetuas y Fondo de Tequio Comunal',
+    headline: `${PROTOCOL_FEES.artisanResaleRoyaltyPct}% de Regalías Perpetuas y Fondo de Tequio Comunal`,
     narration:
-      'A través de contratos inteligentes en Soroban, cada pieza artesanal y lote conserva un 10% de regalías perpetuas para la creadora en reventas secundarias, y un 2% automático para el fondo de obras comunitarias Tequio Comunal de Tlaxiaco.',
+      `A través de contratos inteligentes en Soroban, cada pieza artesanal y lote conserva un ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% de regalías perpetuas para la creadora en reventas secundarias, y un ${PROTOCOL_FEES.resaleTequioPct}% automático para el fondo de obras comunitarias Tequio Comunal de Tlaxiaco.`,
     highlights: [
       'Smart contracts en Rust/WASM para protección de artesanas textiles',
-      '10% automático para la creadora en reventas en galerías y boutiques',
-      '2% acreditado a la tesorería comunal de la asamblea para infraestructura'
+      `${PROTOCOL_FEES.artisanResaleRoyaltyPct}% automático para la creadora en reventas en galerías y boutiques`,
+      `${PROTOCOL_FEES.resaleTequioPct}% acreditado a la tesorería comunal de la asamblea para infraestructura`
     ],
     visualTag: '💎 Blindaje On-Chain',
     bgGradient: 'from-rose-950 via-neutral-900 to-stone-950'

@@ -2,6 +2,22 @@
 
 Este documento describe la base de datos fuera de la cadena: qué tablas hay, qué guarda cada una, quién la escribe y qué **nunca** se guarda. Desarrolla la decisión D7 de [ADR-006](../adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md) y la sección 5 de la [guía del servidor](./SERVIDOR.md). Donde una issue diga algo distinto, manda la issue; si te parece que la issue está mal, coméntalo en ella antes de programar.
 
+> **English summary.**
+>
+> **Purpose:** This document explains how Yucu Protocol stores data outside the Stellar blockchain. It describes the database tables, the information they contain, who can write to them, and which data must never be stored. The database supports application features while keeping the blockchain as the main source of truth.
+>
+> **Main rules:** The database only stores the minimum information needed to operate the application. Stellar remains the source of truth for lots, payments, and attestations. The database may keep copies of blockchain information for faster reading, but these copies must follow the information recorded on the network.
+>
+> Personal information must be protected. People are identified by their Stellar addresses (`G…`). Private keys, PINs, personal identification details, audio, photos of people, payment codes, and unnecessary personal data must not be stored. The database is accessed only by the server and must not be exposed directly to the browser.
+>
+> The database contains information about groups, accounts, profiles, lots, products, orders, withdrawals, and provider clients. It also stores server information, such as session challenges and usage counters. Operations that update important values must use a single database statement to avoid conflicts when requests happen at the same time.
+>
+> Product photos are stored outside PostgreSQL. The phone removes photo metadata before calculating the SHA-256 hash. The server checks the hash and rejects photos with GPS information.
+>
+> **Where it applies:** These rules apply to the Yucu Protocol application, its server, database tables, photo storage, migrations, and development environments. They cover local development, CI tests, Vercel previews, and Production. Database changes must follow the migration rules, and personal data must not be copied between environments.
+>
+> Some decisions are still pending, including shipping addresses, artisan name visibility, data retention periods, and the database region. These decisions must follow the project's privacy and architecture guidelines.
+
 ## 1. Principios
 
 1. **La cadena manda.** Si la base de datos y Stellar dicen cosas distintas sobre un lote, un pago o una atestación, vale lo de Stellar. La base de datos guarda copias para leer rápido y lo que no cabe en la cadena (fotos, descripciones, precios).

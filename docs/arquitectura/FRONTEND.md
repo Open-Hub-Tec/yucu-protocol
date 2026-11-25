@@ -1,5 +1,20 @@
 # Guía del front end
 
+> **English summary.**
+>
+> **Purpose:** This guide is for teams building screens for the app. The users are artisans and producers from the Mixteca region. Many are older, have trouble seeing in the sun, and use WhatsApp voice notes but not forms. The goal is that people can ask for what they want by speaking or typing, like in WhatsApp, and that everything is easy to read in large letters. If a screen forces a form, small text or a technical word, it is badly made, even if it works. If an issue says something different, the issue wins; comment on it before coding.
+>
+> **Main rules:**
+> - **Chat:** The main screen is a chat with bubbles, a text box, a big microphone button and up to 3 quick-reply buttons. Voice or text is always possible. Every reply can be listened to. One idea per message, two lines at most. Nothing is signed from a chat bubble; signing uses the accessible screen (#97).
+> - **Request engine:** Three layers: matching on the phone (no signal, no AI), server AI (`interpretRequest`, W52 #181) that picks from a closed list of functions, and asking the person when unsure. It never guesses. A request only opens a screen; anything that moves money or signs needs read-aloud, Yes/No buttons and a PIN.
+> - **Text and access:** Three sizes (Normal 18 px, Large 22 px, Very large 28 px), saved on the phone. Font sizes use `rem`, never fixed pixels in new code. No text under 16 px at Normal. Contrast of at least 7:1. Touch areas of at least 56 × 56 px. Every icon has text.
+> - **Voice:** Record by tapping or by press-and-hold (Opus, 24 kbps, 60 seconds maximum, consent read aloud first). Listening uses `speechSynthesis` in Mexican Spanish. Mixtec voice is not promised until it is evaluated (#158).
+> - **Words:** Plain words, no technical terms. Say "pesos" and "confirm with your PIN", not wallet, USDC, XLM, hash or blockchain. Never say "official".
+> - **No signal:** The menu, layer 1, text size and listening work offline. AI and sending transactions need signal. The app always says the state of things.
+> - **Code:** Small files in `src/components/<area>/`. Do not add code to `ChatScreen.tsx` or `RegisterCoffeeLotScreen.tsx`. Use ports only. Mark demo data with `<DemoBadge />`.
+>
+> **Where it applies:** To every screen that artisans use. The verifier, console and impact page share the same text-size and contrast rules. Every screen PR needs screenshots at 360 px (Normal and Very large text), a Lighthouse accessibility score of 90 or more, and the checklist in section 12.
+
 Esta guía es para los equipos que trabajan pantallas. La app la usan artesanas y productores de la Mixteca: muchas personas son mayores, ven poco con el sol y usan WhatsApp con notas de voz, pero no formularios. **La meta es que puedan pedir lo que quieren hablando o escribiendo, como en WhatsApp, y que todo se lea en letra grande.** Si una pantalla obliga a llenar un formulario, a leer letra chica o a entender una palabra técnica, está mal hecha aunque funcione.
 
 Donde una issue diga algo distinto, manda la issue; si te parece que la issue está mal, coméntalo en ella antes de programar. Léela junto con [`AGENTS.md`](../../AGENTS.md), [ADR-004](../adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) (la artesana solo ve pesos), [ADR-006](../adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md), [ADR-007](../adr/ADR-007-MOTOR-DE-ATESTACIONES-POR-VOZ.md) y [ADR-008](../adr/ADR-008-COMMUNICATION-CHANNELS-AND-WHATSAPP-ALTERNATIVES.md) (chat propio en lugar de WhatsApp).

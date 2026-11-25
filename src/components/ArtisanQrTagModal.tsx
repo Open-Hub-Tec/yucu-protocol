@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { DigitalPassportLot } from '../types';
 import { generateQrDataUri, generateQrSvg } from '../utils/qrCode';
+import { ExplicacionSello } from './accesibilidad/ExplicacionSello';
 
 interface ArtisanQrTagModalProps {
   isOpen: boolean;
@@ -191,6 +192,9 @@ export const ArtisanQrTagModal: React.FC<ArtisanQrTagModalProps> = ({
                 </span>
               </div>
             </div>
+
+            {/* El sello explicado en la etiqueta (también sale al imprimir) (W53 #182) */}
+            <ExplicacionSello compacta className="mb-2 text-left" />
 
             {/* Buyer Instructions */}
             <p className="text-[10px] text-[#424843] leading-tight italic px-1">

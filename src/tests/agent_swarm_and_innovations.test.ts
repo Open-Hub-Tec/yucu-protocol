@@ -2,6 +2,7 @@
  * Test Suite: Enjambre de Agentes Especializados & Nuevos Tipos de Atestación (DPP, IP, IoT)
  */
 
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { YucuAgentSwarm } from '../core/agents/YucuAgentSwarm';
 import { raizProtocol } from '../core/sdk/RaizProtocolSDK';
 
@@ -38,7 +39,7 @@ async function runTests() {
   });
   assert(ipResult.status === 'CERTIFIED', 'Escudo de propiedad colectiva comunitaria emitido');
   assert(ipResult.schemaId === '0x06_INDIGENOUS_IP', 'Esquema correcto 0x06_INDIGENOUS_IP');
-  assert(ipResult.evidenceSummary.includes('10% creador + 2% Tequio'), 'Regalía perpetua comunal programada');
+  assert(ipResult.evidenceSummary.includes(`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% creador + ${PROTOCOL_FEES.resaleTequioPct}% Tequio`), 'Regalía perpetua comunal programada');
 
   console.log('\n📍 3. AGENTE DE RESOLUCIÓN FINANCIERA MULTILATERAL');
   const settlementResult = await YucuAgentSwarm.runSettlementSolverAgent({

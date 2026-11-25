@@ -1,5 +1,12 @@
 # Guía del servidor
 
+> **English summary.**
+>
+> **Purpose:** The server is the backend of Yucu Protocol. It uses Express and runs locally, in Google AI Studio, and as a Vercel function. Its main responsibilities are preparing unsigned transactions for users to sign on their phones, connecting to external services that require secret credentials, and storing application data such as catalogs, profiles, and orders. It also supports platform-level signing for specific operations, such as lot certification and sponsored transaction fees.
+>
+> **Main rules:** The server must never receive, generate, store, or derive a user's private key. It must not hold anyone's funds or invent blockchain records, hashes, verifications, or certifications. Simulated results must be clearly identified with `source: 'simulated'`. Sensitive information, personal data, and secret keys must not appear in logs or error responses. Server routes should be organized in separate modules under `src/server/routes/`, while `server.ts` should only mount them. Responses must use consistent JSON formats, and errors must include a clear message with an appropriate HTTP status code. Shared data must use storage interfaces instead of relying on server memory, because requests may run on different instances.
+>
+> **Where it applies:** These rules apply to all server-side development, including AI endpoints, blockchain transactions, authentication, escrow, payouts, catalog and profile management, and legacy API routes. They also guide environment variable configuration, automated tests, and deployment to Vercel. Contributors must use simulated services during tests, avoid external service calls in CI, protect personal data and credentials, and verify their changes with linting, tests, and builds before submitting a pull request.
 Esta guía es para los equipos que trabajan issues del servidor. Unos 11 equipos van a tocar `server.ts` al mismo tiempo; si cada uno sigue estas reglas, sus PRs no chocan y el servidor queda parejo. Donde una issue diga algo distinto, manda la issue; si te parece que la issue está mal, coméntalo en ella antes de programar.
 
 Léela junto con [`AGENTS.md`](../../AGENTS.md), [ADR-003](../adr/ADR-003-NO-CUSTODIAL-Y-TRUSTLESS-WORK.md), [ADR-004](../adr/ADR-004-PAGOS-EN-PESOS-SIN-BILLETERA.md) y [ADR-006](../adr/ADR-006-DATOS-FUERA-DE-LA-CADENA-E-IA.md).

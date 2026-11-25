@@ -1,0 +1,39 @@
+{
+  "schema": "origen-comunitario",
+  "version": 1,
+  "fields": {
+    "categoria": {
+      "type": "enum",
+      "values": [
+        "cafe",
+        "mezcal",
+        "textil"
+      ],
+      "privacy": "public"
+    },
+    "municipio_codigo": {
+      "type": "string",
+      "source": "catalogo-municipios",
+      "privacy": "public"
+    },
+    "lote_referencia": {
+      "type": "string",
+      "privacy": "hash-only"
+    },
+    "evidencia_digest": {
+      "type": "string",
+      "privacy": "hash-only"
+    }
+  },
+  "voice": {
+    "ask": {
+      "es": "¿Cuál es la categoría y el código de municipio del lote?"
+    },
+    "confirm": {
+      "es": "Categoría {categoria}, municipio {municipio_codigo}. ¿Lo confirma?"
+    }
+  },
+  "signer": "group",
+  "cosigner": null,
+  "rules": "Only a registered organization may issue this statement"
+}

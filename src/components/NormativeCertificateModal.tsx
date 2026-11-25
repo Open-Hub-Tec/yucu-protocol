@@ -86,13 +86,13 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
 
   const handleShareWhatsApp = () => {
     const text = encodeURIComponent(
-      `☕ *Certificado Oficial de Café NOM/NMX*\n\n` +
+      `☕ *Certificado de Demostración de Café NOM/NMX*\n\n` +
       `Lote: *${lot.title}* (Folio: OAX-MIX-${lot.code})\n` +
       `Productor: ${lot.producerName} (${lot.location})\n` +
       `Humedad: ${lot.nomCompliance?.humidity || '11.4%'} (Conforme NMX-F-083)\n` +
       `Altitud: ${lot.altitude || '1,650 msnm'} (Estricta Altura NOM-255-SCFI)\n` +
       `Sellado Inmutable en Stellar Horizon Testnet.\n\n` +
-      `Ver dictamen oficial y trazabilidad:\n${shareUrl}`
+      `Ver dictamen de demostración y trazabilidad:\n${shareUrl}`
     );
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
@@ -101,8 +101,8 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Certificado Oficial NOM/NMX - Lote ${lot.code}`,
-          text: `Certificado Oficial de Cumplimiento Normativo (NMX-F-083 / NOM-255-SCFI) - Lote ${lot.code} (${lot.producerName}), sellado inmutable en Stellar Horizon.`,
+          title: `Certificado de Demostración NOM/NMX - Lote ${lot.code}`,
+          text: `Certificado de Demostración de Cumplimiento Normativo (NMX-F-083 / NOM-255-SCFI) - Lote ${lot.code} (${lot.producerName}), sellado inmutable en Stellar Horizon.`,
           url: shareUrl,
         });
       } catch (e) {
@@ -124,7 +124,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Certificado Oficial de Cumplimiento Normativo NOM/NMX - Lote ${lot.code} - IT Tlaxiaco</title>
+  <title>Certificado de Demostración de Cumplimiento Normativo NOM/NMX - Lote ${lot.code} - IT Tlaxiaco</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 36px; color: #1c1c18; max-width: 820px; margin: auto; background: #fff; }
     .header { border-bottom: 3px solid #1b3b2b; padding-bottom: 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
@@ -150,12 +150,12 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
       <div class="subtitle">Laboratorio de Calidad del Café & Yucu · Tlaxiaco, Oaxaca</div>
       <div class="subtitle"><strong>CERTIFICADO DE CONFORMIDAD NORMATIVA (${lot.nomCompliance?.standard || 'CALIDAD TRADICIONAL Y COMUNITARIA'})</strong></div>
     </div>
-    <div class="badge">DOCUMENTO DE DEMOSTRACIÓN · NO ES UN DICTAMEN OFICIAL</div>
+    <div class="badge">DOCUMENTO DE DEMOSTRACIÓN · NO ES UN DICTAMEN DE CERTIFICACIÓN</div>
   </div>
 
   <div class="section">
     <div style="display: flex; justify-content: space-between; font-size: 12px;">
-      <strong>FOLIO OFICIAL: OAX-MIX-${lot.code}</strong>
+      <strong>FOLIO DE DEMOSTRACIÓN: OAX-MIX-${lot.code}</strong>
       <span>Fecha: 28 Octubre 2024</span>
     </div>
     <h2 style="color: #032517; margin: 8px 0 6px 0; font-size: 18px;">${lot.title}</h2>
@@ -167,7 +167,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
     </p>
   </div>
 
-  <h3 style="color: #032517; font-size: 14px; margin-bottom: 6px;">TABLA DE CUMPLIMIENTO DE NORMAS OFICIALES Y COMUNITARIAS</h3>
+  <h3 style="color: #032517; font-size: 14px; margin-bottom: 6px;">TABLA DE REFERENCIA NORMATIVA Y COMUNITARIA (DEMOSTRACIÓN)</h3>
   <table class="table-nom">
     <thead>
       <tr>
@@ -259,7 +259,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Dictamen-Oficial-${lot.code}.html`;
+        a.download = `Dictamen-Demostracion-${lot.code}.html`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -292,7 +292,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
             <div>
               <div className="flex items-center gap-1.5">
                 <h3 id="dictamen-title" className="text-[17px] font-bold tracking-tight">Dictamen Normativo</h3>
-                <DemoBadge detail="No es un dictamen oficial: ningún laboratorio ni validador humano ha firmado este documento." />
+                <DemoBadge detail="Este dictamen es de demostración: ningún laboratorio ni validador humano ha firmado este documento." />
               </div>
               <p className="text-[11px] text-[#abcfb8]">Certificación Agroecológica Mixteca</p>
             </div>
@@ -350,7 +350,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
             <div className="flex items-center justify-between">
               <h5 className="font-bold text-[#032517] text-[12px] uppercase tracking-wide flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[16px] text-emerald-700">fact_check</span>
-                <span>Conformidad Normativa Oficial ({lot.nomCompliance?.standard || 'Norma Tradicional'})</span>
+                <span>Conformidad normativa (demostración) ({lot.nomCompliance?.standard || 'Norma Tradicional'})</span>
               </h5>
               <span className="text-[10px] text-emerald-800 bg-emerald-50 font-bold px-2 py-0.5 rounded border border-emerald-200">
                 Aprobado 100%
@@ -486,7 +486,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
             </div>
 
             <div className="flex items-center justify-between text-[10px] text-emerald-200/80 pt-0.5">
-              <span>Red: Stellar Horizon (Testnet Oficial)</span>
+              <span>Red: Stellar Horizon (testnet)</span>
               <span>Inmutable & No Alterable</span>
             </div>
           </div>
@@ -602,7 +602,7 @@ export const NormativeCertificateModal: React.FC<NormativeCertificateModalProps>
                   ? 'Generando PDF...'
                   : downloadStatus === 'ready'
                   ? '¡PDF Guardado!'
-                  : 'Descargar Dictamen Oficial'}
+                  : 'Descargar Dictamen de Demostración'}
               </span>
             </button>
             <button
