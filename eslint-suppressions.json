@@ -34,11 +34,6 @@
       "count": 3
     }
   },
-  "src/components/MicrophoneDiagnosticModal.tsx": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 4
-    }
-  },
   "src/components/ProductTypeCatalogScreen.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
@@ -80,11 +75,6 @@
   "src/types.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 5
-    }
-  },
-  "src/utils/audioRecorder.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 10
     }
   }
 }

@@ -1,5 +1,11 @@
+
 // Audio Recording and Speech-to-Text Utility for Yucu
-// Supports MediaRecorder, Web Speech API (webkitSpeechRecognition) and Gemini backend transcription
+// Grabación local y transcripción con consentimiento explícito.
+
+import {
+  puedeEnviarAIA,
+  type ConsentimientoIA,
+} from './consentimientoIA';
 
 export interface AudioRecordingResult {
   audioBlob: Blob;
@@ -20,29 +26,80 @@ export interface LiveRecorderSession {
   cancel: () => void;
 }
 
+type SpeechRecognitionResultEvent = {
+  results: ArrayLike<{
+    isFinal: boolean;
+    0: { transcript: string };
+  }>;
+};
+
+type SpeechRecognitionErrorEvent = {
+  error: string;
+  message?: string;
+};
+
+type SpeechRecognitionLike = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type WindowWithSpeechRecognition = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+};
+
+type WindowWithAudioContext = Window & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 /**
- * Check browser support for audio capture and speech recognition
+ * Comprueba las capacidades del micrófono.
  */
 export async function getMicrophoneCapabilities() {
   const hasGetUserMedia = Boolean(
     typeof navigator !== 'undefined' &&
-    navigator.mediaDevices &&
-    typeof navigator.mediaDevices.getUserMedia === 'function'
+    navigator.mediaDevices?.getUserMedia
   );
 
-  const SpeechRecognitionClass =
+  const browserWindow =
     typeof window !== 'undefined'
-      ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      ? (window as WindowWithSpeechRecognition)
       : null;
 
-  const hasSpeechRecognition = Boolean(SpeechRecognitionClass);
+  const SpeechRecognitionClass =
+    browserWindow?.SpeechRecognition ||
+    browserWindow?.webkitSpeechRecognition ||
+    null;
 
-  let permissionState: 'granted' | 'denied' | 'prompt' | 'unknown' = 'unknown';
+  let permissionState:
+    | 'granted'
+    | 'denied'
+    | 'prompt'
+    | 'unknown' = 'unknown';
 
-  if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.permissions?.query
+  ) {
     try {
-      const status = await navigator.permissions.query({ name: 'microphone' as any });
-      permissionState = status.state as any;
+      const status = await navigator.permissions.query({
+        name: 'microphone' as PermissionName,
+      });
+
+      permissionState = status.state as
+        | 'granted'
+        | 'denied'
+        | 'prompt';
     } catch {
       permissionState = 'unknown';
     }
@@ -50,38 +107,105 @@ export async function getMicrophoneCapabilities() {
 
   return {
     hasGetUserMedia,
-    hasSpeechRecognition,
+    hasSpeechRecognition: Boolean(SpeechRecognitionClass),
     permissionState,
   };
 }
 
 /**
- * Convert Blob to Base64 string
+ * Convierte un Blob a Base64.
  */
 export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+
     reader.onloadend = () => {
-      resolve(reader.result as string);
+      if (typeof reader.result !== 'string') {
+        reject(new Error('No se pudo convertir el audio.'));
+        return;
+      }
+
+      resolve(reader.result);
     };
-    reader.onerror = reject;
+
+    reader.onerror = () => {
+      reject(new Error('Error leyendo el audio grabado.'));
+    };
+
     reader.readAsDataURL(blob);
   });
 }
 
 /**
- * Start live recording with audio stream, volume meter and optional speech recognition
+ * Transcripción mediante Gemini.
+ * Solo permite enviar audio con consentimiento explícito.
+ */
+export async function transcribeAudioWithAI(
+  audioBase64: string,
+  mimeType: string,
+  consentimiento: ConsentimientoIA
+): Promise<string | null> {
+  if (!puedeEnviarAIA(consentimiento, 'audio')) {
+    return null;
+  }
+
+  if (!audioBase64 || audioBase64.length < 100) {
+    throw new Error('No hay audio válido para transcribir.');
+  }
+
+  const response = await fetch('/api/transcribe-audio', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      audioBase64,
+      mimeType: mimeType || 'audio/webm',
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('El servidor no pudo procesar la transcripción.');
+  }
+
+  const data = await response.json();
+
+  return typeof data.transcript === 'string'
+    ? data.transcript.trim()
+    : '';
+}
+
+/**
+ * Inicia una grabación local.
+ *
+ * No envía audio a Gemini.
+ * No realiza peticiones HTTP.
  */
 export async function startAudioRecording(
   options: StartRecordingOptions = {}
 ): Promise<LiveRecorderSession> {
-  const { onVolumeChange, onInterimTranscript, lang = 'es-MX' } = options;
+  const {
+    onVolumeChange,
+    onInterimTranscript,
+    lang = 'es-MX',
+  } = options;
 
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error('Tu navegador no permite acceso al micrófono o la conexión no es segura (HTTPS).');
+  if (
+    typeof navigator === 'undefined' ||
+    !navigator.mediaDevices?.getUserMedia
+  ) {
+    throw new Error(
+      'Tu navegador no permite acceder al micrófono. Verifica que uses HTTPS.'
+    );
   }
 
-  // 1. Request microphone access with enhancement flags
+  if (typeof MediaRecorder === 'undefined') {
+    throw new Error(
+      'Tu navegador no es compatible con la grabación de audio.'
+    );
+  }
+
+  // 1. Solicitar acceso al micrófono.
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       echoCancellation: true,
@@ -93,8 +217,7 @@ export async function startAudioRecording(
   const startTime = Date.now();
   const audioChunks: Blob[] = [];
 
-  // Determine supported mime type across Chrome, Firefox, Safari iOS
-  let selectedMimeType = '';
+  // 2. Detectar formato compatible.
   const candidates = [
     'audio/webm;codecs=opus',
     'audio/webm',
@@ -104,205 +227,333 @@ export async function startAudioRecording(
     'audio/wav',
   ];
 
-  if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
-    for (const cand of candidates) {
-      if (MediaRecorder.isTypeSupported(cand)) {
-        selectedMimeType = cand;
+  let selectedMimeType = '';
+
+  if (typeof MediaRecorder.isTypeSupported === 'function') {
+    for (const candidate of candidates) {
+      if (MediaRecorder.isTypeSupported(candidate)) {
+        selectedMimeType = candidate;
         break;
       }
     }
   }
 
-  const recorderOptions: MediaRecorderOptions = selectedMimeType ? { mimeType: selectedMimeType } : {};
-  const mediaRecorder = new MediaRecorder(stream, recorderOptions);
-  const actualMimeType = mediaRecorder.mimeType || selectedMimeType || 'audio/webm';
+  let mediaRecorder: MediaRecorder;
 
-  mediaRecorder.ondataavailable = (event) => {
+  try {
+    const recorderOptions: MediaRecorderOptions =
+      selectedMimeType
+        ? { mimeType: selectedMimeType }
+        : {};
+
+    mediaRecorder = new MediaRecorder(
+      stream,
+      recorderOptions
+    );
+  } catch (error) {
+    stream.getTracks().forEach((track) => track.stop());
+    throw error;
+  }
+
+  const actualMimeType =
+    mediaRecorder.mimeType ||
+    selectedMimeType ||
+    'audio/webm';
+
+  mediaRecorder.ondataavailable = (event: BlobEvent) => {
     if (event.data && event.data.size > 0) {
       audioChunks.push(event.data);
     }
   };
 
-  // 2. AudioContext volume visualizer
+  // 3. Visualizador de volumen.
   let audioContext: AudioContext | null = null;
   let animFrameId: number | null = null;
 
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (AudioCtx) {
-      audioContext = new AudioCtx();
+    const audioWindow = window as WindowWithAudioContext;
+
+    const AudioContextClass =
+      window.AudioContext ||
+      audioWindow.webkitAudioContext;
+
+    if (AudioContextClass) {
+      audioContext = new AudioContextClass();
+
       if (audioContext.state === 'suspended') {
-        audioContext.resume().catch(() => {});
+        await audioContext.resume().catch(() => {});
       }
-      const sourceNode = audioContext.createMediaStreamSource(stream);
+
+      const sourceNode =
+        audioContext.createMediaStreamSource(stream);
+
       const analyser = audioContext.createAnalyser();
+
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.4;
+
       sourceNode.connect(analyser);
 
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const dataArray = new Uint8Array(
+        analyser.frequencyBinCount
+      );
 
       const checkVolume = () => {
-        if (audioContext && audioContext.state === 'suspended') {
-          audioContext.resume().catch(() => {});
+        if (
+          !audioContext ||
+          audioContext.state === 'closed'
+        ) {
+          return;
         }
+
         analyser.getByteFrequencyData(dataArray);
+
         let sum = 0;
+
         for (let i = 0; i < dataArray.length; i++) {
           sum += dataArray[i];
         }
+
         const average = sum / dataArray.length;
-        // Perceptually scaled volume level (0 to 100)
-        const volumeLevel = Math.min(100, Math.round((average / 60) * 100));
-        if (onVolumeChange) {
-          onVolumeChange(volumeLevel);
-        }
+
+        const volumeLevel = Math.min(
+          100,
+          Math.round((average / 60) * 100)
+        );
+
+        onVolumeChange?.(volumeLevel);
+
         animFrameId = requestAnimationFrame(checkVolume);
       };
 
       checkVolume();
     }
-  } catch (err) {
-    console.warn('AudioContext no disponible para visualizador de volumen:', err);
+  } catch (error) {
+    console.warn(
+      'AudioContext no disponible:',
+      error
+    );
   }
 
-  // 3. Web Speech Recognition (client-side real-time transcription)
+  // 4. Reconocimiento de voz.
   let speechTranscript = '';
-  let recognitionInstance: any = null;
+  let interimTranscript = '';
+  let recognitionInstance: SpeechRecognitionLike | null = null;
 
   try {
+    const speechWindow =
+      window as WindowWithSpeechRecognition;
+
     const SpeechRecognitionClass =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      speechWindow.SpeechRecognition ||
+      speechWindow.webkitSpeechRecognition;
 
     if (SpeechRecognitionClass) {
       recognitionInstance = new SpeechRecognitionClass();
+
       recognitionInstance.lang = lang;
       recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
       recognitionInstance.maxAlternatives = 1;
 
-      recognitionInstance.onresult = (event: any) => {
-        let interim = '';
-        let final = '';
+      recognitionInstance.onresult = (event) => {
+        let finalText = '';
+        let interimText = '';
 
-        for (let i = 0; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+
+          if (result.isFinal) {
+            finalText += result[0].transcript + ' ';
           } else {
-            interim += event.results[i][0].transcript;
+            interimText += result[0].transcript + ' ';
           }
         }
 
-        const currentText = (final + ' ' + interim).trim();
-        speechTranscript = (final || interim).trim();
+        if (finalText.trim()) {
+          speechTranscript = finalText.trim();
+        }
 
-        if (onInterimTranscript && currentText) {
-          onInterimTranscript(currentText);
+        interimTranscript = interimText.trim();
+
+        const currentText = [
+          speechTranscript,
+          interimTranscript,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
+        if (currentText) {
+          onInterimTranscript?.(currentText);
         }
       };
 
-      recognitionInstance.onerror = (e: any) => {
-        console.warn('SpeechRecognition warning:', e?.error);
+      recognitionInstance.onerror = (event) => {
+        console.warn(
+          'SpeechRecognition warning:',
+          event.error
+        );
       };
 
       try {
         recognitionInstance.start();
-      } catch (startErr) {
-        console.warn('No se pudo iniciar SpeechRecognition:', startErr);
+      } catch (error) {
+        console.warn(
+          'No se pudo iniciar SpeechRecognition:',
+          error
+        );
       }
     }
-  } catch (e) {
-    console.warn('SpeechRecognition no disponible:', e);
+  } catch (error) {
+    console.warn(
+      'SpeechRecognition no disponible:',
+      error
+    );
   }
 
-  // Start recording with 250ms timeslices for stream stability
-  mediaRecorder.start(250);
+  // 5. Iniciar grabación.
+  try {
+    mediaRecorder.start(250);
+  } catch (error) {
+    if (animFrameId !== null) {
+      cancelAnimationFrame(animFrameId);
+    }
 
-  // Controller
+    try {
+      recognitionInstance?.abort();
+    } catch {}
+
+    audioContext?.close().catch(() => {});
+
+    stream.getTracks().forEach((track) => track.stop());
+
+    throw error;
+  }
+
+  let finished = false;
+
+  // 6. Liberar recursos.
+  const cleanup = () => {
+    if (animFrameId !== null) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+
+    if (audioContext && audioContext.state !== 'closed') {
+      audioContext.close().catch(() => {});
+      audioContext = null;
+    }
+
+    if (recognitionInstance) {
+      try {
+        recognitionInstance.stop();
+      } catch {}
+    }
+
+    stream.getTracks().forEach((track) => track.stop());
+
+    onVolumeChange?.(0);
+  };
+
+  // 7. Devolver controles.
   return {
     stop: (): Promise<AudioRecordingResult> => {
-      return new Promise((resolve) => {
-        const cleanup = () => {
-          if (animFrameId) cancelAnimationFrame(animFrameId);
-          if (audioContext && audioContext.state !== 'closed') {
-            audioContext.close().catch(() => {});
-          }
-          if (recognitionInstance) {
-            try {
-              recognitionInstance.stop();
-            } catch {}
-          }
-          stream.getTracks().forEach((track) => track.stop());
+      return new Promise((resolve, reject) => {
+        if (finished) {
+          reject(
+            new Error('La grabación ya terminó.')
+          );
+          return;
+        }
+
+        finished = true;
+
+        mediaRecorder.onerror = () => {
+          cleanup();
+
+          reject(
+            new Error('Error durante la grabación.')
+          );
         };
 
         mediaRecorder.onstop = async () => {
           cleanup();
-          const durationSeconds = Math.max(1, Math.round((Date.now() - startTime) / 1000));
-          const audioBlob = new Blob(audioChunks, { type: actualMimeType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const base64Audio = await blobToBase64(audioBlob);
 
-          let finalTranscript = speechTranscript;
+          try {
+            const durationSeconds = Math.max(
+              1,
+              Math.round(
+                (Date.now() - startTime) / 1000
+              )
+            );
 
-          // If client-side SpeechRecognition didn't capture text, transcribe via Gemini server endpoint
-          if (!finalTranscript.trim() && base64Audio && base64Audio.length > 100) {
-            try {
-              const res = await fetch('/api/transcribe-audio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  audioBase64: base64Audio,
-                  mimeType: actualMimeType,
-                }),
-              });
-              if (res.ok) {
-                const data = await res.json();
-                if (data.transcript) {
-                  finalTranscript = data.transcript;
-                }
-              }
-            } catch (err) {
-              console.warn('Fallo transcripción server:', err);
-            }
+            const audioBlob = new Blob(audioChunks, {
+              type: actualMimeType,
+            });
+
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            const base64Audio =
+              await blobToBase64(audioBlob);
+
+            const transcript = [
+              speechTranscript,
+              interimTranscript,
+            ]
+              .filter(Boolean)
+              .join(' ')
+              .trim();
+
+            // No se llama a Gemini aquí.
+            // El envío requiere consentimiento explícito.
+
+            resolve({
+              audioBlob,
+              audioUrl,
+              base64Audio,
+              transcript,
+              durationSeconds,
+            });
+          } catch (error) {
+            reject(error);
           }
-
-          resolve({
-            audioBlob,
-            audioUrl,
-            base64Audio,
-            transcript: finalTranscript,
-            durationSeconds,
-          });
         };
 
         if (mediaRecorder.state === 'recording') {
           mediaRecorder.stop();
         } else {
           cleanup();
+
           resolve({
-            audioBlob: new Blob(),
+            audioBlob: new Blob([], {
+              type: actualMimeType,
+            }),
             audioUrl: '',
             base64Audio: '',
-            transcript: speechTranscript,
+            transcript: speechTranscript || interimTranscript,
             durationSeconds: 0,
           });
         }
       });
     },
+
     cancel: () => {
-      if (animFrameId) cancelAnimationFrame(animFrameId);
-      if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close().catch(() => {});
-      }
-      if (recognitionInstance) {
-        try {
-          recognitionInstance.abort();
-        } catch {}
-      }
-      stream.getTracks().forEach((track) => track.stop());
+      if (finished) return;
+
+      finished = true;
+
+      cleanup();
+
+      mediaRecorder.ondataavailable = null;
+      mediaRecorder.onstop = null;
+      mediaRecorder.onerror = null;
+
       if (mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
       }
+
+      // Cancelar nunca envía información a la IA.
     },
   };
 }
