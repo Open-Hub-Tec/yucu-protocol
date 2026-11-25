@@ -16,6 +16,7 @@ export * from './settlement/HybridSettlementOrchestrator';
 export * from './auth/RaizAuthEngine';
 export * from './ai/RaizAIOracles';
 export * from './sdk/RaizProtocolSDK';
+export * from './payout';
 
 import { CryptoEngine } from './crypto/CryptoEngine';
 import { SyncEngine } from './sync/SyncEngine';
