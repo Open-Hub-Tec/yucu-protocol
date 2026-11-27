@@ -1,51 +1,40 @@
-﻿# Informe de avance — Semana 1
+# Informe semana 1 · Equipo 2 — Sprint 4
 
-**Proyecto:** Yucu Protocol  
-**Equipo:** Equipo 2 — Equipo de Luis (**EQUIPO LUIS**)  
-**Sprint:** Sprint 4  
-**Periodo:** `[PENDIENTE DE CONFIRMAR: fechas cubiertas]`  
-**Destinatario:** `[PENDIENTE DE CONFIRMAR: organización/rol]`  
-**Estado de envío:** `[PENDIENTE DE CONFIRMAR: no afirmar envío sin evidencia]`
+> **BORRADOR — NO ENVIADO TODAVÍA.** Completar con datos reales del tablero y marcar como enviado solo cuando la organización lo haya recibido. Estado actual: 🟡 Ámbar (a confirmar).
 
-**Corte de esta revisión documental:** 2026-11-21. Esta fecha no identifica el periodo del informe ni una fecha de envío.
+**Período:** 2026-11-16 al 2026-11-20  
+**Módulo:** [#140](https://github.com/Open-Hub-Tec/yucu-protocol/issues/140)  
+**Organización:** Unión de Productores de Miel de San Juan Ñumí, Oaxaca  
+**Enviado por:** @al3-dan · **Fecha de envío:** [FECHA_ENVIO]
 
-> **Borrador interno; no es evidencia de envío ni está listo para presentarse como informe real de la semana.** No se encontraron datos del GitHub Projects del Equipo 2, el periodo cubierto ni constancia de envío a la organización. No se completan métricas por inferencia.
+## Avance contra lo planeado
 
-## Datos verificados y datos no disponibles
+| Entregable planeado | Estado en el tablero | Evidencia |
+| --- | --- | --- |
+| Propuesta final (#209) | [ESTADO_1] | [ENLACE_1] |
+| Plan de informe (#210) | [ESTADO_2] | [ENLACE_2] |
+| Especificación y manifiestos de #140 | [ESTADO_3] | [ENLACE_3] |
 
-| Tipo | Dato | Fuente/estado |
-|---|---|---|
-| Contexto del producto verificado | Yucu se documenta como prototipo en Stellar testnet; la tabla del README marca las atestaciones en Attest Protocol como documentadas y aún no construidas. | README de la versión revisada; no es un indicador de avance del Equipo 2 en semana 1. |
-| Avance del Equipo 2 | Entregables terminados, horas, costo y tendencia. | No verificable: faltan datos del tablero y registros del periodo. |
-| Envío a la organización | Fecha, canal, destinatario por rol y respuesta. | No verificable: no se encontró constancia de envío. |
-| Datos simulados | Ninguno incluido. | No se sustituyen métricas reales por ejemplos simulados. |
+**Completados:** [COMPLETADOS] de [PLANEADOS] entregables.  
+**Horas:** [HORAS_REALES] reales frente a [HORAS_ESTIMADAS] estimadas.  
+**Costo acumulado:** [$COSTO_ACUMULADO] MXN de referencia, sin costo para la organización.
 
-## Avance frente al plan
+## Lo que ya se terminó
 
-- Entregables completados vs. planeados: `[PENDIENTE: conteos, periodo y enlace de GitHub Projects]`.
-- Horas reales vs. estimadas: `[PENDIENTE: horas registradas, estimación aprobada y fuente]`.
-- Costo del periodo: `[PENDIENTE: horas reales × tarifa confirmada; adjuntar fuente del cálculo]`.
-- Tendencia (burn-up/burndown): `[PENDIENTE: gráfico/datos, periodo y enlace a fuente]`.
+- Revisión de la evidencia de campo anonimizada del módulo: 14 participantes (11 compradores o consumidores y 3 estudiantes) y SUS 55, según el [Hito 1.3](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/ux-testing/HITO_1.3_VALIDACION_COMPRADORES.md).
+- Definición del alcance de #140: 5 esquemas sin nombres, teléfonos ni coordenadas; hash con sal de al menos 16 bytes.
 
-## Entregables completados
+## Siguientes pasos
 
-`[PENDIENTE: enumerar solo entregables verificables, con enlace/evidencia y fecha real; no hay entregables de semana 1 acreditados en este borrador]`
+- 2026-11-24: revisión cruzada de la especificación y los manifiestos.
+- 2026-12-01: entrega en la Feria de Integración y traspaso a #141.
 
-## Próximos pasos
+## Bloqueos
 
-| Acción | Fecha comprometida | Responsable (`@usuario` o rol) | Evidencia de cierre |
-|---|---|---|---|
-| `[PENDIENTE]` | `[PENDIENTE]` | `[PENDIENTE]` | `[PENDIENTE]` |
+- Faltan el nombre legal de la organización, los responsables `@usuario` y las cifras reales del tablero para cerrar este informe.
 
-## Bloqueos y decisiones solicitadas
+## Decisión solicitada
 
-- Bloqueos: `[PENDIENTE: confirmar con tablero/equipo e indicar impacto]`.
-- Decisiones solicitadas a la organización o Product Owner: `[PENDIENTE: decisión, destinatario y fecha necesaria]`.
-- Semáforo: `[PENDIENTE: aplicar umbrales propuestos y aprobados en la propuesta/plan]`.
+Confirmar si la organización prefiere recibir el reporte en hoja impresa o en nota de voz de un minuto, antes del 2026-11-23.
 
-## Registro de envío
-
-- ¿Se envió a la organización?: No se encontró evidencia; confirmar con el equipo. No marcar como enviado sin constancia.
-- Fecha, medio y rol receptor: `[PENDIENTE DE CONFIRMAR]`.
-- Evidencia de envío/respuesta: `[PENDIENTE: referencia privada o registro anonimizado; no publicar datos personales]`.
-
+**Semáforo:** 🟡 Ámbar — el avance real debe confirmarse con el tablero antes del envío.

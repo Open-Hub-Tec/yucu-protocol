@@ -1,76 +1,75 @@
-﻿# Plan de informe y comunicación
+# Plan de informe · Equipo 2 — Sprint 4
 
-**Proyecto:** Yucu Protocol  
-**Equipo:** Equipo 2 — Equipo de Luis (**EQUIPO LUIS**)  
-**Sprint:** Sprint 4  
-**Repositorio:** Open-Hub-Tec/yucu-protocol  
-**Issues relacionadas:** #198, #209 y #210  
-**Estado:** borrador; canales, responsables y calendario por confirmar
+**Módulo:** [#140 · Attestation specification with test vectors](https://github.com/Open-Hub-Tec/yucu-protocol/issues/140)  
+**Sub-issue:** [#210](https://github.com/Open-Hub-Tec/yucu-protocol/issues/210)  
+**Organización:** Unión de Productores de Miel de San Juan Ñumí, Oaxaca
 
-> Completar con acuerdos reales del equipo y de la organización. Los marcadores no son datos ni compromisos aprobados.
+> **Estado del borrador:** sustituir los corchetes por datos reales. Los integrantes aparecen solo con su `@usuario`; no se publican nombres de personas de la comunidad.
 
 ## Destinatarios
 
-| Destinatario | Información necesaria para decidir | Medio/idioma/horario |
-|---|---|---|
-| Organización destinataria `[PENDIENTE: nombre legal confirmado]` | Avances comprensibles, pruebas/decisiones requeridas, bloqueos y cambios de fecha. | `[PENDIENTE: canal, idioma y horario acordados; considerar baja conectividad]` |
-| Product Owner `[PENDIENTE: rol/persona confirmados]` | Alcance, entregables, riesgos, dependencias y decisiones de producto. | `[PENDIENTE]` |
-| Equipo 2 — Equipo de Luis | Tareas, estado, horas, bloqueos, acuerdos y responsables por `@usuario`. | Tablero GitHub Projects; confirmar frecuencia. |
-| Financiador (si aplica) `[PENDIENTE: confirmar si existe]` | Hitos, uso de recursos y desviaciones relevantes. | `[PENDIENTE]` |
+| Destinatario | Qué necesita saber para decidir |
+| --- | --- |
+| Organización (Unión de Productores de Miel de San Juan Ñumí, Oaxaca) | Si el módulo avanza, qué necesita revisar y en qué fecha; en lenguaje sencillo y sin datos personales. |
+| Product Owner / docente | Cumplimiento de la propuesta, evidencia del tablero y solicitudes de decisión. |
+| Equipo 2 (@LuisAlexisMorales — eduScrum Master, @DiegoSosa-05, @Felix-Angel, @al3-dan) | Qué entregable le toca, bloqueos y próximos compromisos. |
+| Financiador (si aplica) | Horas, costo y entregables verificables, sin prometer ventas ni rendimientos. |
 
 ## Matriz de comunicación
 
-| Qué se comunica | A quién | Cuándo | Medio | Quién responde | Evidencia retenida |
-|---|---|---|---|---|---|
-| Avance, entregables y próximos pasos | Organización | `[PENDIENTE: frecuencia acordada]` | `[PENDIENTE: oral/escrito/impreso, idioma y alternativa sin señal]` | `[PENDIENTE: rol o @usuario]` | Copia anonimizada del informe o registro de envío, con autorización |
-| Bloqueo o riesgo que afecte fecha comprometida | Organización y Product Owner | Antes de la fecha comprometida según plazo acordado | `[PENDIENTE]` | `[PENDIENTE: rol o @usuario]` | Fecha, decisión y minuta sin datos personales |
-| Estado de tareas e indicadores | Equipo 2 | `[PENDIENTE]` | GitHub Projects/Issues `[PENDIENTE: confirmar configuración]` | `[PENDIENTE: @usuario]` | Historial del tablero/enlaces |
-| Decisión de alcance o cambio | Product Owner y equipo | Cuando se requiera decisión | Issue/minuta/reunión `[PENDIENTE]` | `[PENDIENTE: rol o @usuario]` | Acuerdo y tarea registrada en el tablero |
+| Qué se reporta | A quién | Cuándo | Medio | Quién responde | Evidencia que se conserva |
+| --- | --- | --- | --- | --- | --- |
+| Avance semanal y semáforo | Organización y Product Owner | Cada lunes | Nota de voz de un minuto o hoja impresa de una página; también se sube el texto al repo | @al3-dan | `informe-semana-N.md` y confirmación de recepción |
+| Entregables completados y horas | Product Owner y financiador | Al cierre de cada entrega | GitHub Projects, Issues y Milestones | @Felix-Angel | Enlace al tablero, captura de estado y `Insights` |
+| Decisiones solicitadas | Organización y Product Owner | Cuando aparezca un bloqueo, antes de la fecha comprometida | Reunión o asamblea y nota de voz | @DiegoSosa-05 | Minuta en `docs/gestion/equipo-2/minutas/` y tarea en el tablero |
+| Carta de entendimiento | Organización | [FECHA_LECTURA] y [FECHA_ASAMBLEA] | Lectura en voz alta y copia impresa | @LuisAlexisMorales | Minuta de lectura; la firma original queda fuera del repo |
+
+Todo lo que se reporta a la organización se escribe sin nombres, teléfonos ni cargos personales: solo el rol y la comunidad.
 
 ## Formato del informe
 
-El informe dirigido a la organización tendrá una página como máximo (o una nota de voz de hasta un minuto, si ese canal y formato se acuerdan), con lenguaje llano. Respetará idioma, horarios y disponibilidad de conectividad. Si no hay señal, se acordará previamente una alternativa accesible.
+El informe cabe en una página (o en una nota de voz de un minuto) y lleva:
 
-1. Periodo cubierto: `[PENDIENTE]`.
-2. Avance frente al plan aprobado: `[PENDIENTE, con fuente]`.
-3. Entregables completados y evidencia: `[PENDIENTE]`.
-4. Próximos pasos y fechas: `[PENDIENTE]`.
-5. Bloqueos y acciones: `[PENDIENTE]`.
-6. Decisiones solicitadas y fecha requerida: `[PENDIENTE]`.
+1. **Período:** fechas `[DESDE]` a `[HASTA]`.
+2. **Avance contra lo planeado:** entregables planeados y completados con datos del tablero.
+3. **Entregables terminados:** enlaces a commits, PR o documentos.
+4. **Siguientes pasos:** qué se hará y para cuándo.
+5. **Bloqueos:** qué impide avanzar y quién puede desbloquear.
+6. **Decisión solicitada:** una sola pregunta concreta, con fecha límite de respuesta.
 
-No se describirán como enviados informes que no cuenten con evidencia de envío.
+Modelo: [`informe-semana-1.md`](./informe-semana-1.md). El texto se redacta en lenguaje sencillo y, si la organización lo pide, se lee en su lengua antes de enviarse por WhatsApp o en papel.
 
 ## Indicadores de avance
 
-| Indicador | Cálculo/definición | Fuente | Frecuencia/responsable |
-|---|---|---|---|
-| Entregables completados vs. planeados | Entregables completados ÷ entregables planeados × 100; reportar también ambos conteos. | GitHub Projects y lista de entregables aprobada. | Semanal; responsable de seguimiento [PENDIENTE DE CONFIRMAR: @usuario]. |
-| Horas reales vs. estimadas | Horas reales ÷ horas estimadas × 100 por entregable y acumulado; explicar variaciones. | Registro de horas y estimaciones aprobadas [PENDIENTE: fuente disponible]. | Semanal; responsable de horas [PENDIENTE DE CONFIRMAR: @usuario]. |
-| Costo acumulado y variación | Suma de horas reales × tarifa aprobada + costos aprobados; comparar con presupuesto. | Registro de horas, tabla de tarifas con fuente y presupuesto de propuesta [PENDIENTE]. | Semanal; responsable de presupuesto [PENDIENTE DE CONFIRMAR: @usuario]. |
-| Tendencia de avance | Burn-up: suma de entregables completados por periodo frente al total previsto. Si se usa burndown, mostrar trabajo restante por periodo. | GitHub Projects o hoja de cálculo identificada; conservar fuente/exportación. | Semanal; responsable [PENDIENTE DE CONFIRMAR: @usuario]. |
+| Indicador | Cómo se mide | Fuente del dato |
+| --- | --- | --- |
+| Entregables completados vs. planeados | Número de tarjetas en `Done` entre tarjetas con fecha de la semana | GitHub Projects del Sprint 4 |
+| Horas reales vs. estimadas | Suma de horas registradas menos horas planeadas en la propuesta | Tablero y hoja de cálculo de seguimiento |
+| Costo acumulado | Horas reales por tarifa de referencia, sin cobro a la organización | Hoja de cálculo y sección de presupuesto de la propuesta |
+| Burndown / burn-up | Avance de tarjetas y alcance acumulado por semana | GitHub Projects (burn-up) o hoja de cálculo (burndown) |
+| Pruebas del módulo | Porcentaje de vectores que coinciden con `ids.ts` | `npm test` y PR de #140 |
 
-No hay cifras de Project, horas, costos o avance del Equipo 2 disponibles en la auditoría local; completar solo al revisar fuentes originales.
+Cada cifra lleva su fuente. Si el tablero no está disponible, se usa la hoja de cálculo y se anota la fecha de corte; nunca se inventa un dato.
 
 ## Semáforo y escalamiento
 
-Las bandas deben aprobarse con la propuesta y ajustarse a fechas reales; no se establecen umbrales ficticios.
+| Color | Definición medible | Acción |
+| --- | --- | --- |
+| 🟢 Verde | 100% de los entregables de la semana en `Done`, horas reales ≤ estimadas y sin bloqueos. | Reporte normal el lunes. |
+| 🟡 Ámbar | Entre 60% y 99% de entregables en `Done`, o horas reales hasta 20% sobre lo estimado. | Aviso a @LuisAlexisMorales y ajuste del plan en el tablero. |
+| 🔴 Rojo | Menos de 60% de entregables en `Done`, horas reales > 20% sobre lo estimado o bloqueo sin solución. | Escalamiento al Product Owner y a la organización. |
 
-| Estado | Definición medible | Acción |
-|---|---|---|
-| Verde | Propuesta por validar: ≥90 % de entregables del periodo completados y ningún hito crítico vencido. | Mantener el plan y comunicar el avance en el siguiente reporte acordado. |
-| Ámbar | Propuesta por validar: 70–89 % completado, o una previsión documentada de atraso en un hito aún no vencido. | Responsable prepara acciones de recuperación y solicita ajuste/decisión. Avisar antes de la fecha comprometida; plazo y canal [PENDIENTE DE ACORDAR con organización y docente]. |
-| Rojo | Propuesta por validar: <70 %, un hito crítico vencido o bloqueo que impide un entregable comprometido. | Escalar al Product Owner y avisar a la organización con impacto, opciones y decisión requerida. Plazo objetivo propuesto: dentro de un día hábil de detectar el bloqueo; confirmar acuerdo y canal antes de usarlo. |
-
-Los porcentajes y el plazo anteriores son umbrales operativos propuestos, no acuerdos ni resultados observados. Aprobarlos con la propuesta, el docente y la organización antes de usarlos como compromiso.
+**Plazo de aviso:** si una fecha comprometida está en riesgo, se notifica a la organización con al menos **3 días naturales** de anticipación. En caso de sin señal, el aviso se deja por escrito en papel y se conserva la nota de voz local para entregarla cuando haya conexión.
 
 ## Herramientas
 
-| Herramienta | Uso | Justificación por costo, conectividad y usuario | Estado |
-|---|---|---|---|
-| GitHub Projects | Fuente principal de entregables planeados/completados y gráfico burn-up. | Para el equipo, centraliza tareas y permite revisar historial; requiere internet para actualizar. Costo/cuota de la cuenta: [PENDIENTE DE CONFIRMAR]. | Tablero y acceso del Equipo 2 [PENDIENTE DE CONFIRMAR]; responsable [PENDIENTE: @usuario]. |
-| Issues y milestones | Registrar alcance, fechas, bloqueos y decisiones. | Enlazan tareas con criterios y trazabilidad; se consultan en línea. Adecuadas para equipo/docente, no necesariamente para la organización. | Uso y asignación del Equipo 2 [PENDIENTE DE CONFIRMAR]. |
-| Insights | Consultar actividad del repositorio cuando una métrica responda a una pregunta de avance. | Puede requerir conexión; usar solo si la métrica aporta información distinta del tablero. Costo y permisos [PENDIENTE DE CONFIRMAR]. | Métrica y responsable [PENDIENTE: @usuario]. |
-| Hoja de cálculo | Registrar horas y tarifas si Projects no contiene esos campos; graficar burndown si se elige esa alternativa. | Puede consultarse sin conexión si se prepara localmente; revisar costo/licencia, acceso y respaldo antes de elegir herramienta. | Herramienta, costo y responsable [PENDIENTE DE CONFIRMAR]. |
-| Nota de voz | Resumen breve para la organización, solo si el canal es acordado y accesible. | Puede funcionar con baja conectividad mediante entrega diferida; confirmar idioma, dispositivo y costo. No subir audio al repositorio: conservar solo texto anonimizado si procede. | Acuerdo, emisor por rol y receptor por rol [PENDIENTE DE CONFIRMAR]. |
-| Hoja impresa | Entregar resumen de una página cuando no haya señal o así lo prefiera la organización. | Acceso sin internet; costo de impresión, traslado y resguardo deben confirmarse. | Usuario, costo y punto de entrega [PENDIENTE DE CONFIRMAR]. |
+| Herramienta | Uso | Por qué se eligió |
+| --- | --- | --- |
+| GitHub Projects | Tablero, burndown/burn-up y estado de entregables | Gratuito, visible para el equipo y con historial; requiere conexión. |
+| Issues y Milestones | Seguimiento de #209, #210, #211 y del módulo #140 | Cada acuerdo queda como tarea con responsable y fecha. |
+| GitHub Insights | Conteo de commits y participación por integrante | Evidencia automática de trabajo en equipo, sin correos personales. |
+| Hoja de cálculo | Horas, tarifas y burndown alternativo | Funciona sin conexión y la puede imprimir la organización. |
+| Nota de voz de un minuto | Reporte en lenguaje sencillo | Útil cuando la escritura es difícil; el audio se comparte fuera del repo y solo el texto entra aquí. |
+| Hoja impresa y WhatsApp | Entrega final cuando hay sin conexión o poca conectividad | La organización decide qué medio prefiere; ambos son de bajo costo. |
 
+La organización puede elegir papel o nota de voz; el repo público solo guarda el texto anonimizado.
