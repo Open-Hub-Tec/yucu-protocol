@@ -160,7 +160,7 @@ app.get(["/api/download/docx", "/Raiz_Protocol_Stellar_PitchDeck.docx"], (_req: 
 
 // SYSTEM INSTRUCTIONS: STRICT DOMAIN GUARDRAILS & ELDERLY-ACCESSIBLE DESIGN FOR RAÍZ
 const SYSTEM_INSTRUCTION = `
-Eres el Asistente Inteligente y Comunitario Oficial de "Yucu", una plataforma comunitaria desarrollada junto al Instituto Tecnológico de Tlaxiaco (Oaxaca, México) para familias campesinas, caficultoras, apicultoras y artesanas de la Mixteca Alta.
+Eres el Asistente Inteligente y Comunitario de "Yucu", una plataforma comunitaria desarrollada junto al Instituto Tecnológico de Tlaxiaco (Oaxaca, México) para familias campesinas, caficultoras, apicultoras y artesanas de la Mixteca Alta.
 
 MISIÓN PRINCIPAL: ELIMINAR LA FRICCIÓN PARA ADULTOS MAYORES Y CAMPESINOS:
 - La gran mayoría de usuarios son personas adultas mayores (abuelos, personas de campo de 60+ años) con poca experiencia tecnológica, vista cansada o teléfonos sencillos.
@@ -193,7 +193,7 @@ SOLICITUDES DE REGISTRO DE PRODUCTO O COSECHA:
 
 ¿QUÉ HACE LA APLICACIÓN RAÍZ Y CÓMO FRENAR LA FRICCIÓN?
 Cuando pregunten qué hace la aplicación, cómo funciona o para qué sirve, explica en 4 puntos muy directos y humanos:
-1. 📸 EVALUACIÓN RÁPIDA CON FOTO: El productor solo le toma una foto a sus granos de café, miel o artesanía con su celular. La IA del Tec de Tlaxiaco analiza en 3 segundos la humedad (10-12%), granos vanos y broca para emitir su Dictamen Oficial sin trámites ni cobros de peritos.
+1. 📸 EVALUACIÓN RÁPIDA CON FOTO: El productor solo le toma una foto a sus granos de café, miel o artesanía con su celular. La IA del Tec de Tlaxiaco analiza en 3 segundos la humedad (10-12%), granos vanos y broca para emitir su Dictamen de Demostración sin trámites ni cobros de peritos.
 2. 💰 PAGO DIRECTO Y JUSTO: Se elimina a los intermediarios ("coyotes"). El dinero de su cosecha se deposita directo a su billetera protegida ($85-$115/kg vs $35 que pagan afuera) y pueden cobrarlo en efectivo en Tlaxiaco o en su comunidad.
 3. 🏷️ SELLO Y PASAPORTE COMUNITARIO: Certificación de origen en la red Stellar para que cafeterías de especialidad compren su lote a precio de exportación.
 4. 🚚 FLETE Y RECOLECCIÓN LOCAL: Camionetas comunitarias recogen la cosecha en su parcela con tarifa fija transparente.
@@ -400,7 +400,7 @@ function getDomainFallback(message: string): {
   ) {
     return {
       reply:
-        "¡Con mucho gusto, paisano! La plataforma Yucu fue creada junto al Tec de Tlaxiaco para que las familias del campo reciban un pago justo por su cosecha y no dependan de intermediarios ('coyotes').\n\nAquí puede realizar 4 cosas muy sencillas con un solo toque:\n\n1. 📸 Evaluar su cosecha con foto: Le toma foto a sus granos de café o producto y la IA revisa la humedad y calidad en 3 segundos sin costo.\n2. 💰 Ver y retirar su dinero: El pago de sus cosechas se guarda seguro en su billetera comunitaria ($85/kg o más) y puede cobrarlo en efectivo en Tlaxiaco.\n3. 🏷️ Pasaporte y Sello Oficial: Su lote recibe certificación con sello digital para venderlo a cafeterías de especialidad a precio alto.\n4. 🚚 Flete y transporte en parcela: Las camionetas de la región recogen los sacos en su comunidad con tarifa fija acordada.",
+        "¡Con mucho gusto, paisano! La plataforma Yucu fue creada junto al Tec de Tlaxiaco para que las familias del campo reciban un pago justo por su cosecha y no dependan de intermediarios ('coyotes').\n\nAquí puede realizar 4 cosas muy sencillas con un solo toque:\n\n1. 📸 Evaluar su cosecha con foto: Le toma foto a sus granos de café o producto y la IA revisa la humedad y calidad en 3 segundos sin costo.\n2. 💰 Ver y retirar su dinero: El pago de sus cosechas se guarda seguro en su billetera comunitaria ($85/kg o más) y puede cobrarlo en efectivo en Tlaxiaco.\n3. 🏷️ Pasaporte y Sello Digital: Su lote recibe certificación con sello digital para venderlo a cafeterías de especialidad a precio alto.\n4. 🚚 Flete y transporte en parcela: Las camionetas de la región recogen los sacos en su comunidad con tarifa fija acordada.",
       agent: "🤖 Asistente Comunitario Yucu",
       cardType: null,
       options: [
@@ -457,7 +457,7 @@ function getDomainFallback(message: string): {
         },
         {
           id: 2,
-          title: "📜 Consultar Dictamen Oficial",
+          title: "📜 Consultar Dictamen de Demostración",
           subtitle: "Ver parámetros de la norma",
           icon: "verified",
           action: "ver_dictamen",
@@ -557,7 +557,7 @@ function getDomainFallback(message: string): {
   ) {
     return {
       reply:
-        "Disculpe paisano, como asistente oficial de Yucu en la Mixteca, únicamente puedo responder consultas sobre cosechas, evaluación con foto, trazabilidad en Stellar, pagos comunitarios y asesoría para productores de la región. ¿En qué podemos apoyarle con su producto?",
+        "Disculpe paisano, como asistente de Yucu en la Mixteca, únicamente puedo responder consultas sobre cosechas, evaluación con foto, trazabilidad en Stellar, pagos comunitarios y asesoría para productores de la región. ¿En qué podemos apoyarle con su producto?",
       agent: "🤖 Asistente Comunitario Yucu",
       cardType: null,
     };
@@ -930,7 +930,7 @@ app.post("/api/analyze-image", async (req: Request, res: Response) => {
           agroecologicalFreePesticides: true,
           complianceStatus: "Aprobado para Sello Stellar Inmutable",
         },
-        recomendacion: "Lote conforme a Norma Oficial. Proceder al sellado criptográfico en Stellar Testnet.",
+        recomendacion: "Lote conforme a norma de referencia. Proceder al sellado criptográfico en Stellar Testnet.",
         cardType: "dictamen_stellar",
         agent: "🌿 Asesoría Agronómica TecNM",
         isSimulated: true,
@@ -938,7 +938,7 @@ app.post("/api/analyze-image", async (req: Request, res: Response) => {
     }
 
     const visionPrompt = `Actúa como el Agente Agrónomo e Investigador de Calidad del Instituto Tecnológico de Tlaxiaco (Mixteca Alta de Oaxaca).
-Analiza detalladamente esta fotografía tomada por un productor campesino para la certificación y sellado inmutable en Stellar bajo Normas Oficiales Mexicanas de Café (NMX-F-083-COFOCAFE, NOM-255-SCFI-2018).
+Analiza detalladamente esta fotografía tomada por un productor campesino para la certificación y sellado inmutable en Stellar bajo normas mexicanas de referencia de Café (NMX-F-083-COFOCAFE, NOM-255-SCFI-2018).
 
 REGLA FUNDAMENTAL DE VERIFICACIÓN VISUAL:
 1. PASO 1 - IDENTIFICACIÓN REAL DEL PRODUCTO:
@@ -956,14 +956,14 @@ REGLA FUNDAMENTAL DE VERIFICACIÓN VISUAL:
 2. PASO 2 - AUDITORÍA NORMATIVA NOM / NMX (SI ES CAFÉ):
    - Conforme a NMX-F-083:
      * Inspecciona la muestra física: cuenta defectos primarios (grano negro, agrio, moho) y secundarios (quebrados, mordeduras, conchas).
-     * Estima el porcentaje de humedad aparente (el rango oficial normativo es 10.0% a 12.0%).
+     * Estima el porcentaje de humedad aparente (el rango de referencia es 10.0% a 12.0%).
      * Dictamina si es "Calidad Especialidad / Exportación" (defectos < 2%) o "Estándar".
    - Conforme a NOM-255-SCFI (Oaxaca):
      * Valida pureza varietal de altura (Typica Pluma / Bourbon).
 
 ${prompt ? `Contexto o mensaje adicional del usuario: "${prompt}"\n` : ""}
 Responde estrictamente en formato JSON con la siguiente estructura. Los valores entre <> describen el tipo; NO los copies.
-Si la imagen no permite estimar un valor con honestidad, usa null. No inventes cifras ni certificaciones: tu respuesta es una estimación de IA, no un dictamen oficial.
+Si la imagen no permite estimar un valor con honestidad, usa null. No inventes cifras ni certificaciones: tu respuesta es una estimación de IA, no un dictamen de demostración.
 {
   "isCoffee": <true | false>,
   "detectedCategory": "<cafe | miel | pulque | chocolate | textil | otro>",
@@ -982,7 +982,7 @@ Si la imagen no permite estimar un valor con honestidad, usa null. No inventes c
     "strictAltitude": <true | false | null>,
     "botanicalPurity": "<texto o null>",
     "agroecologicalFreePesticides": <true | false | null>,
-    "complianceStatus": "<texto; nunca afirmes conformidad oficial>"
+    "complianceStatus": "<texto; nunca afirmes conformidad de referencia>"
   },
   "recomendacion": "<recomendación técnica y comercial para el productor>",
   "analysis": "<explicación en 3 o 4 viñetas dirigida con respeto y calidez comunitaria al productor ('paisano/Don/Doña')>"
@@ -1052,7 +1052,7 @@ Si la imagen no permite estimar un valor con honestidad, usa null. No inventes c
         strictAltitude: true,
         botanicalPurity: "100% Nativa Typica Pluma",
         agroecologicalFreePesticides: true,
-        complianceStatus: "Conforme a Norma Oficial",
+        complianceStatus: "Conforme a norma de referencia",
       },
       recomendacion: parsed.recomendacion || (isHoney ? "Producto excelente para la Vitrina Comunitaria de Miel del Tec." : "Proceder al registro del lote y sellado en Stellar."),
       cardType: isHoney ? "producto_vitrina" : (isCoffee ? "dictamen_stellar" : "trazabilidad_pasaporte"),

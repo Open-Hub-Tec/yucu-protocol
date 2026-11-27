@@ -129,3 +129,44 @@ fn el_dueno_no_se_vende_a_si_mismo() {
         .try_execute_secondary_sale(&s.item_id, &s.artisan, &s.token, &10_000);
     assert_eq!(res, Err(Ok(RoyaltyError::Unauthorized)));
 }
+
+#[test]
+fn no_permite_registrar_la_misma_pieza_dos_veces() {
+    let s = setup();
+    let otra_artesana = Address::generate(&s.env);
+    let otra_comunidad = Address::generate(&s.env);
+    let res = s.client.try_register_heritage_item(
+        &s.item_id,
+        &otra_artesana,
+        &otra_comunidad,
+        &BytesN::from_array(&s.env, &[9u8; 32]),
+        &String::from_str(&s.env, "Pieza duplicada"),
+    );
+    assert_eq!(res, Err(Ok(RoyaltyError::ItemAlreadyRegistered)));
+}
+
+#[test]
+fn reventa_o_consulta_de_pieza_inexistente_devuelve_error() {
+    let s = setup();
+    let buyer = Address::generate(&s.env);
+    let inexistente = BytesN::from_array(&s.env, &[99u8; 32]);
+
+    let res_get = s.client.try_get_item(&inexistente);
+    assert_eq!(res_get, Err(Ok(RoyaltyError::ItemNotFound)));
+
+    let res_sale = s
+        .client
+        .try_execute_secondary_sale(&inexistente, &buyer, &s.token, &10_000);
+    assert_eq!(res_sale, Err(Ok(RoyaltyError::ItemNotFound)));
+}
+
+#[test]
+fn reventa_falla_si_el_comprador_no_tiene_saldo() {
+    let s = setup();
+    let comprador_sin_fondos = Address::generate(&s.env);
+    let res =
+        s.client
+            .try_execute_secondary_sale(&s.item_id, &comprador_sin_fondos, &s.token, &10_000);
+    assert!(res.is_err());
+    assert_eq!(s.client.get_item(&s.item_id).current_owner, s.artisan);
+}

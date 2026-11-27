@@ -70,7 +70,7 @@ export const MyPaymentsModal: React.FC<MyPaymentsModalProps> = ({
 
   const handleShareSpei = async () => {
     const text = 
-      `🏛️ COMPROBANTE OFICIAL DE TRANSFERENCIA SPEI A TARJETA BIENESTAR\n\n` +
+      `🏛️ COMPROBANTE DE DEMOSTRACIÓN DE TRANSFERENCIA SPEI A TARJETA BIENESTAR\n\n` +
       `¡Hola ${cardHolder}! Su pago de café ha sido transferido exitosamente a su cuenta:\n` +
       `💵 Monto: $${totalAvailable.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN\n` +
       `💳 Banco Receptor: Banco del Bienestar (México)\n` +
@@ -194,7 +194,7 @@ export const MyPaymentsModal: React.FC<MyPaymentsModalProps> = ({
                 ${totalAvailable.toLocaleString('es-MX', { minimumFractionDigits: 2 })} MXN
               </span>
               <span className="text-[11px] text-[#abcfb8]">
-                Sin comisión (0%)
+                Sin comisión
               </span>
             </div>
 
@@ -552,7 +552,7 @@ export const MyPaymentsModal: React.FC<MyPaymentsModalProps> = ({
                   <p><strong>Beneficiario:</strong> Don Aurelio Bautista Santiago</p>
                   <p><strong>Puntos de Cobro en Tlaxiaco:</strong> Banco del Bienestar o Finabien Centro</p>
                   <p><strong>Requisito:</strong> Presentar Credencial INE original (sin tarjeta ni cuenta bancaria).</p>
-                  <p><strong>Vigencia:</strong> 15 días naturales · 0% comisión.</p>
+                  <p><strong>Vigencia:</strong> 15 días naturales · sin comisión.</p>
                 </div>
               </div>
             )}

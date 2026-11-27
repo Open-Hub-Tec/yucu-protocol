@@ -2,7 +2,7 @@
 <!-- Explica brevemente qué cambiaste y por qué -->
 
 ### 📌 Issue Vinculada (obligatoria)
-<!-- Reemplaza con el número de tu issue asignada -->
+<!-- Reemplaza con el número de tu issue asignada. Un solo PR por issue: si te piden cambios, súbelos a este mismo PR (misma rama); no abras otro. -->
 Resolves #
 
 ---
@@ -26,6 +26,7 @@ Resolves #
 - [ ] Sin nombres de personas entrevistadas, teléfonos, llaves ni secretos en código, pruebas o logs.
 - [ ] Si cambié pantallas, las probé en un celular y en Modo Abuelo.
 - [ ] Puedo explicar cada parte de mi código en la revisión.
+- [ ] Es el único PR abierto para mi issue y lo hice desde una rama `feat/issue-<número>`, no desde `main`.
 - [ ] (Opcional) Corrí el agente `yucu-revisor` en Claude Code ("revisa mis cambios") y atendí lo que encontró.
 
 ---

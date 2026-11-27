@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { BotCardData, DigitalPassportLot, ScreenView } from '../types';
 
 interface BotCardViewProps {
@@ -495,12 +496,12 @@ export const BotCardView: React.FC<BotCardViewProps> = ({
             </div>
           </div>
           <span className="text-[11px] bg-rose-950/80 text-rose-300 px-2.5 py-0.5 rounded-full border border-rose-500/40 font-bold">
-            10% Regalía
+            {`${PROTOCOL_FEES.artisanResaleRoyaltyPct}% Regalía`}
           </span>
         </div>
 
         <p className="text-[12px] text-rose-100/90 leading-relaxed">
-          Protección contra el despojo artesanal: Cada vez que esta pieza se revende en galerías o boutiques de México o el extranjero, el contrato transfiere automáticamente el 10% a la artesana original.
+          {`Protección contra el despojo artesanal: Cada vez que esta pieza se revende en galerías o boutiques de México o el extranjero, el contrato transfiere automáticamente el ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% a la artesana original.`}
         </p>
 
         <div className="bg-black/25 rounded-xl p-3 border border-white/10 flex flex-col gap-2 text-[12px]">
@@ -540,13 +541,13 @@ export const BotCardView: React.FC<BotCardViewProps> = ({
     );
   }
 
-  // CARD 9: RECIBO / COMPROBANTE OFICIAL DE COMPRA (ÚLTIMO EVENTO DEL FLUJO)
+  // CARD 9: RECIBO / COMPROBANTE DE DEMOSTRACIÓN DE COMPRA (ÚLTIMO EVENTO DEL FLUJO)
   if (card.type === 'recibo_ticket') {
     const folio = card.data?.id || 'REC-MIX-2024-8841';
     const total = card.data?.total || 480;
     const artisanName = card.data?.artisanName || 'Doña Juana Bautista';
     const location = card.data?.location || 'San Juan Mixtepec, Oaxaca';
-    const paymentMethod = card.data?.paymentMethod || 'Transferencia Directa SPEI (0% Comisión)';
+    const paymentMethod = card.data?.paymentMethod || 'Transferencia Directa SPEI (sin comisión)';
     const summary = card.data?.summary || 'Piezas artesanales de la Mixteca';
     const stellarLedger = card.data?.stellarTxLedger || 52499210;
     const stellarHash = card.data?.stellarTxHash || '0x7e29a8f4c100e439281b9921ef45a8823b10';
@@ -561,7 +562,7 @@ export const BotCardView: React.FC<BotCardViewProps> = ({
             </span>
             <div>
               <p className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
-                Comprobante Oficial · Yucu Protocol
+                Comprobante de Demostración · Yucu Protocol
               </p>
               <h4 className="text-[15px] font-bold text-white leading-tight">
                 Folio #{folio}
@@ -647,7 +648,7 @@ export const BotCardView: React.FC<BotCardViewProps> = ({
           <button
             type="button"
             onClick={() => {
-              const textToCopy = `🧾 COMPROBANTE OFICIAL DE COMPRA DIRECTA · RAÍZ PROTOCOLO\nFolio: #${folio}\nTotal: $${total} MXN (100% Directo a Artesana)\nArtesana: ${artisanName} (${location})\nPago: ${paymentMethod}\nStellar Ledger: #${stellarLedger}\nEstatus: Pago Confirmado · En preparación`;
+              const textToCopy = `🧾 COMPROBANTE DE DEMOSTRACIÓN DE COMPRA DIRECTA · RAÍZ PROTOCOLO\nFolio: #${folio}\nTotal: $${total} MXN (100% Directo a Artesana)\nArtesana: ${artisanName} (${location})\nPago: ${paymentMethod}\nStellar Ledger: #${stellarLedger}\nEstatus: Pago Confirmado · En preparación`;
               navigator.clipboard?.writeText(textToCopy);
               setCopiedHash(true);
               setTimeout(() => setCopiedHash(false), 2000);

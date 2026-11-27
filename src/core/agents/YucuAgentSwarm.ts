@@ -12,6 +12,7 @@
  * 6. SettlementSolverAgent: Ruteo óptimo de liquidación multilateral a moneda local
  */
 
+import { PROTOCOL_FEES } from '../../config/protocolFees';
 import { CryptoEngine } from '../crypto/CryptoEngine';
 
 export interface AgentAttestationProof {
@@ -129,7 +130,7 @@ export class YucuAgentSwarm {
 
   /**
    * 5. Agente Guardián de Patrimonio Cultural Indígena & Regalías Perpetuas
-   * Innovación: Blindaje contra plagio de marcas transnacionales y retención del 10% artesano + 2% Tequio
+   * Innovación: Blindaje contra plagio de marcas transnacionales y regalías de reventa según PROTOCOL_FEES
    */
   public static async runIndigenousIPGuardianAgent(params: {
     artisanCommunity: string;
@@ -145,7 +146,7 @@ export class YucuAgentSwarm {
       attestationDigest: `0x_cultural_shield_${params.artisanCommunity.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`,
       status: isCompliant ? 'CERTIFIED' : 'REJECTED',
       metricScore: isCompliant ? 100.0 : 0.0,
-      evidenceSummary: `Diseño tradicional registrado a nombre de la asamblea comunal de ${params.artisanCommunity}. Licencia comunitaria no exclusiva y regalía perpetua (10% creador + 2% Tequio) programada en Soroban.`,
+      evidenceSummary: `Diseño tradicional registrado a nombre de la asamblea comunal de ${params.artisanCommunity}. Licencia comunitaria no exclusiva y regalía perpetua (${PROTOCOL_FEES.artisanResaleRoyaltyPct}% creador + ${PROTOCOL_FEES.resaleTequioPct}% Tequio) programada en Soroban.`,
       timestamp: new Date().toISOString(),
       standardsCompliance: [
         'Ley Federal de Protección del Patrimonio Cultural de los Pueblos Indígenas (2022)',
@@ -170,7 +171,7 @@ export class YucuAgentSwarm {
       attestationDigest: `0x_path_payment_stellar_amm_${params.destinationCountry}_${params.amountUSDC}`,
       status: 'CERTIFIED',
       metricScore: 99.9,
-      evidenceSummary: `Ruta óptima trazada en Stellar DEX: $${params.amountUSDC} USDC convertidos a moneda local vía ancla regulada (${params.settlementRail}) con 0% comisión al productor.`,
+      evidenceSummary: `Ruta óptima trazada en Stellar DEX: $${params.amountUSDC} USDC convertidos a moneda local vía ancla regulada (${params.settlementRail}) sin comisión para el productor.`,
       timestamp: new Date().toISOString(),
       standardsCompliance: ['Stellar Path Payment Strict Receive', 'Banxico SPEI Regulation', 'Banco Central do Brasil PIX'],
     };

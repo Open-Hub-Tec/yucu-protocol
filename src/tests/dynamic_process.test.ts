@@ -1,3 +1,4 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 import { ProcessStage, DynamicSpec, DigitalPassportLot } from '../types';
 import { CryptoEngine } from '../core/crypto/CryptoEngine';
@@ -180,7 +181,7 @@ assert(normalizeMixtecoVoiceIntent(voiceSample1).length > 0, 'Normalizador de vo
 assert(normalizeMixtecoVoiceIntent(voiceSample2).includes('opcion 1'), 'Detección robusta de opción por comando de voz');
 assert(normalizeMixtecoVoiceIntent(voiceSample3).includes('telar'), 'Captura de texto para la creación de etapas');
 
-// C. Verificación de Regalías Justas Comunitarias (10% Productor + 2% Tequio, ver src/config/protocolFees.ts)
+// C. Verificación de Regalías Justas Comunitarias (ver src/config/protocolFees.ts)
 function calculateSplits(saleAmountMxn: number) {
   const r = FairTradeEngine.calculateSecondaryRoyalty(saleAmountMxn);
   return { producerRoyalty: r.artisanRoyaltyMxn, tequioFund: r.cooperativeFundMxn, sellerNet: r.sellerNetMxn };
@@ -189,8 +190,8 @@ function calculateSplits(saleAmountMxn: number) {
 const sampleResale = 5000; // Un textil de reventa en galería de arte por $5,000 MXN
 const splits = calculateSplits(sampleResale);
 
-assert(splits.producerRoyalty === 500, `Regalía del 10% calculada con exactitud ($500 MXN de $5,000 MXN)`);
-assert(splits.tequioFund === 100, `Fondo comunitario de tequio del 2% asignado ($100 MXN de $5,000 MXN)`);
+assert(splits.producerRoyalty === Math.round((sampleResale * PROTOCOL_FEES.artisanResaleRoyaltyPct) / 100), `Regalía del ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% calculada con exactitud ($500 MXN de $5,000 MXN)`);
+assert(splits.tequioFund === Math.round((sampleResale * PROTOCOL_FEES.resaleTequioPct) / 100), `Fondo comunitario de tequio del ${PROTOCOL_FEES.resaleTequioPct}% asignado ($100 MXN de $5,000 MXN)`);
 assert(splits.producerRoyalty + splits.tequioFund + splits.sellerNet === sampleResale, 'Conservación matemática del 100% de los fondos sin fuga financiera');
 
 // Ejecución asíncrona de pruebas criptográficas

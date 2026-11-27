@@ -116,7 +116,8 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
       const released = escrowAdapter.releaseMilestonePayment(escrowOrder.escrowId, 'm2');
       if (released) {
         setEscrowOrder({ ...released });
-        setEscrowFeedback('🎉 Hito 2 Liberado: 70% restante ($7,000 MXN) liquidado al entregar en bodega de Tlaxiaco. Escrow completado con 0% de comisiones.');
+        const mensaje = '🎉 Hito 2 Liberado: 70% restante ($7,000 MXN) liquidado al entregar en bodega de Tlaxiaco. Escrow completado; el productor no paga nada.';
+        setEscrowFeedback(mensaje);
       }
     }
   };
@@ -253,7 +254,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
               href="/api/download/docx"
               download="Yucu_Protocol_Stellar_PitchDeck.docx"
               className="py-1 px-2.5 rounded-xl bg-blue-700 hover:bg-blue-600 text-white font-black text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer border border-blue-500/40"
-              title="Descargar Dossier Oficial en formato Microsoft Word (.docx)"
+              title="Descargar Dossier en formato Microsoft Word (.docx)"
             >
               <span>📄</span>
               <span>Word (.docx)</span>
@@ -262,7 +263,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
               href="/api/download/pptx"
               download="Yucu_Protocol_Stellar_PitchDeck.pptx"
               className="py-1 px-2.5 rounded-xl bg-linear-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-neutral-950 font-black text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer border border-amber-500/30"
-              title="Descargar Presentación Oficial en Microsoft PowerPoint (.pptx)"
+              title="Descargar Presentación en Microsoft PowerPoint (.pptx)"
             >
               <span>📊</span>
               <span>PowerPoint (.pptx)</span>
@@ -418,7 +419,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
                   {eudrResult && (
                     <div className="bg-gray-900 text-emerald-400 p-4 rounded-xl text-xs font-mono space-y-2 overflow-x-auto">
                       <div className="text-white/80 font-bold border-b border-gray-800 pb-1">Reporte de Conformidad EUDR emitido:</div>
-                      <div>Folio Oficial: {eudrResult.complianceId}</div>
+                      <div>Folio de Demostración: {eudrResult.complianceId}</div>
                       <div>Deforestación Detectada: {eudrResult.forestCoverLossDetected ? 'SÍ' : 'NO (0.00% pérdida)'}</div>
                       <div>Densidad de Dosel Forestal: {eudrResult.canopyDensityPercent}%</div>
                       <div className="text-amber-300">Digest de Certificación: {eudrResult.certificationDigest}</div>
@@ -634,7 +635,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
                   </span>
                 </div>
                 <p className="text-xs text-amber-900 leading-relaxed font-medium">
-                  En lugar de custodiar fondos en contratos no auditados, Yucu adopta la infraestructura de <strong>Trustless Work</strong> en Soroban con un cronograma de 2 hitos para proteger la cosecha campesina con 0% de comisiones ocultas y arbitraje comunitario cooperativo en Tlaxiaco.
+                  En lugar de custodiar fondos en contratos propios, Yucu adopta la infraestructura de <strong>Trustless Work</strong> en Soroban con un cronograma de 2 hitos para proteger la cosecha campesina sin comisiones ocultas y arbitraje comunitario cooperativo en Tlaxiaco.
                 </p>
               </div>
 
@@ -803,7 +804,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
               {/* UX Usability Pillars */}
               <div className="bg-neutral-900 text-white p-4 rounded-2xl space-y-2 font-mono text-xs">
                 <div className="font-bold text-emerald-400 mb-1 border-b border-neutral-800 pb-1">
-                  Métricas de Usabilidad Auditadas en Campo (Hito 1.2):
+                  Observaciones de usabilidad en campo (Hito 1.2):
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-neutral-300">
                   <div>✓ Botonera táctil de 112px ergonómica para adultos mayores</div>
@@ -1008,7 +1009,7 @@ export const ProtocolInfrastructureModal: React.FC<ProtocolInfrastructureModalPr
 import { YucuProtocolSDK } from '@yucu-protocol/sdk';
 
 const yucu = new YucuProtocolSDK({
-  network: 'stellar-mainnet',
+  network: 'stellar-testnet',
   sponsorGas: true // Stellar CAP-0015 Fee-Bump patrocinado
 });
 
@@ -1058,7 +1059,7 @@ curl -X POST https://yucu.tecnm.mx/api/v1/attestations/verify \\
                     <span className="text-xl">🦅</span>
                     <div>
                       <h5 className="text-xs font-black uppercase tracking-wider text-blue-200">
-                        Stellar Raven (MCP Server Oficial de SDF)
+                        Stellar Raven (servidor MCP de la comunidad)
                       </h5>
                       <p className="text-[11px] text-blue-300/80">
                         Servidor de Model Context Protocol para asistir el desarrollo en Soroban sin errores ni alucinaciones.
@@ -1111,7 +1112,7 @@ curl -X POST https://yucu.tecnm.mx/api/v1/attestations/verify \\
                   <pre>{`import { YucuProtocolSDK } from '@yucu-protocol/sdk';
 
 // 1. Inicializar el cliente del protocolo
-const yucu = new YucuProtocolSDK({ network: 'stellar-mainnet', sponsorGas: true });
+const yucu = new YucuProtocolSDK({ network: 'stellar-testnet', sponsorGas: true });
 
 // 2. Ejecutar el oráculo de IA para voz en Mixteco
 const voiceLot = yucu.ai.processVoiceLot(farmerAudioTranscript, 'tuun_savi');

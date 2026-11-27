@@ -1,15 +1,8 @@
 import React, { StrictMode, Component, ReactNode, ErrorInfo } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { browserStorage, purgeLegacyBuyerLeads } from './core/privacy/legacyBuyerLeads';
 import './index.css';
-import { purgeLegacyBuyerLeads } from './utils/buyerInterviewPrivacy';
-
-// Privacidad (#121): borra los nombres y teléfonos de compradores que guardaban versiones anteriores.
-try {
-  purgeLegacyBuyerLeads(window.localStorage);
-} catch (e) {
-  console.error('No se pudo limpiar el almacenamiento local de compradores:', e);
-}
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -64,6 +57,9 @@ class RootErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundar
     return this.props.children;
   }
 }
+
+// #121: borra los nombres y teléfonos de compradores que guardaban versiones anteriores.
+purgeLegacyBuyerLeads(browserStorage());
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

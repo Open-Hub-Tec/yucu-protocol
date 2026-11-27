@@ -1,3 +1,4 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { FairTradeEngine } from '../core/policy/FairTradeEngine';
 /**
  * SUITE INTEGRAL DE PRUEBAS DE PUNTA A PUNTA (E2E)
@@ -142,13 +143,13 @@ async function runCompleteSystemAudit() {
 
   // Simulación de reventa en una boutique o cafetería de especialidad en EE.UU. o Europa
   const montoVentaMxn = 12000; // $12,000 MXN por un huipil ceremonial
-  const reparto = FairTradeEngine.calculateSecondaryRoyalty(montoVentaMxn); // porcentajes oficiales
-  const regaliaCampesina = reparto.artisanRoyaltyMxn; // 10%
-  const fondoTequio = reparto.cooperativeFundMxn;     // 2%
+  const reparto = FairTradeEngine.calculateSecondaryRoyalty(montoVentaMxn); // porcentajes del protocolo
+  const regaliaCampesina = reparto.artisanRoyaltyMxn; // según PROTOCOL_FEES
+  const fondoTequio = reparto.cooperativeFundMxn;     // según PROTOCOL_FEES
   const liquidezVendedor = reparto.sellerNetMxn;      // 88%
 
-  check(regaliaCampesina === 1200, `Regalía de la artesana del 10% liquidada con exactitud ($1,200 MXN de $12,000 MXN)`);
-  check(fondoTequio === 240, `Aporte al Tequio Comunal del 2% acreditado ($240 MXN para obras del pueblo)`);
+  check(regaliaCampesina === Math.round((montoVentaMxn * PROTOCOL_FEES.artisanResaleRoyaltyPct) / 100), `Regalía de la artesana del ${PROTOCOL_FEES.artisanResaleRoyaltyPct}% liquidada con exactitud ($1,200 MXN de $12,000 MXN)`);
+  check(fondoTequio === Math.round((montoVentaMxn * PROTOCOL_FEES.resaleTequioPct) / 100), `Aporte al Tequio Comunal del ${PROTOCOL_FEES.resaleTequioPct}% acreditado ($240 MXN para obras del pueblo)`);
   check(regaliaCampesina + fondoTequio + liquidezVendedor === montoVentaMxn, 'Conservación estricta del 100% del dinero sin comisiones ocultas');
 
   // -------------------------------------------------------------------------

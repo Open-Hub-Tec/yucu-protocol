@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BuyerInterviewRecord } from '../types';
-import { loadBuyerInterviews, nextBuyerCode, saveBuyerInterviews } from '../utils/buyerInterviewPrivacy';
+import React, { useState } from 'react';
+import { browserStorage } from '../core/privacy/legacyBuyerLeads';
+import {
+  readContactConsentTally,
+  recordContactConsent,
+  type ContactConsentTally,
+} from '../core/privacy/contactConsentTally';
 
-type BuyerResearchTab = 'template' | 'campo' | 'entrevistas' | 'guide' | 'example';
+// #121: esta pantalla no guarda nombres ni teléfonos de compradores (PRIVACIDAD.md, reglas 2 y 5).
+// Solo se anota si la persona aceptó que la contacten (sí/no); el contacto va en la carpeta privada.
+type BuyerResearchTab = 'template' | 'campo' | 'guide' | 'example';
 
 interface BuyerResearchIssueModalProps {
   isOpen: boolean;
@@ -19,8 +25,7 @@ export const BuyerResearchIssueModal: React.FC<BuyerResearchIssueModalProps> = (
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [copied, setCopied] = useState<boolean>(false);
 
-  // Formulario de campo. El comprador se identifica solo con un código anónimo (C-01, C-02, …):
-  // nunca se pide ni se guarda su nombre o teléfono (docs/research/PRIVACIDAD.md, reglas 2 y 5).
+  // Formulario de campo: resumen de la entrevista, sin datos de contacto del comprador.
   const [studentName, setStudentName] = useState('');
   const [studentGroup, setStudentGroup] = useState('5º Semestre Grupo B - Ing. en Sistemas Computacionales');
   const [buyerCity, setBuyerCity] = useState('Tlaxiaco, Oaxaca');
@@ -36,24 +41,10 @@ export const BuyerResearchIssueModal: React.FC<BuyerResearchIssueModalProps> = (
   const [buyerQuote, setBuyerQuote] = useState('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
-  // Entrevistas anónimas guardadas en este dispositivo (solo código C-NN, sin datos de contacto)
-  const [interviews, setInterviews] = useState<BuyerInterviewRecord[]>(() => {
-    try {
-      return loadBuyerInterviews(localStorage);
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
-  });
-
-  // Sincronizar en localStorage cuando cambian las entrevistas
-  useEffect(() => {
-    try {
-      saveBuyerInterviews(localStorage, interviews);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [interviews]);
+  // Solo cuántas personas aceptaron (sí) o no que las contacten. Sin nombres ni teléfonos.
+  const [consentTally, setConsentTally] = useState<ContactConsentTally>(() =>
+    readContactConsentTally(browserStorage())
+  );
 
   if (!isOpen) return null;
 
@@ -76,7 +67,7 @@ assignees: ''
    Instituto Tecnológico de Tlaxiaco (TecNM). Request verbal consent before taking notes.
 3. Zero-Bias Principle: Never "sell" or explain where to click. Let the buyer explore the screen 
    using the "Think Aloud Protocol". Every hesitation or doubt is a valuable software insight.
-4. Future Contact Consent: Ask if the buyer agrees to be contacted at launch (Yes/No). Never write
+4. Future Contact Consent: Ask if the buyer agrees to be contacted (Yes/No). Never write
    their name or phone number in this issue: identify them only with an anonymous code (C-01, C-02, …).
 5. Language Requirement: Complete and submit this report in English for the international
    open-source software evaluation committee.
@@ -116,11 +107,9 @@ assignees: ''
 ---
 
 ## 🔒 2.1 Contact details
-> **Do not publish them here.** This issue is public. If the buyer agrees to be contacted at launch, store the contact in the team's private folder (\`.investigacion_privada/\`), never in an issue ([\`docs/research/PRIVACIDAD.md\`](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/research/PRIVACIDAD.md), rules 2 and 5).
+> **Do not publish them here.** This issue is public. If the buyer agrees to be contacted at launch, store the contact in the team's private folder (\`.investigacion_privada/\`), never in an issue ([\`docs/research/PRIVACIDAD.md\`](../../docs/research/PRIVACIDAD.md), rules 2 and 5).
 
 - **Agreed to be contacted?** [ ] Yes (stored in the private folder) · [ ] No
-- **Interested Products / Pieces:** <!-- e.g., High-altitude specialty coffee (2kg), Backstrap-loom rebozo -->
-- **Target Budget / Willingness to Pay:** <!-- e.g., $1,200 MXN -->
 
 ---
 
@@ -243,7 +232,7 @@ Technical engineering tasks identified for upcoming Pull Requests in the reposit
   // SPANISH OFFICIAL TEMPLATE
   const rawSpanishTemplate = `---
 name: 🛍️ Entrevista a Compradores y Evaluación de Usabilidad UX
-about: Plantilla oficial para que los estudiantes del TecNM registren entrevistas de validación con compradores y pruebas de usabilidad del Pasaporte Digital Yucu
+about: Plantilla del proyecto para que los estudiantes del TecNM registren entrevistas de validación con compradores y pruebas de usabilidad del Pasaporte Digital Yucu
 title: "[UX-RESEARCH]: Entrevista a Comprador y Prueba de Usabilidad - [Perfil/Ubicación]"
 labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluation"]
 assignees: ''
@@ -267,7 +256,7 @@ assignees: ''
 ---
 
 ## 👤 2. Perfil del Comprador Entrevistado
-- **Código anónimo:** <!-- Ej. C-01 (nunca un nombre ni iniciales) -->
+- **Código anónimo:** <!-- Ej. C-01 (nunca nombre ni iniciales) -->
 - **Edad y Ocupación:** 
 - **Lugar de Residencia:** <!-- Ej. Tlaxiaco, Oaxaca / CDMX / Extranjero -->
 - **Segmento de Comprador:**
@@ -281,12 +270,10 @@ assignees: ''
 
 ---
 
-## 🔒 2.1 Datos de contacto
-> **No se publican aquí.** Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (\`.investigacion_privada/\`), nunca en una issue ([\`docs/research/PRIVACIDAD.md\`](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/research/PRIVACIDAD.md), reglas 2 y 5).
+## 🔒 Datos de contacto
+> **No se publican aquí.** Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (\`.investigacion_privada/\`), nunca en una issue ([\`docs/research/PRIVACIDAD.md\`](../../docs/research/PRIVACIDAD.md), reglas 2 y 5).
 
 - **¿Aceptó que la contacten?** [ ] Sí (contacto guardado en la carpeta privada) · [ ] No
-- **Productos / Artesanías de Interés:** <!-- Ej. Café de especialidad Nuu Savi (2kg), Huipil Triqui de telar -->
-- **Presupuesto Estimado / Disposición a Pagar:** <!-- Ej. $1,200 MXN -->
 
 ---
 
@@ -355,108 +342,19 @@ assignees: ''
     URL.revokeObjectURL(url);
   };
 
-  // Guardar la entrevista con un código anónimo (C-01, C-02, …), sin nombre ni teléfono
-  const handleSaveFieldInterview = (e: React.FormEvent) => {
+  // Guarda solo la respuesta sí/no de la entrevista (#121). Nada de nombre ni teléfono.
+  const handleSaveConsent = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const code = nextBuyerCode(interviews);
-    const newInterview: BuyerInterviewRecord = {
-      code,
-      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      studentName: studentName.trim() || undefined,
-      studentGroup: studentGroup.trim() || undefined,
-      buyerCity: buyerCity.trim(),
-      buyerSegment,
-      interestedProducts: interestedProducts.trim(),
-      willingnessToPayExtraMxn: Number(willingnessToPayExtra) || 0,
-      susScore: Number(susScore) || 85,
-      consentForFutureContact,
-      notes: buyerQuote.trim() || undefined
-    };
-
-    setInterviews([newInterview, ...interviews]);
-    setSaveSuccessMsg(`Entrevista ${code} guardada de forma anónima.`);
+    setConsentTally(recordContactConsent(browserStorage(), consentForFutureContact));
+    setSaveSuccessMsg(
+      consentForFutureContact
+        ? 'Guardado: aceptó que la contacten.'
+        : 'Guardado: no aceptó que la contacten.'
+    );
     setTimeout(() => setSaveSuccessMsg(null), 4000);
 
     // Limpiar formulario para la siguiente entrevista
     setBuyerQuote('');
-    setConsentForFutureContact(false);
-  };
-
-  // Generar Markdown individual para una entrevista anónima
-  const generateInterviewMarkdown = (interview: BuyerInterviewRecord) => {
-    return `---
-name: 🛍️ Buyer Research Interview & Usability Evaluation (TecNM)
-title: "[UX-RESEARCH]: Buyer Interview - ${interview.code} (${interview.buyerCity})"
-labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluation"]
----
-
-# 🛍️ Reporte de Entrevista a Comprador y Prueba de Usabilidad UX
-**Proyecto:** Yucu Mixteca Open Hub (\`Open-Hub-Tec/yucu\`)
-**Institución:** Instituto Tecnológico de Tlaxiaco (TecNM) – Depto. de Sistemas y Computación
-**Estudiante(s):** ${interview.studentName || 'Estudiante TecNM'} (${interview.studentGroup || 'Ing. Sistemas'})
-**Fecha:** ${interview.timestamp}
-
----
-
-## 👤 Perfil del Comprador
-- **Código anónimo:** ${interview.code}
-- **Ciudad:** ${interview.buyerCity}
-- **Segmento:** ${interview.buyerSegment}
-- **Productos de Interés:** ${interview.interestedProducts}
-- **Disposición a Pagar Sobreprecio Ético:** +$${interview.willingnessToPayExtraMxn ?? 0} MXN
-- **Puntuación SUS Reportada:** ${interview.susScore ?? '—'} / 100
-- **Cita Textual del Comprador:** "${interview.notes || '—'}"
-
-## 🔒 Datos de contacto
-> **No se publican aquí.** Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (\`.investigacion_privada/\`), nunca en una issue ([\`docs/research/PRIVACIDAD.md\`](https://github.com/Open-Hub-Tec/yucu-protocol/blob/main/docs/research/PRIVACIDAD.md), reglas 2 y 5).
-
-- **¿Aceptó que la contacten?** ${interview.consentForFutureContact ? '[x] Sí (contacto guardado en la carpeta privada) · [ ] No' : '[ ] Sí (contacto guardado en la carpeta privada) · [x] No'}
-`;
-  };
-
-  // Abrir issue en GitHub para una entrevista
-  const handleOpenGitHubForInterview = (interview: BuyerInterviewRecord) => {
-    const md = generateInterviewMarkdown(interview);
-    const title = `[UX-RESEARCH]: Entrevista Comprador - ${interview.code} (${interview.buyerCity})`;
-    const url = `https://github.com/Open-Hub-Tec/yucu/issues/new?title=${encodeURIComponent(title)}&labels=user-research,usability-testing,buyer-interviews,ux-evaluation&body=${encodeURIComponent(md)}`;
-    window.open(url, '_blank');
-  };
-
-  // Exportar las entrevistas anónimas a CSV (sin datos de contacto)
-  const handleExportCsv = () => {
-    const headers = ['Codigo', 'Fecha', 'Estudiante', 'Grupo', 'Ciudad', 'Segmento', 'Productos_Interes', 'Sobreprecio_MXN', 'SUS_Score', 'Acepto_Contacto', 'Notas'];
-    const rows = interviews.map(i => [
-      i.code,
-      `"${i.timestamp}"`,
-      `"${i.studentName || ''}"`,
-      `"${i.studentGroup || ''}"`,
-      `"${i.buyerCity}"`,
-      `"${i.buyerSegment}"`,
-      `"${i.interestedProducts}"`,
-      i.willingnessToPayExtraMxn || 0,
-      i.susScore || 0,
-      i.consentForFutureContact ? 'SI' : 'NO',
-      `"${(i.notes || '').replace(/"/g, '""')}"`
-    ]);
-
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `ENTREVISTAS_COMPRADORES_TECNM_${new Date().toISOString().substring(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  // Eliminar entrevista
-  const handleDeleteInterview = (code: string) => {
-    if (confirm(`¿Eliminar la entrevista ${code} de este dispositivo?`)) {
-      setInterviews(interviews.filter(i => i.code !== code));
-    }
   };
 
   return (
@@ -477,12 +375,9 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-700/50">
                   TecNM Tlaxiaco · Open Hub Milestone
                 </span>
-                <span className="text-[11px] text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/40 font-bold">
-                  {interviews.length} Entrevistas anónimas
-                </span>
               </div>
               <h3 className="text-base sm:text-lg font-black text-white leading-tight mt-0.5">
-                Validación de Compradores y Usabilidad UX
+                Validación de Compradores, Usabilidad UX y Directorio
               </h3>
             </div>
           </div>
@@ -539,24 +434,8 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   : 'text-stone-600 hover:text-stone-900 border-transparent hover:bg-stone-200/60'
               }`}
             >
-              <span>📱</span>
-              <span>Modo Campo (Registrar Entrevista)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('entrevistas')}
-              className={`px-3.5 py-2 text-xs sm:text-sm font-bold rounded-t-xl transition-all cursor-pointer border-t border-x flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === 'entrevistas'
-                  ? 'bg-[#fcfaf6] text-[#032517] border-stone-300 shadow-2xs font-black'
-                  : 'text-stone-600 hover:text-stone-900 border-transparent hover:bg-stone-200/60'
-              }`}
-            >
-              <span>🗂️</span>
-              <span>Entrevistas anónimas</span>
-              <span className="bg-amber-400 text-stone-950 text-[10px] font-black px-1.5 py-0.2 rounded-full">
-                {interviews.length}
-              </span>
+              <span>📝</span>
+              <span>Modo Campo</span>
             </button>
 
             <button
@@ -627,30 +506,19 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
 
         {/* CONTENT BODY */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 text-sm">
-          {/* TAB 1: MODO CAMPO (REGISTRAR ENTREVISTA ANÓNIMA EN VIVO) */}
+          {/* TAB 1: MODO CAMPO (RESUMEN DE LA ENTREVISTA, SIN DATOS DE CONTACTO) */}
           {activeTab === 'campo' && (
             <div className="space-y-5">
-              <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-950">
-                <div className="flex items-start gap-3">
-                  <div className="text-2xl mt-0.5">💡</div>
-                  <div>
-                    <h4 className="font-black text-sm text-amber-900">
-                      Captura en Campo para Estudiantes del TecNM
-                    </h4>
-                    <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
-                      Cada comprador entrevistado recibe un <strong>código anónimo</strong> (la siguiente entrevista será <strong>{nextBuyerCode(interviews)}</strong>). No se pide ni se guarda su nombre ni su teléfono: si acepta que lo contacten, guarda su contacto en la carpeta privada del equipo (<code>.investigacion_privada/</code>), nunca en la app ni en una issue.
-                    </p>
-                  </div>
+              <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl flex items-start gap-3 text-amber-950">
+                <div className="text-2xl mt-0.5">🔒</div>
+                <div>
+                  <h4 className="font-black text-sm text-amber-900">
+                    Datos de contacto
+                  </h4>
+                  <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
+                    <strong>No se publican aquí.</strong> Esta issue es pública. Si la persona acepta que la contacten cuando se abran pedidos, guarda su contacto en la carpeta privada del equipo (<code>.investigacion_privada/</code>), nunca en una issue (<code>docs/research/PRIVACIDAD.md</code>, reglas 2 y 5).
+                  </p>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('entrevistas')}
-                  className="shrink-0 bg-amber-400 hover:bg-amber-300 text-stone-950 font-black px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[16px]">folder_open</span>
-                  <span>Ver Entrevistas ({interviews.length})</span>
-                </button>
               </div>
 
               {saveSuccessMsg && (
@@ -660,7 +528,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 </div>
               )}
 
-              <form onSubmit={handleSaveFieldInterview} className="bg-white p-5 rounded-2xl border border-stone-300 shadow-xs space-y-4">
+              <form onSubmit={handleSaveConsent} className="bg-white p-5 rounded-2xl border border-stone-300 shadow-xs space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Datos del estudiante */}
                   <div>
@@ -672,7 +540,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                       className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-emerald-700 focus:ring-1 focus:ring-emerald-700 outline-none"
                       value={studentName}
                       onChange={(e) => setStudentName(e.target.value)}
-                      placeholder="Nombre o usuario de GitHub del estudiante"
+                      placeholder="Ej. Castro Jared & Dulce Maetzy"
                     />
                   </div>
                   <div>
@@ -690,22 +558,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 </div>
 
                 <div className="border-t border-stone-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* Datos del Comprador */}
-                  <div>
-                    <span className="block text-xs font-black text-stone-900 mb-1">
-                      Código anónimo del comprador:
-                    </span>
-                    <span
-                      className="block w-full px-3 py-2 text-sm rounded-xl border border-emerald-600 bg-emerald-50 font-mono font-black text-emerald-950"
-                      data-testid="next-buyer-code"
-                    >
-                      {nextBuyerCode(interviews)}
-                    </span>
-                    <span className="text-[10px] text-stone-500 mt-0.5 block">
-                      Se asigna solo. Sin nombre ni teléfono.
-                    </span>
-                  </div>
-
+                  {/* Datos del comprador: sin nombre ni teléfono (#121) */}
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1">
                       Ciudad / Ubicación de la Prueba:
@@ -718,9 +571,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                       placeholder="Ej. Tlaxiaco / Oaxaca / CDMX"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-stone-700 mb-1">
                       Perfil o Segmento de Comprador:
@@ -821,7 +672,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   </div>
                 </div>
 
-                {/* ¿Aceptó que lo contacten? Solo Sí/No, sin datos de contacto */}
+                {/* Solo sí/no: el contacto nunca se escribe aquí (#121) */}
                 <div className="bg-emerald-50 border border-emerald-300 p-3.5 rounded-xl">
                   <label className="flex items-start gap-2.5 cursor-pointer select-none">
                     <input
@@ -832,10 +683,10 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     />
                     <div className="text-xs text-emerald-950">
                       <strong className="block font-black text-emerald-900">
-                        🔒 ¿Aceptó que lo contacten cuando se abran pedidos?
+                        ¿Aceptó que la contacten?
                       </strong>
                       <span>
-                        Marca la casilla solo si dijo que sí. Aquí se guarda únicamente Sí/No. Su contacto va en la carpeta privada del equipo (<code>.investigacion_privada/</code>), nunca en la app ni en una issue (<code>docs/research/PRIVACIDAD.md</code>, reglas 2 y 5).
+                        Marca la casilla si dijo que sí. Su contacto se guarda en la carpeta privada del equipo, no en esta app.
                       </span>
                     </div>
                   </label>
@@ -849,7 +700,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   <textarea
                     rows={2}
                     className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-emerald-700 outline-none"
-                    placeholder="Ej. 'Me encanta poder hablar directo por WhatsApp con la artesana sin que una aplicación intermediaria le quite el 30% de su trabajo...'"
+                    placeholder="Ej. 'Me encanta poder hablar directo por WhatsApp con la artesana sin que una aplicación intermediaria le quite una parte de su trabajo...'"
                     value={buyerQuote}
                     onChange={(e) => setBuyerQuote(e.target.value)}
                   />
@@ -858,7 +709,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 {/* Botones de acción */}
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                   <span className="text-[11px] text-stone-500">
-                    Se guarda de forma anónima en este dispositivo y se puede exportar a CSV o subir a GitHub.
+                    En el dispositivo solo se guarda si aceptó o no que la contacten. Aceptaron: {consentTally.si} · No aceptaron: {consentTally.no}
                   </span>
 
                   <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -867,145 +718,11 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                       className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#032517] hover:bg-emerald-950 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-base">save</span>
-                      <span>Guardar Entrevista {nextBuyerCode(interviews)}</span>
+                      <span>Guardar respuesta</span>
                     </button>
                   </div>
                 </div>
               </form>
-            </div>
-          )}
-
-          {/* TAB 2: ENTREVISTAS ANÓNIMAS GUARDADAS (SIN DATOS DE CONTACTO) */}
-          {activeTab === 'entrevistas' && (
-            <div className="space-y-4">
-              <div className="bg-[#f0eee8] border border-stone-300 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🗂️</span>
-                    <h4 className="text-base font-black text-[#032517]">
-                      Entrevistas anónimas ({interviews.length})
-                    </h4>
-                  </div>
-                  <p className="text-xs text-stone-600 mt-1 max-w-2xl">
-                    Cada comprador aparece solo con su código (C-01, C-02, …). Aquí no hay nombres ni teléfonos: los contactos de quienes aceptaron van en la carpeta privada del equipo.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleExportCsv}
-                    className="px-3.5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                    title="Descargar tabla compatible con Excel o Google Sheets"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">file_download</span>
-                    <span>Exportar CSV</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('campo')}
-                    className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-stone-950 font-black text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">person_add</span>
-                    <span>Nueva Entrevista</span>
-                  </button>
-                </div>
-              </div>
-
-              {interviews.length === 0 ? (
-                <div className="p-8 text-center bg-white rounded-2xl border border-stone-200">
-                  <p className="text-stone-500 font-medium">Aún no hay entrevistas guardadas en este dispositivo.</p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('campo')}
-                    className="mt-3 px-4 py-2 bg-[#032517] text-white rounded-xl text-xs font-bold"
-                  >
-                    Registrar primera entrevista
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                  {interviews.map((interview) => (
-                    <div
-                      key={interview.code}
-                      className="bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs hover:border-emerald-800/40 transition-all space-y-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-2 border-b border-stone-100 pb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h5 className="font-black text-sm text-[#032517] font-mono">{interview.code}</h5>
-                            <span className="text-[10px] bg-stone-100 text-stone-700 px-2 py-0.5 rounded-full font-mono">
-                              {interview.buyerCity}
-                            </span>
-                          </div>
-                          <span className="text-xs text-stone-500 block mt-0.5 font-medium">
-                            {interview.buyerSegment}
-                          </span>
-                        </div>
-
-                        <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
-                          SUS: {interview.susScore ?? '—'}/100
-                        </span>
-                      </div>
-
-                      <div className="space-y-1 text-xs">
-                        <div className="flex items-center justify-between text-stone-700">
-                          <span className="text-stone-500">Interés:</span>
-                          <span className="font-medium text-stone-900 text-right">{interview.interestedProducts}</span>
-                        </div>
-
-                        {interview.willingnessToPayExtraMxn ? (
-                          <div className="flex items-center justify-between text-stone-700">
-                            <span className="text-stone-500">Sobreprecio Ético:</span>
-                            <span className="font-bold text-amber-700">+${interview.willingnessToPayExtraMxn} MXN</span>
-                          </div>
-                        ) : null}
-
-                        {interview.notes ? (
-                          <p className="text-[11px] text-stone-600 italic bg-stone-50 p-2 rounded-lg border border-stone-150 mt-1">
-                            &ldquo;{interview.notes}&rdquo;
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-stone-100 gap-2 flex-wrap">
-                        <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-bold">
-                          <span className="material-symbols-outlined text-[15px] text-emerald-600">
-                            {interview.consentForFutureContact ? 'check_circle' : 'block'}
-                          </span>
-                          <span>
-                            {interview.consentForFutureContact ? 'Aceptó que lo contacten' : 'No aceptó contacto'}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 ml-auto">
-                          {/* Botón Subir Issue a GitHub */}
-                          <button
-                            type="button"
-                            onClick={() => handleOpenGitHubForInterview(interview)}
-                            className="px-2.5 py-1.5 rounded-lg bg-stone-900 text-white hover:bg-stone-800 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all"
-                            title="Crear Issue en GitHub con los datos de esta entrevista"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                            <span>Issue GitHub</span>
-                          </button>
-
-                          {/* Botón Borrar */}
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteInterview(interview.code)}
-                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
-                            title="Eliminar entrevista"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -1016,7 +733,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <div className="flex items-center gap-2.5">
                   <span className="text-xl">💡</span>
                   <div>
-                    <strong>Instrucción para el Alumno:</strong> Copia esta plantilla oficial o abre directamente la nueva issue con la plantilla en GitHub:
+                    <strong>Instrucción para el Alumno:</strong> Copia esta plantilla del proyecto o abre directamente la nueva issue con la plantilla en GitHub:
                     <div className="mt-0.5">
                       <code className="bg-emerald-100 text-emerald-900 px-1 py-0.5 rounded font-mono font-bold text-xs">
                         github.com/Open-Hub-Tec/yucu/issues/new?template=buyer_interview_and_usability.md
@@ -1053,7 +770,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                   Protocolo del Estudiante del Tec de Tlaxiaco en Campo
                 </h4>
                 <p>
-                  Tu función es validar la experiencia del comprador sin vender el producto ni indicarle dónde hacer clic. Aplica el <strong>Think-Aloud Protocol</strong> (pensar en voz alta), registra dolores observados e identifica a cada comprador solo con su código anónimo (C-01, C-02, …).
+                  Tu función es validar la experiencia del comprador sin vender el producto ni indicarle dónde hacer clic. Aplica el <strong>Think-Aloud Protocol</strong> (pensar en voz alta), registra dolores observados y pide permiso para guardar su WhatsApp.
                 </p>
               </div>
 
@@ -1071,10 +788,10 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-xs space-y-2">
                   <h5 className="font-black text-stone-900 text-sm flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-emerald-800 text-white flex items-center justify-center text-xs">2</span>
-                    Contacto al Lanzamiento (Sí/No)
+                    Captura del Teléfono para el Lanzamiento
                   </h5>
                   <p className="text-xs text-stone-600 leading-relaxed">
-                    Pregunta: <em>&ldquo;¿Te podemos avisar cuando se abran pedidos?&rdquo;</em> En &ldquo;Modo Campo&rdquo; marca solo Sí o No. Si dice que sí, guarda su contacto en la carpeta privada del equipo (<code>.investigacion_privada/</code>), nunca en la app ni en una issue.
+                    Pregunta: <em>&ldquo;¿Nos autorizas guardar tu número celular para avisarte por WhatsApp en cuanto el proyecto esté listo y se puedan hacer compras?&rdquo;</em> Si acepta, regístralo en la pestaña &ldquo;Modo Campo&rdquo;.
                   </p>
                 </div>
               </div>
@@ -1134,7 +851,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                 <div className="flex items-center justify-between border-b border-stone-200 pb-2">
                   <div>
                     <span className="font-black text-[#032517] text-sm sm:text-base block">
-                      Ejemplo de Referencia: C-01 (barista de cafetería de especialidad, Tlaxiaco)
+                      Ejemplo de Referencia: Comprador-01 (barista, Tlaxiaco)
                     </span>
                     <span className="text-xs text-stone-500">
                       Evaluado por: Castro Jared &amp; Dulce Maetzy (TecNM Tlaxiaco - ISC)
@@ -1151,10 +868,6 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     Barista y copropietario de cafetería Nuu Savi, Tlaxiaco.
                   </div>
                   <div className="bg-white p-3 rounded-lg border border-stone-200">
-                    <strong className="block text-stone-900 mb-0.5">🔒 ¿Aceptó contacto?</strong>
-                    Sí (contacto guardado en la carpeta privada del equipo, no aquí).
-                  </div>
-                  <div className="bg-white p-3 rounded-lg border border-stone-200">
                     <strong className="block text-stone-900 mb-0.5">Velocidad QR (T1):</strong>
                     6 segundos (Cámara nativa Xiaomi Redmi).
                   </div>
@@ -1169,7 +882,7 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
                     &ldquo;Me parece brillante que la blockchain no guarde mi INE ni datos invasivos de la artesana. Si ella quiere pausar su ficha, mantiene soberanía. El hecho de que Stellar solo registre la huella digital prueba la autenticidad física sin vulnerar la privacidad. Y tener un botón directo de WhatsApp para pactar la entrega sin intermediarios es el modelo más honesto posible.&rdquo;
                   </p>
                   <p className="font-bold text-emerald-800 text-right">
-                    — C-01, barista de cafetería de especialidad, Tlaxiaco, Oaxaca
+                    — Comprador-01, barista, Tlaxiaco, Oaxaca
                   </p>
                 </div>
               </div>
@@ -1186,16 +899,6 @@ labels: ["user-research", "usability-testing", "buyer-interviews", "ux-evaluatio
           </div>
 
           <div className="flex items-center gap-2 ml-auto">
-            {activeTab === 'campo' && (
-              <button
-                type="button"
-                onClick={() => setActiveTab('entrevistas')}
-                className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white hover:bg-stone-200 text-stone-700 border border-stone-300 transition-all cursor-pointer"
-              >
-                Ver Entrevistas ({interviews.length})
-              </button>
-            )}
-
             <button
               type="button"
               onClick={onClose}

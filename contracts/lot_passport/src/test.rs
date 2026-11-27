@@ -163,3 +163,20 @@ fn solo_el_admin_cambia_el_certificador() {
     assert_eq!(res, Err(Ok(Error::Unauthorized)));
     assert_eq!(c.get_certifier(), certifier);
 }
+
+#[test]
+fn certificar_o_consultar_un_lote_inexistente_devuelve_error() {
+    let (env, c, _admin, certifier, _producer) = setup();
+    let inexistente = String::from_str(&env, "LOTE-404");
+
+    let res_cert = c.try_certify_lot(
+        &certifier,
+        &inexistente,
+        &BytesN::from_array(&env, &[4u8; 32]),
+        &90,
+    );
+    assert_eq!(res_cert, Err(Ok(Error::LotNotFound)));
+
+    let res_get = c.try_get_lot(&inexistente);
+    assert_eq!(res_get, Err(Ok(Error::LotNotFound)));
+}

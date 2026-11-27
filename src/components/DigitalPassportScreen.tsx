@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppLanguage, DigitalPassportLot, ScreenView } from '../types';
 import { PROTOCOL_FEES } from '../config/protocolFees';
 import { DemoBadge } from './DemoBadge';
+import { ExplicacionSello } from './accesibilidad/ExplicacionSello';
 
 interface DigitalPassportScreenProps {
   lot: DigitalPassportLot;
@@ -85,7 +86,7 @@ function getProductTerminology(title: string, productType: string) {
         : isChoc
         ? '¡Tu chocolate artesanal ya está registrado y protegido!'
         : '¡Tu elaboración tradicional ya está registrada y protegida!',
-      bannerSubtext: 'Nadie puede copiar tu receta ni tu origen. Tu lote cuenta con respaldo comunitario oficial.',
+      bannerSubtext: 'Nadie puede copiar tu receta ni tu origen. Tu lote cuenta con respaldo comunitario.',
       quantityLabel: isMole ? '1. Cantidad de Pasta / Mole' : isChoc ? '1. Cantidad de Chocolate' : '1. Cantidad Elaborada',
       quantityUnitDesc: isMole ? 'Pasta lista para entrega o envasado' : 'Listo para entrega o empaque',
       totalValueLabel: isMole ? '3. Valor Total de tu Elaboración' : '3. Valor Total de tu Lote',
@@ -96,7 +97,7 @@ function getProductTerminology(title: string, productType: string) {
       tagSubtext: isMole
         ? 'Para colocar al frasco, cazuela, cubeta o empaque antes de entregar'
         : 'Para colocar a la bolsa, paquete o canasto antes de entregar',
-      shareGreeting: `Hola, le comparto la ficha oficial de mi elaboración tradicional de "${title}" (Lote #${productType}) con Sello de Calidad respaldado por el TecNM Tlaxiaco.`,
+      shareGreeting: `Hola, le comparto la ficha de demostración de mi elaboración tradicional de "${title}" (Lote #${productType}) con Sello de Calidad respaldado por el TecNM Tlaxiaco.`,
       timelineLabel: 'Bitácora de Ingredientes, Tueste y Molienda',
       registerAnother: 'Registrar Otra Elaboración o Producto',
       buyerBubble: 'Aquí tienes la ficha transparente de esta elaboración gastronómica tradicional de Oaxaca validada por la red comunitaria.',
@@ -122,7 +123,7 @@ function getProductTerminology(title: string, productType: string) {
       nextActionQuestion: '¿Qué deseas hacer ahora con tu tenate de palma?',
       tagLabel: 'Ver e Imprimir Etiqueta de Autenticidad',
       tagSubtext: 'Para atar con fibra de palma al tenate antes de entregar',
-      shareGreeting: `Hola, le comparto la ficha oficial de mi tenate ceremonial de palma dulce "${title}" con Sello de Autenticidad del TecNM Tlaxiaco.`,
+      shareGreeting: `Hola, le comparto la ficha de demostración de mi tenate ceremonial de palma dulce "${title}" con Sello de Autenticidad del TecNM Tlaxiaco.`,
       timelineLabel: 'Bitácora de Corte de Palma, Tintes y Doble Nudo',
       registerAnother: 'Registrar Otro Tenate o Artesanía',
       buyerBubble: 'Aquí tienes la ficha transparente de este tenate tradicional mixteco tejido a mano con palma dulce y tintes naturales.',
@@ -142,7 +143,7 @@ function getProductTerminology(title: string, productType: string) {
       nextActionQuestion: '¿Qué deseas hacer ahora con tu pieza artesanal?',
       tagLabel: 'Ver e Imprimir Etiqueta de Autenticidad',
       tagSubtext: 'Para atar o coser con hilo a la prenda, sombrero o artesanía',
-      shareGreeting: `Hola, le comparto la ficha oficial de mi artesanía "${title}" con Sello de Autenticidad respaldado por el TecNM Tlaxiaco.`,
+      shareGreeting: `Hola, le comparto la ficha de demostración de mi artesanía "${title}" con Sello de Autenticidad respaldado por el TecNM Tlaxiaco.`,
       timelineLabel: 'Bitácora de Telar, Fibras y Acabados',
       registerAnother: 'Registrar Otra Artesanía o Creación',
       buyerBubble: 'Aquí tienes la ficha transparente de esta pieza artesanal única hecha a mano en la Mixteca Alta.',
@@ -162,7 +163,7 @@ function getProductTerminology(title: string, productType: string) {
       nextActionQuestion: '¿Qué deseas hacer ahora con tu producción?',
       tagLabel: 'Ver e Imprimir mi Etiqueta QR',
       tagSubtext: 'Para colocar a la garrafa, botella o barrica antes de entregar',
-      shareGreeting: `Hola, le comparto la ficha oficial de mi producción de "${title}" con Sello de Autenticidad del TecNM Tlaxiaco.`,
+      shareGreeting: `Hola, le comparto la ficha de demostración de mi producción de "${title}" con Sello de Autenticidad del TecNM Tlaxiaco.`,
       timelineLabel: 'Bitácora de Maguey, Fermentación y Destilación',
       registerAnother: 'Registrar Otra Bebida o Lote',
       buyerBubble: 'Aquí tienes la ficha transparente de esta bebida ancestral elaborada con métodos sustentables.',
@@ -182,7 +183,7 @@ function getProductTerminology(title: string, productType: string) {
       nextActionQuestion: '¿Qué deseas hacer ahora con tu recolección?',
       tagLabel: 'Ver e Imprimir Etiqueta QR',
       tagSubtext: 'Para colocar al canasto, frasco o bolsa antes de entregar',
-      shareGreeting: `Hola, le comparto la ficha oficial de mi recolección tradicional de "${title}" con Sello de Calidad del TecNM Tlaxiaco.`,
+      shareGreeting: `Hola, le comparto la ficha de demostración de mi recolección tradicional de "${title}" con Sello de Calidad del TecNM Tlaxiaco.`,
       timelineLabel: 'Bitácora de Milpa, Lavado y Comal de Barro',
       registerAnother: 'Registrar Otra Recolección o Producto',
       buyerBubble: 'Aquí tienes la ficha transparente de esta recolección silvestre tradicional de Oaxaca tostada al comal.',
@@ -195,14 +196,14 @@ function getProductTerminology(title: string, productType: string) {
     noun: 'cosecha',
     tabLabel: 'Mi Cosecha (Productor)',
     bannerTitle: '¡Tu cosecha ya está registrada y protegida!',
-    bannerSubtext: 'Nadie puede copiar tu nombre ni regatear tu origen. Tu lote cuenta con respaldo comunitario oficial.',
+    bannerSubtext: 'Nadie puede copiar tu nombre ni regatear tu origen. Tu lote cuenta con respaldo comunitario.',
     quantityLabel: '1. Cantidad de tu Cosecha',
     quantityUnitDesc: 'Listo para entrega o acopio',
     totalValueLabel: '3. Valor Total de tu Cosecha',
     nextActionQuestion: '¿Qué deseas hacer ahora con tu cosecha?',
     tagLabel: 'Ver e Imprimir mi Etiqueta QR Física',
     tagSubtext: 'Para colgar al costal, canasto o bolsa antes de entregar',
-    shareGreeting: `Hola, le comparto la ficha oficial de mi cosecha "${title}" con Sello de Calidad respaldado por el TecNM Tlaxiaco.`,
+    shareGreeting: `Hola, le comparto la ficha de demostración de mi cosecha "${title}" con Sello de Calidad respaldado por el TecNM Tlaxiaco.`,
     timelineLabel: 'Bitácora de Parcela y Cosecha',
     registerAnother: 'Registrar Otra Cosecha o Producto',
     buyerBubble: 'Aquí tienes la ficha transparente de esta cosecha validada en la Mixteca Alta por la red comunitaria.',
@@ -255,7 +256,7 @@ export const DigitalPassportScreen: React.FC<DigitalPassportScreenProps> = ({
       ? { label: 'Identidad Comunitaria Protegida', icon: 'location_on', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' }
       : { label: 'Artesano(a) Autor(a)', icon: 'badge', color: 'bg-amber-100 text-amber-900 border-amber-300' };
 
-  const shareMessage = `Hola, le comparto la ficha oficial de ${term.noun} "${lot.title}" (Lote #${lot.code}) con Sello de Calidad respaldado por el TecNM Tlaxiaco. Cantidad: ${lot.volumeKg} kg a $${lot.pricePerKg.toFixed(2)} MXN/kg.`;
+  const shareMessage = `Hola, le comparto la ficha de demostración de ${term.noun} "${lot.title}" (Lote #${lot.code}) con Sello de Calidad respaldado por el TecNM Tlaxiaco. Cantidad: ${lot.volumeKg} kg a $${lot.pricePerKg.toFixed(2)} MXN/kg.`;
   const shareUrl = `${window.location.origin}/#pasaporte-${lot.code}`;
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareMessage} Ver ficha completa aquí: ${shareUrl}`)}`;
 
@@ -332,6 +333,9 @@ export const DigitalPassportScreen: React.FC<DigitalPassportScreenProps> = ({
           </button>
         </div>
       </div>
+
+      {/* El sello explicado: no es un trámite ni un cobro (W53 #182) */}
+      <ExplicacionSello />
 
       {/* ============================================================== */}
       {/* VISTA DEL PRODUCTOR / ARTESANO / CAMPESINO (CERO FRICCIÓN)      */}
@@ -609,7 +613,7 @@ export const DigitalPassportScreen: React.FC<DigitalPassportScreenProps> = ({
                 </button>
               </div>
 
-              {/* Botón 3: Ver Dictamen Oficial de Laboratorio (PDF) */}
+              {/* Botón 3: Ver Dictamen de Demostración de Laboratorio (PDF) */}
               <button
                 type="button"
                 onClick={() => onOpenDictamen(lot)}
@@ -621,10 +625,10 @@ export const DigitalPassportScreen: React.FC<DigitalPassportScreenProps> = ({
                   </div>
                   <div>
                     <h4 className="text-[13px] font-bold text-[#032517] leading-tight">
-                      Ver Dictamen Oficial de Calidad (PDF)
+                      Ver Dictamen de Demostración de Calidad (PDF)
                     </h4>
                     <p className="text-[11px] text-[#727973]">
-                      Certificado oficial de origen y sanidad para restaurantes o clientes
+                      Ficha de demostración de origen y sanidad para restaurantes o clientes
                     </p>
                   </div>
                 </div>

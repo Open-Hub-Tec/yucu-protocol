@@ -214,24 +214,3 @@ export interface PendingOfflineLot {
   recordedAt: number;
   syncStatus: 'pending' | 'syncing' | 'synced';
 }
-
-/**
- * Entrevista de campo a un comprador, identificada solo con un código anónimo (C-01, C-02, …).
- * No guarda nombre ni teléfono del comprador (docs/research/PRIVACIDAD.md, reglas 2 y 5).
- */
-export interface BuyerInterviewRecord {
-  /** Código anónimo secuencial: C-01, C-02, … */
-  code: string;
-  timestamp: string;
-  /** Estudiante(s) que entrevistaron. Se permite dar crédito por nombre (PRIVACIDAD.md, regla 5). */
-  studentName?: string;
-  studentGroup?: string;
-  buyerCity: string;
-  buyerSegment: string;
-  interestedProducts: string;
-  willingnessToPayExtraMxn?: number;
-  susScore?: number;
-  /** ¿Aceptó que lo contacten? Sí/No. El contacto, si lo hay, va a la carpeta privada. */
-  consentForFutureContact: boolean;
-  notes?: string;
-}

@@ -1,3 +1,4 @@
+import { PROTOCOL_FEES } from '../config/protocolFees';
 import { DigitalPassportLot, PaymentRecord, ProductItem } from '../types';
 
 export const INITIAL_PRODUCTS: ProductItem[] = [
@@ -248,9 +249,9 @@ export const INITIAL_VERIFIED_LOTS: DigitalPassportLot[] = [
       immutableSealStatus: 'Sellado Inmutable'
     },
     royaltyClause: {
-      percentage: 10,
+      percentage: PROTOCOL_FEES.artisanResaleRoyaltyPct,
       beneficiary: 'Don Efraín Bautista Santiago',
-      smartContractPolicy: 'Soroban Perpetual Royalty Standard (10% reventas secundarias / 2% fondo comunal)',
+      smartContractPolicy: `Soroban Perpetual Royalty Standard (${PROTOCOL_FEES.artisanResaleRoyaltyPct}% reventas secundarias / ${PROTOCOL_FEES.resaleTequioPct}% fondo comunal)`,
       accumulatedRoyaltiesMxn: 4275.0,
       secondarySalesCount: 3
     }
@@ -438,25 +439,25 @@ export const MOCK_PAYMENTS: PaymentRecord[] = [
   {
     id: 'pay-royalty-1',
     date: '05 Nov 2024',
-    concept: 'Regalía Perpetua (10%) · Reventa Café Tostado de Especialidad en CDMX',
+    concept: `Regalía Perpetua (${PROTOCOL_FEES.artisanResaleRoyaltyPct}%) · Reventa Café Tostado de Especialidad en CDMX`,
     lotCode: 'MX-2024-740',
     amount: 2300.0,
     status: 'Disponible',
     buyer: 'Café de Origen Roma Norte (Reventa Lote Fraccionado)',
     paymentType: 'Regalía Perpetua',
-    royaltyRate: '10% s/ $23,000 MXN',
+    royaltyRate: `${PROTOCOL_FEES.artisanResaleRoyaltyPct}% s/ $23,000 MXN`,
     resaleOrigin: 'Boutique Tostadora Roma Norte, CDMX'
   },
   {
     id: 'pay-royalty-2',
     date: '18 Nov 2024',
-    concept: 'Regalía Perpetua (10%) · Reventa Lote Café Tostado en Monterrey',
+    concept: `Regalía Perpetua (${PROTOCOL_FEES.artisanResaleRoyaltyPct}%) · Reventa Lote Café Tostado en Monterrey`,
     lotCode: 'MX-2024-740',
     amount: 1975.0,
     status: 'Disponible',
     buyer: 'Barra de Especialidad Sierra Madre',
     paymentType: 'Regalía Perpetua',
-    royaltyRate: '10% s/ $19,750 MXN',
+    royaltyRate: `${PROTOCOL_FEES.artisanResaleRoyaltyPct}% s/ $19,750 MXN`,
     resaleOrigin: 'Barra Sierra Madre, San Pedro Garza García'
   },
   {

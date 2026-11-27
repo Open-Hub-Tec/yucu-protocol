@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { PROTOCOL_FEES } from "../../config/protocolFees";
 
 // Rutas /api/v1/* (antes estaban en server.ts). Ver docs/arquitectura/SERVIDOR.md, sección 2.
 export const legacyRoutes = Router();
@@ -38,7 +39,7 @@ legacyRoutes.get("/protocol/spec", (_req: Request, res: Response) => {
       { id: "0x03_EUDR_DEFORESTATION", name: "Anti-Deforestación Satelital Copernicus", issuer: "Sentinel-2 Multiespectral Geofence (EUDR 2026)" },
       { id: "0x04_SETTLEMENT_CLEARANCE", name: "Custodia de Hitos & Liquidación Trustless Work", issuer: "Smart Contract Soroban + Banxico SPEI" },
       { id: "0x05_DPP_CIRCULARITY", name: "Pasaporte Digital de Producto Europeo (ESPR) & Insetting de Carbono", issuer: "Calculadora de Biomasa Agroforestal Mixteca" },
-      { id: "0x06_INDIGENOUS_IP", name: "Escudo de Patrimonio Cultural Colectivo & Regalías (10%+2%)", issuer: "Registro de Diseños Tradicionales (Ley 2022)" },
+      { id: "0x06_INDIGENOUS_IP", name: `Escudo de Patrimonio Cultural Colectivo & Regalías (${PROTOCOL_FEES.artisanResaleRoyaltyPct}%+${PROTOCOL_FEES.resaleTequioPct}%)`, issuer: "Registro de Diseños Tradicionales (Ley 2022)" },
       { id: "0x07_IOT_COLD_CHAIN", name: "Telemetría Dinámica de Tránsito (Humedad/Temp/Brix)", issuer: "Sensores IoT en Almacenamiento Temporal Soroban (TTL 60d)" },
       { id: "0x08_SANCTION_USMCA", name: "Regla de Origen T-MEC & Despacho Aduanal Fitosanitario", issuer: "SENASICA / USDA Organic Conformity Gateway" }
     ],

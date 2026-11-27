@@ -1,6 +1,25 @@
 # 🔒 Privacidad de las personas entrevistadas
 
+> **English summary.**
+>
+> **Purpose:**  
+> This document protects the privacy of artisans, producers and speakers who take part in field research for the Yucu Protocol. The repository is public. Everything uploaded can be read, copied and archived by anyone, and it remains in the git history even after deletion. People who give their time never agreed to appear on the internet just because they talked to the team.
+>
+> **Main rules:**  
+> 1. Written consent is required before publishing any name, voice or image. A verbal permission to record is not enough. The signed consent must clearly say the person accepts publication on the internet.  
+> 2. People are described only by role and community (for example “rebozo artisan, Amoltepec” or “tomato producer, San Antonio Nduaxico”). Never use personal names, and never put names in file or branch names.  
+> 3. If someone asks not to be identified, their age and any other detail that could identify them when combined with community and occupation must also be omitted.  
+> 4. Evidence (audio, video, photos of people, signed forms, PDFs) must stay in the private folder `.investigacion_privada/` (listed in `.gitignore`) or in the team’s shared folder. The public repository only receives Markdown summaries that contain no personal data.  
+> 5. Student or participant control numbers, CURP, phone numbers and addresses must never appear in public documents. Credit to a student is given only with their name or GitHub username.  
+> 6. GitHub attachments (files dragged into issues or pull requests) are forbidden because they create permanent public links that cannot be removed from the repository.
+>
+> **Where it applies:**  
+> These rules apply to every contribution that touches field research material, especially files under `docs/research/`, `docs/ux-testing/` and `public/videos/`. Continuous Integration automatically rejects pull requests that add audio, video, images or PDFs in those locations. Before opening a pull request, contributors must check that the document contains no names of interviewed people, no media files with personal data, no control numbers or contact details, and that written consent exists for any personal data that is published.  
+> If something is published by mistake, repository maintainers must be notified at once. Simply deleting the file in a new commit is not enough, because it remains in the history. True removal requires rewriting history with `git filter-repo` and coordinating with the whole team so everyone re-clones the repository.
+
 Este repositorio es **público**: todo lo que se sube aquí lo puede leer, copiar y archivar cualquier persona, y queda en el historial de git aunque después se borre. Las artesanas, productores y hablantes que nos dan su tiempo no aceptaron aparecer en internet por el solo hecho de conversar con nosotros.
+
+
 
 ## Reglas
 
@@ -18,7 +37,7 @@ En las entrevistas y pruebas de usabilidad con compradores, cada persona se iden
 - Usa el mismo código en la entrevista, en la prueba SUS y en el resumen, para poder relacionar las respuestas de una misma persona.
 - Nunca escribas junto al código su nombre, iniciales, teléfono ni dirección.
 - Si la persona acepta que la contacten cuando se abran pedidos, anota solo **Sí/No** en la app o en la issue. Su contacto va en `.investigacion_privada/` (por ejemplo, una tabla `código → contacto`), nunca en el repositorio.
-- La pantalla "Modo Campo" de la app asigna el código sola y no pide nombre ni teléfono. Al abrir la app se borran los contactos que guardaban versiones anteriores (clave `raiz_buyer_leads`).
+- La pantalla "Modo Campo" no pide nombre ni teléfono y solo guarda el conteo de respuestas Sí/No. El equipo asigna el código fuera de la app. Al abrir la app se borran los contactos que guardaban versiones anteriores (clave `raiz_buyer_leads`).
 
 ## Antes de abrir tu PR
 

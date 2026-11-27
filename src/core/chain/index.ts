@@ -4,6 +4,7 @@
  * configuración (#118), y ningún componente de la UI tiene que cambiar.
  */
 import {
+  SimulatedAttestations,
   SimulatedCardWallet,
   SimulatedEscrow,
   SimulatedExternalWallet,
@@ -11,9 +12,19 @@ import {
   SimulatedPayout,
   SimulatedWallet,
 } from './SimulatedChain';
-import type { CardWalletPort, DeviceWalletPort, EscrowPort, ExternalWalletPort, LotRegistryPort, PayoutPort } from './ports';
+import type {
+  AttestationPort,
+  CardWalletPort,
+  DeviceWalletPort,
+  EscrowPort,
+  ExternalWalletPort,
+  LotRegistryPort,
+  PayoutPort,
+} from './ports';
+import { FreighterWallet, type FreighterApi } from './wallet/FreighterWallet';
 
 export * from './ports';
+export * from './wallet';
 
 export interface Chain {
   wallets: {
@@ -26,6 +37,8 @@ export interface Chain {
   };
   lots: LotRegistryPort;
   escrow: EscrowPort;
+  /** Atestaciones en Attest Protocol + índice de Yucu (ADR-005 D9, #141). */
+  attestations: AttestationPort;
   /** Salida a pesos desde la cuenta de la artesana (#112). */
   payout: PayoutPort;
 }
@@ -38,5 +51,23 @@ export const chain: Chain = {
   },
   lots: new SimulatedLotRegistry(),
   escrow: new SimulatedEscrow(),
+  attestations: new SimulatedAttestations(),
   payout: new SimulatedPayout(),
 };
+
+/**
+ * Permite elegir la billetera del comprador para el flujo de compra (#115).
+ * Por ejemplo: setBuyerWallet(new FreighterWallet()).
+ */
+export function setBuyerWallet(wallet: ExternalWalletPort): void {
+  chain.wallets.external = wallet;
+}
+
+/**
+ * Activa Freighter como la billetera externa del comprador (#115).
+ */
+export function useFreighterBuyerWallet(api?: FreighterApi): FreighterWallet {
+  const wallet = new FreighterWallet(api);
+  chain.wallets.external = wallet;
+  return wallet;
+}

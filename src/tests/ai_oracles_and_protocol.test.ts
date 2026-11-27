@@ -82,7 +82,7 @@ assert(routeMexicoCash.targetRail === 'MICOPAY_CASH', 'Rutea a efectivo MicoPay 
 
 // 5. Universal SDK Test
 console.log('\n📍 5. SDK UNIVERSAL DEL YUCU PROTOCOL (@yucu-protocol/sdk)');
-const sdk = new RaizProtocolSDK({ network: 'stellar-mainnet' });
+const sdk = new RaizProtocolSDK({ network: 'stellar-testnet' });
 const metrics = sdk.getMetrics();
 assert(metrics.aiOraclesOnline === 4, '4 oráculos de IA activos en la infraestructura');
 assert(metrics.totalTokenizedRWAKg > 40000, 'Volumen de RWA registrado');

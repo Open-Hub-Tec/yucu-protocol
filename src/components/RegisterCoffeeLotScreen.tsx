@@ -3,6 +3,10 @@ import { AppLanguage, ScreenView, PendingOfflineLot, ArtisanVisibilityLevel, Inf
 import { startAudioRecording, LiveRecorderSession } from '../utils/audioRecorder';
 import { getProductProfile, ProductProfile, sanitizeProductName } from '../utils/productUtils';
 import { saveOfflineLot } from '../utils/offlineStorage';
+import { Escuchar } from './accesibilidad/Escuchar';
+import { BotonRegresar } from './accesibilidad/BotonRegresar';
+import { AvisoAntesDeAccion } from './accesibilidad/AvisoAntesDeAccion';
+import { TEXTOS_ACCIONES } from '../textos/campo';
 
 interface RegisterCoffeeLotScreenProps {
   selectedProductType?: string;
@@ -91,33 +95,10 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
   );
   const [voiceConsentGiven, setVoiceConsentGiven] = useState<boolean>(true);
   const [voiceConsentLang, setVoiceConsentLang] = useState<'mix' | 'es'>(isMixteco ? 'mix' : 'mix');
-  const [isPlayingConsentAudio, setIsPlayingConsentAudio] = useState<boolean>(false);
-
-  const togglePlayConsentAudio = () => {
-    if (isPlayingConsentAudio) {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      setIsPlayingConsentAudio(false);
-      return;
-    }
-
-    setIsPlayingConsentAudio(true);
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const textToSpeak =
-        voiceConsentLang === 'mix'
-          ? "Yu'u kaxi yu ja na koo sutu chi foto pieza yu nuu página Yucu, tasa na kuni na satá na. Soo kuati yu ja na kene yu kani ini yu."
-          : "Otorgo mi consentimiento previo, libre e informado para que la fotografía y datos de mi pieza se muestren para venta en Yucu, conservando mi derecho a retirarlos o pausarlos cuando lo decida.";
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.lang = 'es-MX';
-      utterance.rate = 0.88;
-      utterance.onend = () => setIsPlayingConsentAudio(false);
-      utterance.onerror = () => setIsPlayingConsentAudio(false);
-      window.speechSynthesis.speak(utterance);
-    } else {
-      setTimeout(() => setIsPlayingConsentAudio(false), 3500);
-    }
-  };
+  const textoConsentimiento =
+    voiceConsentLang === 'mix'
+      ? "Yu'u kaxi yu ja na koo sutu chi foto pieza yu nuu página Yucu, tasa na kuni na satá na. Soo kuati yu ja na kene yu kani ini yu."
+      : 'Otorgo mi consentimiento previo, libre e informado para que la fotografía y datos de mi pieza se muestren para venta en Yucu, conservando mi derecho a retirarlos o pausarlos cuando lo decida.';
 
   const getResolvedDisplayName = () => {
     if (visibilityOption === 'cooperativa') return artisanCooperative;
@@ -177,43 +158,19 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
     setAiDiagnosis(null);
   }, [cleanProductName, profile.defaultPhotoOne]);
 
-  const [isSpeakingDiagnosis, setIsSpeakingDiagnosis] = useState<boolean>(false);
-
-  const handleSpeakDiagnosis = (customText?: string) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      return;
-    }
-
-    if (isSpeakingDiagnosis) {
-      window.speechSynthesis.cancel();
-      setIsSpeakingDiagnosis(false);
-      return;
-    }
-
-    const textToRead =
-      customText ||
-      (aiDiagnosis
-        ? `Dictamen de calidad emitido por el Instituto Tecnológico de Tlaxiaco para ${profile.displayName}. ` +
-          (aiDiagnosis.matchesSelectedProduct === false
-            ? `Atención: La muestra analizada fue identificada como ${
-                aiDiagnosis.detectedItem || 'otro producto'
-              } y no corresponde a ${profile.displayName}. ${aiDiagnosis.recomendacion}`
-            : `Muestra verificada de ${profile.displayName}. Estado: ${aiDiagnosis.estado}. Resultado: ${
-                aiDiagnosis.humedadEstimada
-              }. Sanidad y pureza: ${aiDiagnosis.defectosDetectados}. Calificación comunal: ${
-                aiDiagnosis.calidadScore
-              } sobre 100. Recomendación: ${aiDiagnosis.recomendacion}`)
-        : profile.assistiveGuideText);
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.lang = 'es-MX';
-    utterance.rate = 0.92; // Slightly slower for older adults
-    utterance.onend = () => setIsSpeakingDiagnosis(false);
-    utterance.onerror = () => setIsSpeakingDiagnosis(false);
-    setIsSpeakingDiagnosis(true);
-    window.speechSynthesis.speak(utterance);
-  };
+  // Texto que lee el botón "Escuchar" de la guía y del diagnóstico.
+  const textoDiagnostico = aiDiagnosis
+    ? `Dictamen de calidad emitido por el Instituto Tecnológico de Tlaxiaco para ${profile.displayName}. ` +
+      (aiDiagnosis.matchesSelectedProduct === false
+        ? `Atención: La muestra analizada fue identificada como ${
+            aiDiagnosis.detectedItem || 'otro producto'
+          } y no corresponde a ${profile.displayName}. ${aiDiagnosis.recomendacion}`
+        : `Muestra verificada de ${profile.displayName}. Estado: ${aiDiagnosis.estado}. Resultado: ${
+            aiDiagnosis.humedadEstimada
+          }. Sanidad y pureza: ${aiDiagnosis.defectosDetectados}. Calificación comunal: ${
+            aiDiagnosis.calidadScore
+          } sobre 100. Recomendación: ${aiDiagnosis.recomendacion}`)
+    : profile.assistiveGuideText;
 
   // Reset scroll to top on mount so user always starts at the beginning sequentially
   useEffect(() => {
@@ -223,9 +180,6 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
   // Stop camera and audio stream on unmount
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -994,17 +948,8 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
           <div className="flex-1 text-[13px] text-amber-950">
             <div className="font-extrabold flex items-center justify-between">
               <span>Guía Asistida para Personas Mayores</span>
-              <button
-                type="button"
-                onClick={() => handleSpeakDiagnosis()}
-                className="text-[11px] bg-white hover:bg-amber-100 text-amber-950 font-bold px-2.5 py-1 rounded-lg border border-amber-300 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-              >
-                <span className="material-symbols-outlined text-[15px] text-amber-700">
-                  {isSpeakingDiagnosis ? 'volume_off' : 'volume_up'}
-                </span>
-                <span>{isSpeakingDiagnosis ? 'Detener Voz' : 'Escuchar Guía'}</span>
-              </button>
             </div>
+            <Escuchar texto={textoDiagnostico} className="mt-2" />
             <p className="mt-1 text-[12px] leading-snug text-amber-900/90 font-medium">
               {profile.assistiveGuideText}
             </p>
@@ -1166,19 +1111,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
               </div>
             </div>
 
-            {aiDiagnosis && (
-              <button
-                type="button"
-                onClick={() => handleSpeakDiagnosis()}
-                className="px-3 py-1.5 rounded-xl bg-white hover:bg-emerald-50 text-[#032517] border border-emerald-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs shrink-0"
-                title="Escuchar dictamen en voz alta"
-              >
-                <span className="material-symbols-outlined text-[16px] text-emerald-700">
-                  {isSpeakingDiagnosis ? 'volume_off' : 'volume_up'}
-                </span>
-                <span>{isSpeakingDiagnosis ? 'Pausar' : 'Escuchar'}</span>
-              </button>
-            )}
+            {aiDiagnosis && <Escuchar texto={textoDiagnostico} className="shrink-0" />}
           </div>
 
           {/* Diagnosis Result or Call to Action */}
@@ -1785,16 +1718,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
           </p>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={togglePlayConsentAudio}
-              className="flex-1 bg-white hover:bg-stone-50 border border-[#a73918] text-[#a73918] font-bold text-[11px] py-1.5 px-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <span className="material-symbols-outlined text-[15px]">
-                {isPlayingConsentAudio ? 'stop' : 'volume_up'}
-              </span>
-              <span>{isPlayingConsentAudio ? 'Detener lectura' : 'Escuchar audio'}</span>
-            </button>
+            <Escuchar texto={textoConsentimiento} className="flex-1" />
 
             <button
               type="button"
@@ -1827,12 +1751,15 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
       </section>
 
       {/* Fixed Sticky Action Dock */}
-      <div className="fixed bottom-14 left-0 right-0 max-w-md mx-auto z-40 bg-[#fcf9f3]/95 backdrop-blur-md px-4 py-3 border-t border-[#c1c8c2]/30">
+      <div className="fixed bottom-14 left-0 right-0 max-w-md mx-auto z-40 bg-[#fcf9f3]/95 backdrop-blur-md px-4 py-3 border-t border-[#c1c8c2]/30 flex flex-col gap-2">
+        <AvisoAntesDeAccion texto={TEXTOS_ACCIONES.antesDeGuardar(profile.displayName)} />
+        <div className="flex items-center gap-2">
+        <BotonRegresar onClick={() => onNavigateScreen('catalogo_producto')} className="shrink-0" />
         <button
           type="button"
           onClick={handleSendValidation}
           disabled={isValidating}
-          className="w-full min-h-[50px] h-13 bg-[#a73918] text-white rounded-full text-[16px] font-bold shadow-lg hover:bg-[#6c1900] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
+          className="flex-1 min-h-[50px] h-14 bg-[#a73918] text-white rounded-full text-[16px] font-bold shadow-lg hover:bg-[#6c1900] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75"
         >
           {isValidating ? (
             <>
@@ -1846,6 +1773,7 @@ export const RegisterCoffeeLotScreen: React.FC<RegisterCoffeeLotScreenProps> = (
             </>
           )}
         </button>
+        </div>
       </div>
 
       {/* Validation Simulation Modal (Paso 4) */}

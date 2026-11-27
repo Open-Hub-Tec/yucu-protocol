@@ -8,6 +8,7 @@
  *  - SimulatedChain (demostración, ya existe): marca todo con source 'simulated'.
  *  - Implementaciones reales: las construyen los estudiantes en las issues de la Wave.
  */
+import type { JsonValue } from '../attestations/ids';
 
 /** De dónde viene un resultado. Si es 'simulated', la UI debe mostrar <DemoBadge />. */
 export type ChainSource = 'testnet' | 'simulated';
@@ -140,6 +141,89 @@ export interface LotRegistryPort {
   prepareRegisterLot(req: RegisterLotRequest): Promise<UnsignedTransaction>;
   submit(signedXdr: string): Promise<ChainReceipt>;
   getLot(code: string): Promise<(LotRecord & { source: ChainSource }) | null>;
+}
+
+// ─────────────────────────────── Atestaciones (Attest Protocol, ADR-005) ───────────────────────────────
+
+/**
+ * Campos del esquema (ADR-005 D4). Solo datos cerrados o hashes: nunca nombres, teléfonos,
+ * direcciones ni texto libre. El manifiesto del esquema dice qué campos se permiten.
+ */
+export type AttestationContent = Record<string, JsonValue>;
+
+/** Datos que la persona quiere atestuar. El puerto nunca recibe llaves privadas. */
+export interface AttestRequest {
+  /** Esquema registrado (p. ej. 'origen-comunitario', 'consentimiento'). */
+  schemaId: string;
+  /** Dirección pública de quien emite (G...), nunca su nombre. */
+  issuer: string;
+  /** Código del lote o de la pieza; con él se calcula `subject_ref` (ADR-005 D3). */
+  lotCode: string;
+  /** Contenido permitido por el manifiesto del esquema, sin datos personales. */
+  content: AttestationContent;
+  /** Momento (ms) en que deja de valer. Opcional; al preparar debe ser futuro. */
+  expiresAt?: number;
+  /** UID de la atestación que respalda esta (ADR-005 D6: colaboración → consentimiento). */
+  refUid?: string;
+  /** Cuenta pública de la persona de la que se habla, para la lista ByRecipient (D2). */
+  recipient?: string;
+}
+
+/**
+ * Lo único que se lee de la red: hashes y estado. El contenido en claro y la sal viven solo en la
+ * memoria del simulador; la implementación real los guarda fuera de la cadena.
+ */
+export interface AttestationRecord {
+  /** ID de la atestación. Lo calcula Attest Protocol en la red; en demo lo deriva el simulador. */
+  uid: string;
+  schemaId: string;
+  issuer: string;
+  /** sha256('lot:' + código), 'item:', 'addr:' o 'sale:' según corresponda. */
+  subjectRef: string;
+  /** Texto `yucu:1:<subjectRef>:<hash con sal>[:<refUid>]` de ADR-005 D3. Solo hashes. */
+  value: string;
+  refUid?: string;
+  recipient?: string;
+  issuedAt: number;
+  /** `null` cuando la atestación no vence. */
+  expiresAt: number | null;
+  revoked: boolean;
+  /** Siempre `false` en la simulación: no hay renta ni TTL que archiven entradas. */
+  archived: boolean;
+  source: ChainSource;
+}
+
+export interface AttestationList {
+  items: AttestationRecord[];
+  source: ChainSource;
+}
+
+/** Atestaciones en Attest Protocol + índice de Yucu (ADR-005 D9). preparar → firmar → enviar. */
+export interface AttestationPort {
+  prepareAttest(req: AttestRequest): Promise<UnsignedTransaction>;
+  prepareRevoke(attestationId: string, revokerAddress: string): Promise<UnsignedTransaction>;
+  /** Envía la emisión firmada y devuelve el ID que calculó el contrato. */
+  submitAttest(signedXdr: string): Promise<ChainReceipt & { attestationId: string }>;
+  /** Envía cualquier otra operación firmada (hoy, solo revocaciones). */
+  submit(signedXdr: string): Promise<ChainReceipt>;
+  /**
+   * Lee el estado desde la red. Con `expected`, comprueba también esquema y sujeto.
+   * Si la atestación apunta a otra con `ref_uid`, esa también debe seguir vigente (D6).
+   */
+  verify(attestationId: string, expected?: { schemaId: string; subjectRef: string }): Promise<{
+    valid: boolean;
+    revoked: boolean;
+    expired: boolean;
+    archived: boolean;
+    source: ChainSource;
+  }>;
+  /** Lista BySubject en orden de emisión. `start` es el índice inicial y `limit` el máximo de items. */
+  listForLot(lotCode: string, start?: number, limit?: number): Promise<AttestationList>;
+  /** Lista ByAttester para el historial de la consola (ADR-005 D2). */
+  listForIssuer(issuerAddress: string, start?: number, limit?: number): Promise<AttestationList>;
+  /** Lista ByRecipient: lo que se dice de una cuenta pública. */
+  listForRecipient(address: string, start?: number, limit?: number): Promise<AttestationList>;
+  schemaStats(schemaId: string): Promise<{ total: number; revoked: number; source: ChainSource }>;
 }
 
 // ─────────────────────────────── Escrow (Trustless Work) ───────────────────────────────
