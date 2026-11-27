@@ -4,6 +4,9 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { BuyerResearchIssueModal } from '../components/BuyerResearchIssueModal';
 import {
   LEGACY_BUYER_LEADS_KEY,
   purgeLegacyBuyerLeads,
@@ -98,6 +101,37 @@ describe('para medir interés solo se guarda sí/no', () => {
     assert.deepEqual(readContactConsentTally(dañado.storage), { si: 0, no: 0 });
     assert.deepEqual(readContactConsentTally(conTelefono.storage), { si: 0, no: 0 });
     assert.deepEqual(readContactConsentTally(undefined), { si: 0, no: 0 });
+  });
+});
+
+describe('valores iniciales del modo campo', () => {
+  function renderFieldTab() {
+    return renderToStaticMarkup(createElement(BuyerResearchIssueModal, {
+      isOpen: true,
+      onClose: () => undefined,
+      defaultTab: 'campo',
+    }));
+  }
+
+  it('no prellena el nombre de quien realiza la entrevista', () => {
+    const markup = renderFieldTab();
+    const studentField = markup.match(
+      /Estudiante\(s\) Evaluador\(es\) TecNM:[\s\S]*?<input\b[^>]*>/,
+    )?.[0];
+
+    assert.ok(studentField, 'el campo de estudiante debe estar en Modo Campo');
+    assert.match(studentField, /value=""/);
+  });
+
+  it('no marca el consentimiento de contacto antes de que la persona lo otorgue', () => {
+    const markup = renderFieldTab();
+    const labelIndex = markup.indexOf('¿Aceptó que la contacten?');
+    const checkboxStart = markup.lastIndexOf('<input', labelIndex);
+    const consentCheckbox = markup.slice(checkboxStart, markup.indexOf('>', checkboxStart) + 1);
+
+    assert.ok(checkboxStart >= 0, 'debe mostrarse la casilla de consentimiento');
+    assert.match(consentCheckbox, /type="checkbox"/);
+    assert.doesNotMatch(consentCheckbox, /\schecked(?:\s|=|>)/);
   });
 });
 
